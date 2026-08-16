@@ -19,6 +19,14 @@ LEGACY_FIELDS = {
     "hypothesisRange",
     "maxHypothesesPerBiomarker",
 }
+FRONTEND_V0_FIELDS = {
+    "clinical_indication",
+    "biomarker_exploration_range",
+    "maximum_biomarkers",
+    "maximum_literature_papers",
+    "hypothesis_boldness_range",
+    "maximum_hypotheses_per_biomarker",
+}
 GOLDEN_PROFILE = "golden.ra-irak4.v1"
 
 
@@ -193,6 +201,44 @@ def _legacy(raw: dict[str, Any], registry: ModuleRegistry | None) -> dict[str, A
         frame=frame,
     )
     result["normalizedIndication"] = "Rheumatoid arthritis"
+    return result
+
+
+def is_frontend_v0_request(raw: Any) -> bool:
+    """Return whether a payload is using the frontend's snake-case v0 dialect."""
+
+    return isinstance(raw, dict) and bool(set(raw) & FRONTEND_V0_FIELDS)
+
+
+def _frontend_v0(raw: dict[str, Any], registry: ModuleRegistry | None) -> dict[str, Any]:
+    """Translate the six-field frontend contract into the immutable internal setup."""
+
+    _exact_object(raw, label="frontend run setup", required=FRONTEND_V0_FIELDS)
+    indication = _exact_object(
+        raw["clinical_indication"],
+        label="clinical_indication",
+        required={"submitted_text"},
+    )
+    biomarker = _exact_object(
+        raw["biomarker_exploration_range"],
+        label="biomarker_exploration_range",
+        required={"lower", "upper"},
+    )
+    hypothesis = _exact_object(
+        raw["hypothesis_boldness_range"],
+        label="hypothesis_boldness_range",
+        required={"lower", "upper"},
+    )
+    translated = {
+        "clinicalIndication": indication["submitted_text"],
+        "biomarkerRange": [biomarker["lower"], biomarker["upper"]],
+        "maxBiomarkers": raw["maximum_biomarkers"],
+        "maxLiteraturePapers": raw["maximum_literature_papers"],
+        "hypothesisRange": [hypothesis["lower"], hypothesis["upper"]],
+        "maxHypothesesPerBiomarker": raw["maximum_hypotheses_per_biomarker"],
+    }
+    result = _legacy(translated, registry)
+    result["requestSchemaVersion"] = "labrador.frontend-run-setup.v0"
     return result
 
 
@@ -394,4 +440,6 @@ def validate_setup(raw: Any, *, registry: ModuleRegistry | None = None) -> dict[
         raise ContractError("request body must be a JSON object")
     if raw.get("schemaVersion") == "labrador.run-setup.v2":
         return _v2(raw, registry)
+    if is_frontend_v0_request(raw):
+        return _frontend_v0(raw, registry)
     return _legacy(raw, registry)

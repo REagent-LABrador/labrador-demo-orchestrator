@@ -34,9 +34,12 @@ def enrollment_delay_years(months: int | float) -> int:
     return max(0, round((float(months) - PLANNED_ENROLLMENT_MONTHS) / 12))
 
 
-def _profile_roi_input(root: Path, run_id: str, recruitability: dict[str, Any]) -> dict[str, Any]:
+def _profile_roi_input(root: Path, recruitability: dict[str, Any]) -> dict[str, Any]:
     value = copy.deepcopy(load_json(root / "fixtures/golden/roi-input-template.json"))
-    value["request_id"] = f"{run_id}-roi"
+    # The golden profile is a frozen program fixture. Keeping its native request id
+    # stable lets a validated cached output remain verbatim instead of rewriting one
+    # field while leaving the producer's lineage bound to different input bytes.
+    value["request_id"] = "IRAK4-RA-DEMO-roi"
     program = value["program"]
     program.update(
         {
@@ -139,7 +142,6 @@ def build_module_input(
     root: Path,
     module_id: str,
     *,
-    run_id: str,
     setup: dict[str, Any],
     outputs: dict[str, Any],
 ) -> Any:
@@ -174,7 +176,7 @@ def build_module_input(
                     "MISSING_RECRUITABILITY_OUTPUT",
                     "the golden ROI profile requires recruitability output",
                 )
-            return _profile_roi_input(root, run_id, recruitability)
+            return _profile_roi_input(root, recruitability)
         value = frame.get("roiRequest")
         if not isinstance(value, dict):
             raise StageAbstention(

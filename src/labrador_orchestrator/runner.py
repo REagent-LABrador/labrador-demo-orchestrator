@@ -159,10 +159,6 @@ class SequentialRunner:
                 f"{module.module_id} has no cached artifact bound to this analyst frame",
             )
         fallback = load_json(module.fallback_output)
-        if module.module_id == "roi_calculator" and isinstance(module_input, dict):
-            request_id = module_input.get("request_id")
-            if isinstance(request_id, str) and isinstance(fallback, dict):
-                fallback["request_id"] = request_id
         validate_json(
             load_json(module.output_schema),
             fallback,
@@ -368,7 +364,6 @@ class SequentialRunner:
                 module_input = build_module_input(
                     self.root,
                     module.module_id,
-                    run_id=run_id,
                     setup=manifest["setup"],
                     outputs=outputs,
                 )

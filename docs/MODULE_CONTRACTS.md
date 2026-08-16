@@ -27,11 +27,11 @@ operational use is profile-bound and truth-labeled; they still do not define the
 
 | Order | UI stage | Repository and commit | Current mode | Operator meaning |
 | --- | --- | --- | --- | --- |
-| 1 | Biomarker / evidence | `REagent-LABrador/research-evidence-mapper` at `8524f0c82d5c1f2aa9fab431893ca4baabb10fa4` | **Cached** | The golden profile may use `fixtures/golden/fallbacks/evidence.json`. No live file-in/file-out command is configured. |
-| 2 | Hypothesis | `REagent-LABrador/Hypothesis_Generator` at `66ec21284ff3f9fc1a2e051daf34b9abd5c4532a` | **Auto; profile-only fallback** | Runs a deterministic no-model dry run from the validated evidence graph. |
-| 3 | Recruitability | `REagent-LABrador/clinical_simulation` at `f0ff7aa391ebcc6c70491e203749853fd258fd56` | **Auto; profile-only fallback** | Runs the native clinical thesis when Bun is available. Its `score` is recruitability, not probability of technical success or approval. |
-| 4 | ROI | `REagent-LABrador/rnpv-roi-calculator` at `8e754c595a9c92484e90bb2dce057fbb346c73dc` | **Auto; profile-only fallback** | Runs locally from its locked Python environment. Transport `status: "ok"` can coexist with `NOT_DECISION_GRADE`. |
-| 5 | Simulation / tractability | `REagent-LABrador/simulation` at `6534869763b72081d87346c6ec4df6a0b0e60608` | **Cached** | The golden profile may use `fixtures/golden/fallbacks/simulation.json`. This is a tractability dossier, not atomistic simulation. |
+| 1 | Biomarker / evidence | `REagent-LABrador/research-evidence-mapper` at `60ae23a4275282422416b45ea5bc5041ff3e9195` | **Cached** | The golden profile may use `fixtures/golden/fallbacks/evidence.json`. No live file-in/file-out command is configured. |
+| 2 | Hypothesis | `REagent-LABrador/Hypothesis_Generator` at `80cf2524372003b96b39106dc5487b1f98330fd3` | **Auto; profile-only fallback** | Runs a deterministic no-model dry run from the validated evidence graph. |
+| 3 | Recruitability | `REagent-LABrador/clinical_simulation` at `494479bee1250d0b27ba939bbb063c6901ae3bad` | **Auto; profile-only fallback** | Runs the native clinical thesis when Bun is available. Its `score` is recruitability, not probability of technical success or approval. |
+| 4 | ROI | `REagent-LABrador/rnpv-roi-calculator` at `0a0abd5b6372969bf186d7d2cb496e898cf9703b` | **Auto; profile-only fallback** | Runs locally from its locked Python environment. Transport `status: "ok"` can coexist with `NOT_DECISION_GRADE`. |
+| 5 | Simulation / tractability | `REagent-LABrador/simulation` at `15869b2c8e4ff68d13be357f72ef5d320a3920e6` | **Cached** | The golden profile may use `fixtures/golden/fallbacks/simulation.json`. This is a tractability dossier, not atomistic simulation. |
 
 `auto` means attempt the pinned command and validate the output. It does **not** mean every request
 may use the configured fallback. All current cached/fallback artifacts belong to the golden
@@ -50,6 +50,12 @@ Paths are relative to the orchestrator root. Paths under `.modules/` exist after
 | Tractability | `.modules/simulation/schemas/input.schema.json` (`https://github.com/REagent-LABrador/simulation/schema/input.schema.json`) | `.modules/simulation/schemas/output.schema.json` (`https://github.com/REagent-LABrador/simulation/schema/output.schema.json`) |
 
 All five boundaries use JSON Schema Draft 2020-12.
+
+Interpretability is projection data, not a sequencing dependency. The orchestrator preserves a
+module's native result and transports an optional top-level `interpretability` object unchanged
+inside the functional frontend's `station_payloads`. At this snapshot ROI and tractability emit
+that shared object. Hypothesis interpretability is a separate generated cards artifact and is not
+yet part of the sequential runner; evidence and recruitability may omit it.
 
 ## Versioned setup contracts
 
@@ -285,9 +291,9 @@ Always inspect the new run's `manifest.json`.
   replace the profile cache.
 - The browser currently creates the legacy golden request. Custom v2 requests are available via
   the API or `uv run python app.py run --setup path/to/run-setup.v2.json`.
-- The organization has no Highlander module. Hypothesis Generator emits one winner per run, not a
-  comparison slate. Highlander is a UI comparison over separately produced, truth-labeled
-  candidates, not a sixth live module.
+- The Highlander repository has landed, but this narrow functional slice does not invoke its
+  packet-comparison CLI. The current frontend comparison remains client-side while the five-stage
+  run is tested and debugged; server-side Highlander interoperability is a separate follow-up.
 - Tractability is not atomistic simulation. Do not relabel pocket and precedent evidence as
   molecular dynamics, binding free energy, or atomistic support.
 - Never add API keys, tokens, credential files, or raw secret-bearing stderr to `runs/` or version

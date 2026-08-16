@@ -35,7 +35,9 @@ def _stage_by_ui(manifest: dict[str, Any], stage_id: str) -> dict[str, Any]:
     raise ContractError(f"manifest has no UI stage {stage_id}")
 
 
-def _outputs(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+def load_validated_outputs(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+    """Load only manifest-bound outputs whose exact artifact hashes still match."""
+
     run_dir = root / "runs" / manifest["run_id"]
     result: dict[str, Any] = {}
     for stage in manifest["stages"]:
@@ -533,7 +535,7 @@ def project_ui_state(
     manifest: dict[str, Any],
 ) -> dict[str, Any]:
     root = root.resolve()
-    outputs = _outputs(root, manifest)
+    outputs = load_validated_outputs(root, manifest)
     setup = manifest["setup"]
     stages = {stage["id"]: stage for stage in manifest["stages"]}
     terminal_count = sum(stage["status"] in TERMINAL_STAGE_STATUSES for stage in manifest["stages"])
