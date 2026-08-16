@@ -15,9 +15,9 @@ def test_draft_rollup_pins_every_compatible_draft_and_doubled_timeout() -> None:
     modules = {module["id"]: module for module in lock["modules"]}
 
     assert lock["contracts"]["commit"] == "755499b42ab65d3b01f959b11624dd4e61bdd561"
-    assert lock["frontend"]["commit"] == "95c9de4f3871f14108b3a595579cd991fc26c7ef"
+    assert lock["frontend"]["commit"] == "a9a9c7d888f486ff11fc566a2baad75c4fd8c97c"
     assert lock["portfolio_consumer"]["commit"] == (
-        "e1cdbf317970ad61d21536cb0b271ec563856023"
+        "4d08ea6c38548c491f915b934a6fdd5e58f39dd6"
     )
     assert lock["portfolio_consumer"]["timeout_seconds"] == 240
 
