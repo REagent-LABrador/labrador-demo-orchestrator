@@ -54,6 +54,7 @@ OUTPUT_SCHEMA: dict[str, Any] = {
         "payload": {"type": "object"},
         "target": {"type": "object"},
         "verdict": {"type": "string"},
+        "interpretability": {"type": "object"},
     },
     "additionalProperties": False,
 }
@@ -141,6 +142,17 @@ else:
         payload["input"] = input_value
         payload["target"] = {"uniprot_accession": input_value.get("uniprot_accession")}
         payload["verdict"] = "insufficient_evidence"
+    if args.behavior == "interpretability":
+        payload["interpretability"] = {
+            "schema_version": "1.0.0",
+            "headline": {
+                "title": "Fixture interpretation",
+                "result": "QUALIFIED",
+                "plain_language": "Fixture output retained verbatim.",
+                "status": "QUALIFIED",
+                "basis": ["MODELED"],
+            },
+        }
     output.write_text(json.dumps(payload), encoding="utf-8")
 record("end")
 """

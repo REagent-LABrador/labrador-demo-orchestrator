@@ -61,6 +61,25 @@ the indication as **Rheumatoid arthritis**, adjust either 1–10 range if desire
 For an offline UI-only rehearsal, open `ui/index.html` directly or add `?mode=fixture`. An HTTP
 API failure never silently switches a live demonstration back to fixtures.
 
+### Run the landed functional frontend
+
+Keep the orchestrator running on port 8765, then serve the separate
+`REagent-LABrador/frontend` checkout:
+
+```bash
+cd ../frontend
+python3 -m http.server 4173 --bind 127.0.0.1 --directory app
+```
+
+Open
+<http://127.0.0.1:4173/?backend=http&base=http://127.0.0.1:8765>.
+The explicit `backend=http` query is required because that frontend otherwise starts in its
+deterministic mock mode. Its current real path creates one RA / IRAK4 run, polls the five-stage
+snapshot every five seconds, and renders each available native output under
+`station_payloads` without renaming keys. A top-level module `interpretability` object therefore
+reaches the node inspector unchanged when a module supplies one; its absence does not block the
+run.
+
 ## Runs from the terminal
 
 Run the legacy golden profile:
@@ -97,9 +116,11 @@ without an honest input is recorded as `SKIPPED` with a reason code; it does not
 ## Local API
 
 - `GET /api/health`
+- `GET /api/meta`
 - `GET /api/modules/preflight`
 - `POST /api/runs`
 - `GET /api/runs/{runId}/state`
+- `GET /api/runs/{runId}/snapshot`
 - `POST /api/runs/{runId}/highlander`
 
 Create a legacy golden run:
@@ -124,7 +145,9 @@ For a custom program, post a `labrador.run-setup.v2` body with exactly one inlin
 tractability are configured as golden-profile caches, so those two stages will refuse a custom
 frame until live adapters or frame-bound caches exist.
 
-The browser receives only `labrador.ui-run-state.v1`; it never parses the five raw module schemas.
+The bundled mockup receives `labrador.ui-run-state.v1`. The landed functional frontend receives
+the snake-case `/snapshot` projection and treats each `station_payloads` value as an opaque,
+verbatim native result; it does not adapt the five module schemas itself.
 
 ## Verification
 

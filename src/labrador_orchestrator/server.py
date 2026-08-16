@@ -13,9 +13,11 @@ from typing import Any
 from urllib.parse import unquote, urlsplit
 
 from .contracts import ContractError, dump_json_atomic, loads_json, resolve_within, sha256_json
+from .frontend_projection import project_frontend_meta, project_frontend_snapshot
 from .projection import project_ui_state
 from .registry import ModuleRegistry
 from .runner import RunCoordinator, SequentialRunner
+from .setup_contract import is_frontend_v0_request
 from .store import RunStore, utc_now, validate_setup
 
 MAX_REQUEST_BYTES = 1_000_000
@@ -68,6 +70,11 @@ class LabradorApplication:
 
     def state(self, run_id: str) -> dict[str, Any]:
         return project_ui_state(self.root, self.registry, self.store.read(run_id))
+
+    def frontend_snapshot(self, run_id: str) -> dict[str, Any]:
+        return project_frontend_snapshot(
+            self.root, self.registry, self.store.read(run_id)
+        )
 
     def create_run(self, payload: Any, idempotency_key: str | None) -> tuple[dict[str, Any], bool]:
         setup = validate_setup(payload, registry=self.registry)
@@ -185,6 +192,12 @@ def _handler(application: LabradorApplication) -> type[BaseHTTPRequestHandler]:
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")
+            if urlsplit(self.path).path.startswith("/api/"):
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                self.send_header(
+                    "Access-Control-Allow-Headers", "Content-Type, Idempotency-Key"
+                )
             for name, value in (extra_headers or {}).items():
                 self.send_header(name, value)
             self.end_headers()
@@ -227,6 +240,9 @@ def _handler(application: LabradorApplication) -> type[BaseHTTPRequestHandler]:
                         },
                     )
                     return
+                if path == "/api/meta":
+                    self._json(HTTPStatus.OK, project_frontend_meta(application.registry))
+                    return
                 if path == "/api/modules/preflight":
                     self._json(
                         HTTPStatus.OK,
@@ -236,6 +252,13 @@ def _handler(application: LabradorApplication) -> type[BaseHTTPRequestHandler]:
                 parts = [unquote(part) for part in path.split("/") if part]
                 if len(parts) == 4 and parts[:2] == ["api", "runs"] and parts[3] == "state":
                     self._json(HTTPStatus.OK, application.state(parts[2]))
+                    return
+                if (
+                    len(parts) == 4
+                    and parts[:2] == ["api", "runs"]
+                    and parts[3] == "snapshot"
+                ):
+                    self._json(HTTPStatus.OK, application.frontend_snapshot(parts[2]))
                     return
                 self._serve_static(path)
             except FileNotFoundError:
@@ -279,10 +302,17 @@ def _handler(application: LabradorApplication) -> type[BaseHTTPRequestHandler]:
             try:
                 if path == "/api/runs":
                     payload = self._read_json()
+                    frontend_request = is_frontend_v0_request(payload)
                     state, created = application.create_run(
                         payload, self.headers.get("Idempotency-Key")
                     )
-                    self._json(HTTPStatus.ACCEPTED if created else HTTPStatus.OK, state)
+                    if frontend_request:
+                        self._json(
+                            HTTPStatus.CREATED if created else HTTPStatus.OK,
+                            {"run": {"run_id": state["runId"]}},
+                        )
+                    else:
+                        self._json(HTTPStatus.ACCEPTED if created else HTTPStatus.OK, state)
                     return
                 parts = [unquote(part) for part in path.split("/") if part]
                 if (
@@ -310,6 +340,12 @@ def _handler(application: LabradorApplication) -> type[BaseHTTPRequestHandler]:
                 )
 
         def do_PUT(self) -> None:  # noqa: N802
+            self._method_not_allowed()
+
+        def do_OPTIONS(self) -> None:  # noqa: N802
+            if urlsplit(self.path).path.startswith("/api/"):
+                self._send_bytes(HTTPStatus.NO_CONTENT, b"", "application/json")
+                return
             self._method_not_allowed()
 
         def do_PATCH(self) -> None:  # noqa: N802

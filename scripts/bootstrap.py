@@ -60,7 +60,7 @@ def main() -> int:
         "\nPinned modules are present. Bun-dependent modules remain fallback-backed "
         "if Bun is absent."
     )
-    print("Next: uv run labrador-demo preflight")
+    print("Next: uv run python app.py preflight")
     return 0
 
 
