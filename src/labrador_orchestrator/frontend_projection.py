@@ -144,6 +144,11 @@ def project_frontend_snapshot(
 ) -> dict[str, Any]:
     """Return the functional frontend v0 snapshot without altering native outputs."""
 
+    if manifest.get("scientific", {}).get("enabled"):
+        from .scientific_projection import project_scientific_snapshot
+
+        return project_scientific_snapshot(root, registry, manifest)
+
     state = project_ui_state(root, registry, manifest)
     outputs = load_validated_outputs(registry.root, manifest)
     run_data = state["uiProjection"]["runData"]

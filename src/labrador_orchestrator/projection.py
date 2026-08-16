@@ -660,6 +660,10 @@ def project_ui_state(
     registry: ModuleRegistry,
     manifest: dict[str, Any],
 ) -> dict[str, Any]:
+    if manifest.get("scientific", {}).get("enabled"):
+        from .scientific_projection import project_scientific_ui_state
+
+        return project_scientific_ui_state(root, registry, manifest)
     root = root.resolve()
     outputs = load_validated_outputs(root, manifest)
     setup = manifest["setup"]

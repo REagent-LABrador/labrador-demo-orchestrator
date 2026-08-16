@@ -374,6 +374,11 @@ class SequentialRunner:
         }
 
     def run(self, run_id: str) -> dict[str, Any]:
+        manifest = self.store.read(run_id)
+        if manifest["setup"].get("requestSchemaVersion") == "labrador.run-setup.v3":
+            from .scientific_runner import ScientificBranchRunner
+
+            return ScientificBranchRunner(self.root, self.registry, self.store).run(run_id)
         self._mark_run_started(run_id)
         outputs: dict[str, Any] = {}
         fatal_error: str | None = None

@@ -8,7 +8,7 @@ projects their mixed outputs into one stable UI contract.
 This is deliberately demo infrastructure, not a production platform. It has no auth, accounts,
 queue, database, or cloud deployment, and it binds to `127.0.0.1` by default.
 
-## Two supported request paths
+## Three supported request paths
 
 - The existing browser and an unversioned six-field request use the frozen
   `golden.ra-irak4.v1` rheumatoid-arthritis / IRAK4 presentation profile. Only that exact profile
@@ -16,6 +16,17 @@ queue, database, or cloud deployment, and it binds to `127.0.0.1` by default.
 - `labrador.run-setup.v2` accepts an inline, analyst-supplied
   `labrador.program-frame.v1` for another target and indication. Clinical and ROI inputs are
   native module payloads in that frame, not values inferred from repository examples.
+- `labrador.run-setup.v3` is the isolated scientific branch runner. It runs evidence once,
+  selects real `biomarker` nodes followed by evidence-supported `process` nodes, and invokes one
+  focused HypGen run per node. Each branch then invokes clinical, tractability, and ROI without
+  substituting a fixture when a live node fails. A failed node is persisted as
+  `CANNOT_COMPLETE` and other branches continue.
+
+The v3 request keeps an explicit scientific program frame separate from the valuation frame.
+Process nodes are labeled as mechanistic/PD readouts rather than biomarkers. `LIVE` and `REPLAY`
+are explicit request modes and never fall through to one another. The checked-in module lock uses
+the doubled ceilings: mapper and HypGen 20 minutes, clinical 10 minutes, tractability 90 minutes,
+ROI 4 minutes, and Highlander 4 minutes.
 
 The module JSON Schemas referenced by `module-lock.json`, together with the exact versioned
 setup/frame validation in `src/labrador_orchestrator/setup_contract.py`, define accepted
@@ -95,6 +106,18 @@ Run a versioned request from a file:
 uv run python app.py run --setup path/to/run-setup.v2.json \
   > /tmp/labrador-final-state.json
 ```
+
+Run the multi-branch scientific path after bootstrapping draft-compatible producer pins:
+
+```bash
+uv run python app.py run --setup fixtures/scientific/run-setup.v3.json \
+  > /tmp/labrador-scientific-final-state.json
+```
+
+Its artifacts live under `runs/LR-…/scientific/` and `runs/LR-…/branches/`. Every node records
+the exact producer SHA, native input/output, hashes, origin, runtime, and terminal reason. The
+snapshot endpoint returns `labrador.scientific-snapshot.v1` for these runs. Representative demo
+presentation is a watermark-only UI mode and cannot change the scientific artifact hashes.
 
 Every run is written under `runs/LR-…/`:
 
