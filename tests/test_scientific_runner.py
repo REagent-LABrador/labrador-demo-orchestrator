@@ -64,8 +64,10 @@ elif args.stage == "hypothesis_generator":
     if args.fail_focus == focus:
         Path(args.output).write_text(json.dumps({
             "status": "CANNOT_COMPLETE",
-            "reason_code": "CREDENTIAL_MISSING",
-            "message": "ANTHROPIC_API_KEY is missing",
+            "error": {
+                "reason_code": "CREDENTIAL_MISSING",
+                "message": "ANTHROPIC_API_KEY is missing",
+            },
         }), encoding="utf-8")
         sys.exit(2)
     document = {

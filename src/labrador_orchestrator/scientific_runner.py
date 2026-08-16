@@ -544,12 +544,19 @@ class ScientificBranchRunner:
             origin = nested_origin if isinstance(nested_origin, str) else None
         if not isinstance(origin, str):
             origin = "LIVE" if execution_mode == "LIVE" else "DETERMINISTIC_REPLAY"
-        reason_code = output.get("reason_code") or output.get("reasonCode")
+        error = output.get("error") if isinstance(output.get("error"), dict) else {}
+        reason_code = (
+            output.get("reason_code")
+            or output.get("reasonCode")
+            or error.get("reason_code")
+            or error.get("reasonCode")
+        )
+        message = output.get("message") or error.get("message")
         return {
             "module_id": module.module_id,
             "status": "CANNOT_COMPLETE" if cannot else "COMPLETE",
             "reason_code": reason_code if cannot else None,
-            "message": output.get("message") if cannot else "module output validated",
+            "message": message if cannot else "module output validated",
             "output_origin": "NOT_RUN" if cannot else origin,
             "input_ref": str(input_path.relative_to(self.store.runs_root)),
             "input_hash": sha256_file(input_path),
