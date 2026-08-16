@@ -167,10 +167,11 @@ def _actual_program(
             if _number(clinical.get("score")) is not None
             else None
         ),
-        # This repository supplies a tractability dossier, not atomistic simulation.
-        "support": None,
-        "occupancy": None,
-        "convergence": None,
+        # Small-molecule tractability is a categorical verdict over two evidence axes
+        # reported separately; no scalar tractability score is imputed for these slots.
+        "verdict": None,
+        "precedent": None,
+        "computed": None,
     }
     return {
         "id": str(identity.get("programId") or "program-1"),
@@ -214,8 +215,10 @@ def _actual_program(
         "citations": citations,
         "economicsBasis": qualifier,
         "simulationBasis": (
-            f"{simulation_stage['output_origin'].replace('_', ' ')} TRACTABILITY · "
-            "NOT ATOMISTIC"
+            f"{simulation_stage['output_origin'].replace('_', ' ')} SMALL-MOLECULE "
+            f"TRACTABILITY · verdict {simulation.get('verdict') or 'insufficient_evidence'} "
+            f"({simulation.get('verdict_basis') or 'basis not reported'}) · "
+            "two axes reported separately, never combined"
         ),
         "gaps": [
             (
@@ -223,7 +226,11 @@ def _actual_program(
                 "not inferred hypothesis prose."
             ),
             f"ROI basis: {qualifier}.",
-            "Tractability evidence is not an atomistic simulation result.",
+            (
+                "Tractability is a categorical two-axis verdict (retrieved precedent, "
+                "computed tractability); the axes are reported separately, never "
+                "combined into a scalar and never a molecular-dynamics score."
+            ),
         ],
         "failureHistory": [
             {
@@ -258,9 +265,9 @@ def _proxy_programs() -> list[dict[str, Any]]:
                 "duration": None,
                 "screens": None,
                 "risk": None,
-                "support": None,
-                "occupancy": None,
-                "convergence": None,
+                "verdict": None,
+                "precedent": None,
+                "computed": None,
             },
             "publicWhy": "Comparison shell only; no module packet was produced for this program.",
             "uncertainty": "All objectives missing",
@@ -287,9 +294,9 @@ def _proxy_programs() -> list[dict[str, Any]]:
                 "duration": None,
                 "screens": None,
                 "risk": None,
-                "support": None,
-                "occupancy": None,
-                "convergence": None,
+                "verdict": None,
+                "precedent": None,
+                "computed": None,
             },
             "publicWhy": "Comparison shell only; no module packet was produced for this program.",
             "uncertainty": "All objectives missing",
@@ -393,6 +400,56 @@ def _nodes(
     else:
         roi_counterevidence = None
     simulation_origin = stages["simulation"].get("output_origin", "NOT_RUN").replace("_", " ")
+    simulation_target_precedent = (
+        simulation.get("target_precedent")
+        if isinstance(simulation.get("target_precedent"), dict)
+        else {}
+    )
+    simulation_tractability = (
+        simulation.get("tractability")
+        if isinstance(simulation.get("tractability"), dict)
+        else {}
+    )
+    simulation_verdict = simulation.get("verdict") or "insufficient_evidence"
+    simulation_verdict_basis = simulation.get("verdict_basis")
+    simulation_axis_conflict = simulation.get("axis_conflict")
+
+    precedent_bits: list[str] = []
+    best_potency_nm = _number(simulation_target_precedent.get("best_potency_nm"))
+    if best_potency_nm is not None:
+        precedent_bits.append(f"best measured potency {best_potency_nm} nM")
+    approved_count = _number(simulation_target_precedent.get("approved_small_molecules_count"))
+    if approved_count is not None:
+        precedent_bits.append(f"{int(approved_count)} approved small molecules")
+    clinical_molecules = simulation_target_precedent.get("clinical_stage_small_molecules")
+    if isinstance(clinical_molecules, list):
+        precedent_bits.append(f"{len(clinical_molecules)} clinical-stage small molecules")
+    retrieved_precedent_axis = (
+        "Retrieved precedent — " + "; ".join(precedent_bits)
+        if precedent_bits
+        else "Retrieved precedent — no measured small-molecule precedent reported"
+    )
+
+    computed_bits: list[str] = []
+    site_pocket_rank = (
+        simulation_tractability.get("site_pocket_rank")
+        if isinstance(simulation_tractability.get("site_pocket_rank"), dict)
+        else {}
+    )
+    fpocket_rank = _number(site_pocket_rank.get("fpocket"))
+    n_pockets = _number(site_pocket_rank.get("n_pockets"))
+    if fpocket_rank is not None and n_pockets is not None:
+        computed_bits.append(
+            f"within-structure druggability rank {int(fpocket_rank)} of {int(n_pockets)}"
+        )
+    cryptic_risk = simulation_tractability.get("cryptic_pocket_risk")
+    if isinstance(cryptic_risk, str) and cryptic_risk:
+        computed_bits.append(f"cryptic-pocket risk {cryptic_risk}")
+    computed_tractability_axis = (
+        "Computed tractability — " + "; ".join(computed_bits)
+        if computed_bits
+        else "Computed tractability — not reported for this run"
+    )
     nodes = [
         node(
             "biomarker",
@@ -502,27 +559,39 @@ def _nodes(
             "simulation",
             "simulation-slot-0",
             "recruitability-slot-0",
-            f"{target} tractability dossier",
-            {"support": None, "occupancy": None, "convergence": None},
-            "Two evidence axes remain separate; no atomistic score was produced.",
+            f"{target} small-molecule tractability",
+            {"verdict": None, "precedent": None, "computed": None},
+            (
+                "Small-molecule tractability is a categorical verdict over two evidence "
+                "axes reported separately (retrieved precedent, computed tractability); "
+                "the axes are never averaged into a scalar."
+            ),
             {
                 "slot": 0,
                 "biomarkerSlot": 0,
                 "summary": (
-                    f"Verdict: {simulation.get('verdict', 'missing')} · basis: "
-                    f"{simulation.get('verdict_basis', 'missing')}"
+                    f"Verdict: {simulation_verdict} · basis: "
+                    f"{simulation_verdict_basis or 'not reported'}"
                 ),
-                "evidenceSummary": f"{simulation_origin} tractability output",
+                "evidenceSummary": (
+                    f"{simulation_origin} small-molecule tractability dossier · "
+                    f"verdict {simulation_verdict}"
+                ),
                 "counterevidenceSummary": (
-                    simulation.get("axis_conflict") or "No axis conflict recorded"
+                    f"Axis conflict: {simulation_axis_conflict}"
+                    if simulation_axis_conflict
+                    else "No axis conflict recorded between the two evidence axes"
                 ),
                 "limitations": [
-                    "Tractability output is not atomistic simulation",
-                    "No scalar is imputed from separate dossier axes",
+                    "Small-molecule tractability dossier, not a molecular-dynamics score",
+                    "Two axes reported separately; no scalar is imputed from them",
                 ]
                 + list(stages["simulation"].get("warnings", [])),
-                "verdict": simulation.get("verdict"),
-                "verdictBasis": simulation.get("verdict_basis"),
+                "verdict": simulation_verdict,
+                "verdictBasis": simulation_verdict_basis,
+                "axisConflict": simulation_axis_conflict,
+                "retrievedPrecedent": retrieved_precedent_axis,
+                "computedTractability": computed_tractability_axis,
             },
         ),
     ]
