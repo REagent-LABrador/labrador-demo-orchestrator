@@ -28,6 +28,8 @@ class ModuleSpec:
     timeout_seconds: float
     input_schema: Path
     output_schema: Path
+    scientific_input_schema: Path | None
+    scientific_output_schema: Path | None
     example_input: Path
     example_output: Path
     fallback_output: Path
@@ -99,6 +101,16 @@ class ModuleSpec:
             timeout_seconds=float(raw["timeout_seconds"]),
             input_schema=root / str(raw["input_schema"]),
             output_schema=root / str(raw["output_schema"]),
+            scientific_input_schema=(
+                root / str(raw["scientific_input_schema"])
+                if raw.get("scientific_input_schema") is not None
+                else None
+            ),
+            scientific_output_schema=(
+                root / str(raw["scientific_output_schema"])
+                if raw.get("scientific_output_schema") is not None
+                else None
+            ),
             example_input=root / str(raw["example_input"]),
             example_output=root / str(raw["example_output"]),
             fallback_output=root / str(raw["fallback_output"]),
@@ -186,6 +198,16 @@ class ModuleRegistry:
                     raise ContractError(f"{module.module_id}: missing {label} at {path}")
                 if label != "module root":
                     resolve_within(self.root, path, label=f"{module.module_id} {label}")
+                report["checks"].append(f"{label}: present")
+            for label, path in (
+                ("scientific input schema", module.scientific_input_schema),
+                ("scientific output schema", module.scientific_output_schema),
+            ):
+                if path is None:
+                    continue
+                if not path.exists():
+                    raise ContractError(f"{module.module_id}: missing {label} at {path}")
+                resolve_within(self.root, path, label=f"{module.module_id} {label}")
                 report["checks"].append(f"{label}: present")
 
             input_schema = load_json(module.input_schema)

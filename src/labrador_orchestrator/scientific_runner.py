@@ -343,12 +343,14 @@ class ScientificBranchRunner:
         output_path = node_dir / "output.json"
         execution_path = node_dir / "execution.json"
         dump_json_atomic(input_path, input_value)
+        input_schema_path = module.scientific_input_schema or module.input_schema
+        output_schema_path = module.scientific_output_schema or module.output_schema
         try:
             validate_json(
-                load_json(module.input_schema),
+                load_json(input_schema_path),
                 input_value,
                 label=f"{module.module_id} scientific input",
-                schema_path=module.input_schema,
+                schema_path=input_schema_path,
             )
         except ContractError as exc:
             output = self._cannot_complete(
@@ -455,10 +457,10 @@ class ScientificBranchRunner:
             if output.get("status") != "CANNOT_COMPLETE":
                 try:
                     validate_json(
-                        load_json(module.output_schema),
+                        load_json(output_schema_path),
                         output,
                         label=f"{module.module_id} scientific output",
-                        schema_path=module.output_schema,
+                        schema_path=output_schema_path,
                     )
                 except ContractError as exc:
                     invalid_path = node_dir / "output.invalid.json"
