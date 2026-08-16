@@ -191,7 +191,7 @@ assertExactSequence(
 );
 assertInside(highlanderSections, highlanderStart, Number.POSITIVE_INFINITY, "data-highlander-section");
 
-// Contract 6a: the Pareto view includes one labeled nominal frontier projection.
+// Contract 6a: the Pareto view maps plans across exactly three declared dimensions.
 const paretoFrontierPlots = hooks("data-pareto-frontier", "svg");
 assertExactSequence(
   values(paretoFrontierPlots, "data-pareto-frontier"),
@@ -199,6 +199,13 @@ assertExactSequence(
   "data-pareto-frontier hooks",
 );
 assertInside(paretoFrontierPlots, highlanderStart, Number.POSITIVE_INFINITY, "data-pareto-frontier");
+const paretoDimensionPlots = hooks("data-pareto-dimensions", "svg");
+assertExactSequence(
+  values(paretoDimensionPlots, "data-pareto-dimensions"),
+  ["roi,recruitability,simulation"],
+  "data-pareto-dimensions hooks",
+);
+assertInside(paretoDimensionPlots, highlanderStart, Number.POSITIVE_INFINITY, "data-pareto-dimensions");
 const paretoFrontierLines = hooks("data-pareto-frontier-line", "polyline");
 assertExactSequence(
   values(paretoFrontierLines, "data-pareto-frontier-line"),
@@ -208,6 +215,24 @@ assertExactSequence(
 assertInside(paretoFrontierLines, highlanderStart, Number.POSITIVE_INFINITY, "data-pareto-frontier-line");
 if (!html.includes('frontierLine.setAttribute("points"')) {
   fail("The nominal Pareto frontier line must be positioned from rendered non-dominated records.");
+}
+for (const contract of [
+  "Three-dimensional Pareto view:",
+  'var keys = ["roi", "recruitability", "simulation"]',
+  'circle.setAttribute("data-plan-id", program.id)',
+  "missing objective shelf · not plotted as zero",
+  '.pareto-figure { display: flex; flex: 1 1 330px; min-height: 330px;',
+  "Plans with identical vectors fan slightly around their exact shared coordinate",
+  'stem.setAttribute("class", "pareto-cluster-stem")',
+  'point.baseX + "," + point.baseY',
+]) {
+  if (!html.includes(contract)) fail(`Missing 3-D Pareto plan-map contract ${JSON.stringify(contract)}.`);
+}
+if (html.includes("The line is a 2-D visual guide")) {
+  fail("The Pareto description must not retain the old two-dimensional guide copy.");
+}
+if (html.includes("var reported = String(program.paretoStatus")) {
+  fail("The client must compute the declared three-axis Pareto status instead of trusting a legacy reported status.");
 }
 if (/frontier-count|frontier-stat|frontier-total|gap-total/.test(html)) {
   fail("Highlander summary count tiles must not be rendered or updated.");
@@ -312,6 +337,6 @@ console.log("  Setup ranges: biomarker 1-10; hypothesis boldness 1-10");
 console.log("  Graph geometry: 224x144 nodes; 272px lanes; 440px bands");
 console.log(`  Graph: 1 indication root + ${expectedGraphStages.length} stage bands`);
 console.log(`  Highlander surfaces: ${expectedHighlanderSections.join(", ")}`);
-console.log("  Pareto: nominal 2-D frontier projection");
+console.log("  Pareto: expanded 3-D plan map with nominal projected frontier");
 console.log(`  Unique static ids: ${ids.size}`);
 console.log("  Transport: no external assets or remote URLs; one guarded same-origin fetch; explicit fixture mode");

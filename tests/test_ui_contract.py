@@ -52,6 +52,29 @@ class StaticUIContractTests(unittest.TestCase):
         for removed_hook in ("frontier-count", "frontier-stat", "frontier-total", "gap-total"):
             self.assertNotIn(removed_hook, self.html)
 
+    def test_pareto_is_an_expanded_three_axis_plan_map(self) -> None:
+        tag, attrs = self.tag_by_id("pareto-plot")
+        self.assertEqual(tag, "svg")
+        self.assertEqual(attrs.get("data-pareto-dimensions"), "roi,recruitability,simulation")
+        self.assertEqual(attrs.get("viewbox"), "0 0 700 330")
+        self.assertIn("Three-dimensional Pareto view:", self.html)
+        self.assertIn("Each numbered point is one plan.", self.html)
+        self.assertIn('var keys = ["roi", "recruitability", "simulation"]', self.html)
+        self.assertIn('circle.setAttribute("data-plan-id", program.id)', self.html)
+        self.assertIn("missing objective shelf · not plotted as zero", self.html)
+        self.assertIn(
+            "Plans with identical vectors fan slightly around their exact shared coordinate",
+            self.html,
+        )
+        self.assertIn('stem.setAttribute("class", "pareto-cluster-stem")', self.html)
+        self.assertIn('point.baseX + "," + point.baseY', self.html)
+        self.assertIn(
+            '.pareto-figure { display: flex; flex: 1 1 330px; min-height: 330px;',
+            self.html,
+        )
+        self.assertNotIn("The line is a 2-D visual guide", self.html)
+        self.assertNotIn("var reported = String(program.paretoStatus", self.html)
+
     def test_setup_hooks_and_both_ten_point_ranges_remain_visible(self) -> None:
         self.assertEqual(
             self.values("fieldset", "data-setup-input"),

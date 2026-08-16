@@ -164,9 +164,12 @@ and preserves every native station result unchanged in the run artifact. The jud
 readable interpretation and representative display values without rewriting native scientific
 outputs or manufacturing atomistic evidence.
 
-Screen 3 currently performs an advisory Pareto comparison in the browser. The landed
-`hypothesis-highlander` packet consumer is pinned as `NOT_WIRED` and is not invoked or presented
-as integrated in this judging slice.
+Screen 3 currently performs an advisory three-dimensional Pareto comparison in the browser. It
+maps every plan by P50 rNPV, recruitability, and simulation / tractability; any missing axis stays
+incomparable instead of being imputed. In the golden RA profile, the Z axis uses the explicitly
+labeled representative branch-context fit while the native cached dossier remains shared across
+plans. The landed `hypothesis-highlander` packet consumer is pinned as `NOT_WIRED` and is not
+invoked or presented as integrated in this judging slice.
 
 ## Verification
 

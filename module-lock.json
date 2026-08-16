@@ -11,7 +11,7 @@
     "id": "frontend",
     "repository": "REagent-LABrador/frontend",
     "repository_url": "https://github.com/REagent-LABrador/frontend.git",
-    "commit": "4e01916ff2c51ccb55e68ee813ec55c3c46544db",
+    "commit": "7cbda6b4e2fd280a358dc67b86adf6b05d8c26be",
     "module_root": ".frontend",
     "static_root": ".frontend/app"
   },
