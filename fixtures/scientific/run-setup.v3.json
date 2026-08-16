@@ -7,8 +7,9 @@
   "exploration": {
     "evidenceRequest": {
       "ask": "new_question",
-      "target": "Can IRAK4 inhibition suppress synovial inflammation in rheumatoid arthritis?",
-      "depth": "deep"
+      "target": "can a small-molecule IRAK4 inhibitor suppress synovial fibroblast-driven inflammation in rheumatoid arthritis, or is its effect confined to the myeloid compartment?",
+      "depth": "deep",
+      "reason": "frozen golden path for the REagent-LABrador integration demo"
     },
     "focus": {
       "maxBranches": 3

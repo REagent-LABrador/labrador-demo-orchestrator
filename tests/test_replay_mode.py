@@ -27,20 +27,18 @@ class ReplayModeContractTests(unittest.TestCase):
         self.assertTrue(module.command[1].endswith("scripts/run_simulation_replay.py"))
         self.assertIn("--recorded-output", module.command)
         self.assertEqual(module.mode, "replay")
+        self.assertIsNotNone(module.replay_command)
 
         with tempfile.TemporaryDirectory(prefix="labrador-native-simulation-") as temporary:
             output = Path(temporary) / "output.json"
+            input_path = ROOT / "fixtures/golden/simulation-input.json"
             result = subprocess.run(
-                [
-                    "python3",
-                    "-m",
-                    "simulation",
-                    "run",
-                    "--input",
-                    str(ROOT / "fixtures/golden/simulation-input.json"),
-                    "--output",
-                    str(output),
-                ],
+                module.expand_command(
+                    root=ROOT,
+                    input_path=input_path,
+                    output_path=output,
+                    execution_mode="REPLAY",
+                ),
                 cwd=module.module_root,
                 text=True,
                 capture_output=True,
