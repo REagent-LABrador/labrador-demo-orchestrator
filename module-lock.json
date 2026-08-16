@@ -17,7 +17,11 @@
       "commit": "60ae23a4275282422416b45ea5bc5041ff3e9195",
       "module_root": ".modules/research-evidence-mapper",
       "mode": "cached",
-      "setup_command": ["bun", "install", "--frozen-lockfile"],
+      "setup_command": [
+        "bun",
+        "install",
+        "--frozen-lockfile"
+      ],
       "command": [],
       "timeout_seconds": 180,
       "input_schema": "schemas/evidence-input.schema.json",
@@ -26,8 +30,15 @@
       "example_output": "fixtures/golden/fallbacks/evidence.json",
       "fallback_output": "fixtures/golden/fallbacks/evidence.json",
       "runtime_maturity": "UNVERIFIED",
-      "result_basis": ["OBSERVED", "INFERRED"],
-      "qualifiers": ["CACHED_EVIDENCE_INPUT", "VERBATIM_QUOTES", "TRUNCATED_SEARCH"]
+      "result_basis": [
+        "OBSERVED",
+        "INFERRED"
+      ],
+      "qualifiers": [
+        "CACHED_EVIDENCE_INPUT",
+        "VERBATIM_QUOTES",
+        "TRUNCATED_SEARCH"
+      ]
     },
     {
       "id": "hypothesis_generator",
@@ -38,8 +49,22 @@
       "commit": "80cf2524372003b96b39106dc5487b1f98330fd3",
       "module_root": ".modules/Hypothesis_Generator",
       "mode": "auto",
-      "setup_command": ["uv", "sync", "--extra", "dev"],
-      "command": ["python3", "{orchestrator_root}/scripts/run_hypothesis.py", "--module-root", "{module_root}", "--input", "{input}", "--output", "{output}"],
+      "setup_command": [
+        "uv",
+        "sync",
+        "--extra",
+        "dev"
+      ],
+      "command": [
+        "python3",
+        "{orchestrator_root}/scripts/run_hypothesis.py",
+        "--module-root",
+        "{module_root}",
+        "--input",
+        "{input}",
+        "--output",
+        "{output}"
+      ],
       "timeout_seconds": 30,
       "input_schema": ".modules/Hypothesis_Generator/schemas/knowledge-graph.schema.json",
       "output_schema": ".modules/Hypothesis_Generator/schemas/hypothesis.schema.json",
@@ -47,8 +72,13 @@
       "example_output": "fixtures/golden/fallbacks/hypothesis.json",
       "fallback_output": "fixtures/golden/fallbacks/hypothesis.json",
       "runtime_maturity": "LOCAL",
-      "result_basis": ["INFERRED"],
-      "qualifiers": ["DETERMINISTIC_DRY_RUN", "DERIVED_FROM_CACHED_EVIDENCE"]
+      "result_basis": [
+        "INFERRED"
+      ],
+      "qualifiers": [
+        "DETERMINISTIC_DRY_RUN",
+        "DERIVED_FROM_CACHED_EVIDENCE"
+      ]
     },
     {
       "id": "clinical_simulation",
@@ -59,8 +89,19 @@
       "commit": "494479bee1250d0b27ba939bbb063c6901ae3bad",
       "module_root": ".modules/clinical_simulation",
       "mode": "auto",
-      "setup_command": ["bun", "install", "--frozen-lockfile"],
-      "command": ["bun", "run", "simulate", "{input}", "--out", "{output}"],
+      "setup_command": [
+        "bun",
+        "install",
+        "--frozen-lockfile"
+      ],
+      "command": [
+        "bun",
+        "run",
+        "simulate",
+        "{input}",
+        "--out",
+        "{output}"
+      ],
       "timeout_seconds": 75,
       "input_schema": ".modules/clinical_simulation/schemas/input.schema.json",
       "output_schema": ".modules/clinical_simulation/schemas/output.schema.json",
@@ -68,8 +109,14 @@
       "example_output": ".modules/clinical_simulation/schemas/examples/irak4-ra-sourced.result.json",
       "fallback_output": "fixtures/golden/fallbacks/recruitability.json",
       "runtime_maturity": "UNVERIFIED",
-      "result_basis": ["MODELED"],
-      "qualifiers": ["SIMULATED", "ANALYST_FIXTURE_INPUT", "NOT_PROBABILITY_OF_APPROVAL"]
+      "result_basis": [
+        "MODELED"
+      ],
+      "qualifiers": [
+        "SIMULATED",
+        "ANALYST_FIXTURE_INPUT",
+        "NOT_PROBABILITY_OF_APPROVAL"
+      ]
     },
     {
       "id": "roi_calculator",
@@ -80,8 +127,22 @@
       "commit": "0a0abd5b6372969bf186d7d2cb496e898cf9703b",
       "module_root": ".modules/rnpv-roi-calculator",
       "mode": "auto",
-      "setup_command": ["uv", "sync", "--locked", "--extra", "dev", "--no-editable"],
-      "command": ["{module_root}/.venv/bin/rnpv-roi", "run", "--input", "{input}", "--output", "{output}"],
+      "setup_command": [
+        "uv",
+        "sync",
+        "--locked",
+        "--extra",
+        "dev",
+        "--no-editable"
+      ],
+      "command": [
+        "{module_root}/.venv/bin/rnpv-roi",
+        "run",
+        "--input",
+        "{input}",
+        "--output",
+        "{output}"
+      ],
       "timeout_seconds": 45,
       "input_schema": ".modules/rnpv-roi-calculator/schemas/input.schema.json",
       "output_schema": ".modules/rnpv-roi-calculator/schemas/output.schema.json",
@@ -89,8 +150,13 @@
       "example_output": ".modules/rnpv-roi-calculator/examples/output.json",
       "fallback_output": "fixtures/golden/fallbacks/roi.json",
       "runtime_maturity": "LOCAL",
-      "result_basis": ["MODELED"],
-      "qualifiers": ["SYNTHETIC", "NOT_DECISION_GRADE"]
+      "result_basis": [
+        "MODELED"
+      ],
+      "qualifiers": [
+        "SYNTHETIC",
+        "NOT_DECISION_GRADE"
+      ]
     },
     {
       "id": "simulation",
@@ -98,20 +164,43 @@
       "order": 5,
       "repository": "REagent-LABrador/simulation",
       "repository_url": "https://github.com/REagent-LABrador/simulation.git",
-      "commit": "15869b2c8e4ff68d13be357f72ef5d320a3920e6",
+      "commit": "63ed6e560e7c0e66e51085e9140fdcc28c7ca64d",
       "module_root": ".modules/simulation",
-      "mode": "cached",
-      "setup_command": ["python3", "-m", "pip", "install", "-r", "simulation/requirements.txt"],
-      "command": ["python3", "-m", "simulation", "run", "--input", "{input}", "--output", "{output}"],
+      "mode": "auto",
+      "setup_command": [
+        "python3",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "simulation/requirements.txt"
+      ],
+      "command": [
+        "python3",
+        "-m",
+        "simulation",
+        "run",
+        "--input",
+        "{input}",
+        "--output",
+        "{output}"
+      ],
       "timeout_seconds": 75,
       "input_schema": ".modules/simulation/schemas/input.schema.json",
       "output_schema": ".modules/simulation/schemas/output.schema.json",
       "example_input": ".modules/simulation/examples/input.json",
       "example_output": ".modules/simulation/examples/output.json",
       "fallback_output": "fixtures/golden/fallbacks/simulation.json",
-      "runtime_maturity": "UNVERIFIED",
-      "result_basis": ["OBSERVED", "MODELED"],
-      "qualifiers": ["CACHED_DOSSIER", "TRACTABILITY_NOT_ATOMISTIC", "TWO_AXES_NOT_COMBINED"]
+      "runtime_maturity": "LOCAL",
+      "result_basis": [
+        "OBSERVED",
+        "MODELED"
+      ],
+      "qualifiers": [
+        "CACHED_DOSSIER",
+        "TRACTABILITY_NOT_ATOMISTIC",
+        "TWO_AXES_NOT_COMBINED"
+      ]
     }
   ]
 }

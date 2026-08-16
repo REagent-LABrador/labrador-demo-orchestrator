@@ -77,7 +77,12 @@ class FrontendAPIContractTests(unittest.TestCase):
         self.assertTrue(final["programs"])
         program = final["programs"][0]
         self.assertEqual(program["lane"], 0)
-        self.assertIsNone(program["metrics"]["support"])
+        # Stage 05 is small-molecule tractability, not atomistic simulation: it carries a
+        # categorical two-axis verdict, so its projected metric slots stay null and no
+        # scalar tractability score is fabricated.
+        self.assertIsNone(program["metrics"]["verdict"])
+        self.assertIsNone(program["metrics"]["precedent"])
+        self.assertIsNone(program["metrics"]["computed"])
         self.assertEqual(
             program["station_payloads"]["recruitability"]["interpretability"]
             ["schema_version"],

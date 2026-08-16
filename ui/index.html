@@ -1277,12 +1277,12 @@
               <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">0–100<br>simulated</span></div>
             </div>
             <div class="rail-band" data-stage="simulation">
-              <span class="rail-kicker">Stage 05</span><h2>Atomistic simulation</h2>
-              <label class="sr-only" for="metric-simulation">Simulation display metric</label>
+              <span class="rail-kicker">Stage 05</span><h2>Small-molecule tractability</h2>
+              <label class="sr-only" for="metric-simulation">Tractability display metric</label>
               <select id="metric-simulation" class="metric-select" data-metric-stage="simulation">
-                <option value="support">Atomistic support</option><option value="occupancy">Pose occupancy</option><option value="convergence">Convergence</option>
+                <option value="verdict">Tractability verdict</option><option value="precedent">Retrieved precedent</option><option value="computed">Computed tractability</option>
               </select>
-              <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">missing shelf<br>not wired</span></div>
+              <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">categorical verdict<br>two axes, not combined</span></div>
             </div>
           </aside>
 
@@ -1408,7 +1408,7 @@
         <tr><td>Hypothesis generation</td><td>planned hypothesis node</td><td>NOT WIRED; source node has no pushed implementation.</td></tr>
         <tr><td>ROI / impact</td><td>therapeutic-program-economics</td><td>Runnable locally; mock outputs synthetic and NOT_DECISION_GRADE.</td></tr>
         <tr><td>Recruitability</td><td>trial-recruitment-forecaster</td><td>Runnable locally; this UI uses simulated proxy fields only.</td></tr>
-        <tr><td>Atomistic simulation</td><td>target capability</td><td>SKIPPED · MODULE_NOT_WIRED · result basis NOT WIRED.</td></tr>
+        <tr><td>Small-molecule tractability</td><td>simulation</td><td>Runnable locally (LOCAL · LIVE); returns a two-axis tractability dossier (verdict + retrieved-precedent and computed axes), never an atomistic score.</td></tr>
         <tr><td>Highlander</td><td>hypothesis-highlander</td><td>Local proxy module; real node-contract interop unverified.</td></tr>
       </tbody></table>
     </div>
@@ -1496,9 +1496,9 @@
           risk: { label: "Recruitability risk", unit: "/100 proxy", domain: [0, 100], basis: "Illustrative transformation; higher appears lower on this low-to-high axis." }
         },
         simulation: {
-          support: { label: "Atomistic support", unit: "/100", domain: [0, 100], basis: "No values available: target module is not wired." },
-          occupancy: { label: "Pose occupancy", unit: "%", domain: [0, 100], basis: "No values available: target module is not wired." },
-          convergence: { label: "Convergence", unit: "%", domain: [0, 100], basis: "No values available: target module is not wired." }
+          verdict: { label: "Tractability verdict", unit: "categorical", domain: [0, 1], basis: "Categorical two-axis verdict (small_molecule_tractable / not_tractable / insufficient_evidence). Never a scalar score." },
+          precedent: { label: "Retrieved precedent", unit: "axis", domain: [0, 1], basis: "Retrieved small-molecule precedent axis (measured actives, clinical-stage molecules). Reported separately; never combined with the computed axis." },
+          computed: { label: "Computed tractability", unit: "axis", domain: [0, 1], basis: "Computed structural tractability axis (within-structure pocket rank, cryptic risk). Reported separately; never combined with retrieved precedent." }
         }
       };
 
@@ -1597,7 +1597,7 @@
           hypothesis: "boldness",
           roi: "rnpv",
           recruitability: "recruit",
-          simulation: "support"
+          simulation: "verdict"
         }
       };
 
@@ -1972,9 +1972,9 @@
                   duration: hypothesisTemplate.duration,
                   screens: hypothesisTemplate.screens,
                   risk: hypothesisTemplate.risk,
-                  support: null,
-                  occupancy: null,
-                  convergence: null
+                  verdict: null,
+                  precedent: null,
+                  computed: null
                 },
                 uncertainty: hypothesisTemplate.uncertainty,
                 publicWhy: hypothesisTemplate.publicWhy,
@@ -2349,14 +2349,14 @@
           node.kind = "pending";
           node.execution = "RUNNING";
           node.resultBasis = "AWAITING RESULT";
-          node.runtime = stage === "simulation" ? "NOT WIRED" : "LOCAL TARGET / MOCK UI";
+          node.runtime = "LOCAL TARGET / MOCK UI";
           node.metrics = {};
           node.uncertainty = "Pending; no value placed on the metric axis.";
           if (stage === "biomarker") node.label = biomarker.label;
           if (stage === "hypothesis") node.label = program.label;
           if (stage === "roi") node.label = "Economics · " + program.short;
           if (stage === "recruitability") node.label = "Recruitment · " + program.short;
-          if (stage === "simulation") node.label = "Atomistic · " + program.short;
+          if (stage === "simulation") node.label = "Tractability · " + program.short;
         });
       }
 
@@ -2435,16 +2435,20 @@
             node.metadata.summary = "Synthetic RecruitabilityResult-compatible fields.";
           }
           if (stage === "simulation") {
-            node.label = "Atomistic · " + program.short;
-            node.execution = "SKIPPED";
-            node.resultBasis = program.notAmenable ? "NO RESULT" : "NOT WIRED";
-            node.runtime = "NOT WIRED";
-            node.metrics = { support: null, occupancy: null, convergence: null };
-            node.uncertainty = "Not available; missing values stay on the shelf.";
-            node.reason = program.notAmenable
-              ? "NOT_AMENABLE · resolving evidence would be an experimentally supported binding mechanism"
-              : "MODULE_NOT_WIRED";
-            node.metadata.summary = "No atomistic capability was called by this standalone mockup.";
+            node.label = "Tractability · " + program.short;
+            node.execution = "COMPLETE";
+            node.resultBasis = program.notAmenable ? "NOT_TRACTABLE" : "ILLUSTRATIVE PROXY";
+            node.runtime = "LOCAL MODULE TARGET / MOCK UI";
+            node.metrics = { verdict: null, precedent: null, computed: null };
+            node.uncertainty = program.notAmenable
+              ? "Illustrative not-tractable verdict; two axes are reported separately, never combined."
+              : "Illustrative small-molecule-tractable verdict; two axes are reported separately, never combined.";
+            node.reason = null;
+            node.metadata.verdict = program.notAmenable ? "not_tractable" : "small_molecule_tractable";
+            node.metadata.verdictBasis = "illustrative_mock";
+            node.metadata.retrievedPrecedent = "Retrieved precedent — illustrative offline mockup; no precedent module was called.";
+            node.metadata.computedTractability = "Computed tractability — illustrative offline mockup; no structural pipeline was run.";
+            node.metadata.summary = "Illustrative small-molecule tractability shell; no tractability module is wired in this standalone offline mockup.";
           }
         });
         retireUnusedCapacity();
@@ -2463,17 +2467,35 @@
           : null;
       }
 
+      function tractabilityVerdictLabel(verdict) {
+        if (verdict === "small_molecule_tractable") return "Small-molecule tractable";
+        if (verdict === "not_tractable") return "Not tractable";
+        if (verdict === "insufficient_evidence") return "Insufficient evidence";
+        return null;
+      }
+
+      function formatSimulationMetric(node) {
+        var meta = isObject(node.metadata) ? node.metadata : {};
+        var key = state.metrics.simulation;
+        if (key === "precedent") return meta.retrievedPrecedent ? String(meta.retrievedPrecedent) : (node.kind === "pending" ? "Pending · shelf" : "Retrieved-precedent axis · see record");
+        if (key === "computed") return meta.computedTractability ? String(meta.computedTractability) : (node.kind === "pending" ? "Pending · shelf" : "Computed-tractability axis · see record");
+        var label = tractabilityVerdictLabel(meta.verdict);
+        if (label) return label + " · verdict";
+        return node.kind === "pending" ? "Pending · shelf" : "Verdict pending · shelf";
+      }
+
       function formatMetric(node) {
         if (node.kind === "scaffold") return "Capacity shell · no scientific record";
         var definition = metricDefinition(node);
         if (!definition) return "Fixed root";
+        if (node.stage === "simulation") return formatSimulationMetric(node);
         var value = metricValue(node);
         if (value === null || typeof value !== "number" || Number.isNaN(value)) {
           return node.kind === "pending" ? "Pending · shelf" : "Missing · shelf";
         }
         if (definition.names) return definition.names[Math.round(value)] + " · ordinal";
         if (state.metrics[node.stage] === "rnpv") return "$" + value + "M · modeled";
-        if (state.metrics[node.stage] === "positive" || state.metrics[node.stage] === "occupancy" || state.metrics[node.stage] === "convergence") return value + "% · " + definition.unit.replace("% ", "");
+        if (state.metrics[node.stage] === "positive") return value + "% · " + definition.unit.replace("% ", "");
         if (state.metrics[node.stage] === "duration") return value + " months · simulated";
         if (state.metrics[node.stage] === "screens") return value.toFixed(1) + "× · simulated";
         return value + " " + definition.unit;
@@ -2646,7 +2668,7 @@
         state.runData.biomarkers.forEach(function (biomarker) {
           html += "<li>" + escapeHTML(biomarker.label) + "<ul>";
           state.runData.programs.filter(function (program) { return program.biomarkerSlot === biomarker.slot; }).forEach(function (program) {
-            html += "<li>" + escapeHTML(program.label) + "<ul><li>ROI record</li><li>Recruitability record</li><li>Atomistic simulation record</li></ul></li>";
+            html += "<li>" + escapeHTML(program.label) + "<ul><li>ROI record</li><li>Recruitability record</li><li>Small-molecule tractability record</li></ul></li>";
           });
           html += "</ul></li>";
         });
@@ -2708,7 +2730,7 @@
         if (node.stage === "hypothesis") return "Illustrative synthesis cites the parent biomarker record and two mock finding IDs. No generator or mapper was called.";
         if (node.stage === "roi") return "Synthetic economics fields mirror AnalysisSummary-style outputs; the basis remains NOT_DECISION_GRADE.";
         if (node.stage === "recruitability") return "Synthetic record mirrors score, simulatedMonthsToEnroll, screensPerEnrollee, sites basis, and counterfactual fields.";
-        if (node.stage === "simulation") return "No artifact exists because execution was skipped. Missing atomistic evidence is not evidence against the program.";
+        if (node.stage === "simulation") return "Small-molecule tractability is reported as a categorical verdict over two evidence axes (retrieved precedent, computed tractability) held separately; it is not an atomistic simulation and no scalar score is imputed.";
         return "User-submitted indication snapshot; no scientific evidence is attached to the root.";
       }
 
@@ -3194,7 +3216,7 @@
         visiblePrograms().forEach(function (program) {
           var row = document.createElement("tr");
           var status = programStatus(program);
-          var simulationBasis = String(program.simulationBasis || program.simulation_basis || (state.transportMode === "fixture" ? "NOT WIRED" : "NOT REPORTED"));
+          var simulationBasis = String(program.simulationBasis || program.simulation_basis || (state.transportMode === "fixture" ? "ILLUSTRATIVE TRACTABILITY (mock)" : "NOT REPORTED"));
           var simulationClass = basisBadgeClass(simulationBasis);
           row.dataset.status = status;
           row.innerHTML =
@@ -3259,9 +3281,9 @@
             : "A required objective is missing, so dominance is not inferred.";
         var tradeoffs = comparisonPrograms().filter(function (candidate) { return candidate.id !== program.id && programStatus(candidate) === "non-dominated"; }).slice(0, 2).map(function (candidate) { return candidate.short || candidate.label || candidate.id; }).join("; ");
         var qualifiers = Array.isArray(program.qualifiers) ? program.qualifiers.join("; ") : (program.qualifiers || (state.transportMode === "fixture" ? "illustrative product fixture" : "none projected"));
-        var gaps = Array.isArray(program.gaps) ? program.gaps.join("; ") : (program.gaps || (state.transportMode === "fixture" ? "atomistic records not wired; live citations absent; module interop unverified" : "none projected"));
+        var gaps = Array.isArray(program.gaps) ? program.gaps.join("; ") : (program.gaps || (state.transportMode === "fixture" ? "tractability dossier illustrative in this offline mockup; live citations absent; module interop unverified" : "none projected"));
         var economicsBasis = program.economicsBasis || program.economics_basis || (state.transportMode === "fixture" ? "synthetic modeled · NOT_DECISION_GRADE" : "not reported");
-        var simulationBasis = program.simulationBasis || program.simulation_basis || (state.transportMode === "fixture" ? "SKIPPED · MODULE_NOT_WIRED" : "not reported");
+        var simulationBasis = program.simulationBasis || program.simulation_basis || (state.transportMode === "fixture" ? "ILLUSTRATIVE TRACTABILITY · offline mockup" : "not reported");
         var rawFailureHistory = program.failureHistory || program.failure_history;
         var failureHistory = rawFailureHistory ? readableList(rawFailureHistory, "No failed attempt was reported.") : (state.transportMode === "fixture"
           ? (program.roiFailed || program.recruitFailed ? "one or more mock downstream records failed; sibling branches continued." : "no branch failure beyond the terminal simulation gap.")
@@ -3272,7 +3294,7 @@
           '<div class="detail-sections"><details open><summary>Why this Pareto status?</summary><p>' + escapeHTML(whyStatus) + "</p><p><strong>Selected viewing profile:</strong> " + escapeHTML(SCENARIOS[state.scenario].name) + " changes presentation order only. Baseline unweighted status remains <strong>" + escapeHTML(status) + "</strong>.</p><p><strong>Closest tradeoffs:</strong> " + escapeHTML(tradeoffs || "none with complete common axes") + ".</p></details>" +
           "<details><summary>Packet, uncertainty & qualifiers</summary><ul><li>Source branch: " + escapeHTML(program.short || program.id) + "</li><li>Packet revision/hash: " + escapeHTML((program.revision || "not reported") + " · " + (program.hash || "not reported")) + "</li><li>Uncertainty: " + escapeHTML(program.uncertainty || "not reported") + "</li><li>Qualifiers: " + escapeHTML(qualifiers) + "</li><li>Simulation: " + escapeHTML(simulationBasis) + "</li><li>Economics basis: " + escapeHTML(economicsBasis) + "</li></ul></details>" +
           "<details><summary>Evidence, counterevidence & gaps</summary><p><strong>Support:</strong> " + escapeHTML(program.evidenceSummary || program.evidence_summary || (state.transportMode === "fixture" ? "illustrative evidence and branch-linked proxy outputs" : "see projected node evidence summaries")) + ".</p><p><strong>Counterevidence:</strong> " + escapeHTML(program.counterevidenceSummary || program.counterevidence_summary || (state.transportMode === "fixture" ? "retained contradictory findings and modeled downside" : "see projected node counterevidence summaries")) + ".</p><p><strong>Gaps:</strong> " + escapeHTML(gaps) + ".</p><p><strong>Failure history:</strong> " + escapeHTML(failureHistory) + "</p></details>" +
-          "<details><summary>What would change the conclusion?</summary><p>A grounded contradictory finding, validated atomistic evidence, decision-grade economic inputs, a materially different enrollment precedent, or a confirmed hard constraint could create a new decision-set version. Viewing weights alone cannot.</p></details></div>";
+          "<details><summary>What would change the conclusion?</summary><p>A grounded contradictory finding, a stronger or conflicting small-molecule tractability dossier, decision-grade economic inputs, a materially different enrollment precedent, or a confirmed hard constraint could create a new decision-set version. Viewing weights alone cannot.</p></details></div>";
         document.getElementById("open-source-node").dataset.nodeId = program.hypothesisNodeId || program.hypothesis_node_id || "";
       }
 
@@ -3343,7 +3365,7 @@
         if (/why|non-dominated|tradeoff|evidence|gap|change|risk|compare/.test(normalized)) {
           var status = programStatus(program);
           var truthSummary = state.transportMode === "fixture"
-            ? "The synthesis is uncertain because atomistic evidence is NOT WIRED and all displayed outputs are illustrative."
+            ? "The synthesis is uncertain because the small-molecule tractability dossier is illustrative in this offline mockup and all displayed outputs are illustrative."
             : "The synthesis inherits the execution, result-basis, runtime, and gap labels shown on its source nodes.";
           var content = (program.short || program.label || program.id) + " is " + status + " on the baseline common axes. " + (program.publicWhy || program.public_why || "No public rationale was projected.") + " " + truthSummary;
           var citations = [
