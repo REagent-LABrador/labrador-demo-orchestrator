@@ -730,64 +730,53 @@ class ScientificBranchRunner:
 
             clinical_module = self.registry.by_id("clinical_simulation")
             roi_module = self.registry.by_id("roi_calculator")
-            if hypothesis_node["status"] == "COMPLETE":
-                hyp_output = hypothesis_node["output"]
-                document = hyp_output.get("hypothesis")
-                roi_request = hyp_output.get("roi_request")
-                if isinstance(document, dict):
-                    try:
-                        clinical_input = assemble_clinical_thesis(
-                            graph=graph,
-                            focus=branch["focus"],
-                            hypothesis_document=document,
-                            frame=frame,
-                            branch_id=branch["branch_id"],
-                        )
-                        clinical_node = self._invoke(
-                            clinical_module,
-                            input_value=clinical_input,
-                            node_dir=branch_dir / "clinical_simulation",
-                            execution_mode=execution_mode,
-                        )
-                    except ContractError as exc:
-                        clinical_node = self._dependency_failure(
-                            clinical_module,
-                            node_dir=branch_dir / "clinical_simulation",
-                            dependency=str(exc),
-                            execution_mode=execution_mode,
-                        )
-                else:
+            hyp_output = hypothesis_node["output"]
+            document = hyp_output.get("hypothesis")
+            roi_request = hyp_output.get("roi_request")
+            # HypGen deliberately preserves a completed hypothesis when only its ROI
+            # adapter cannot finish. Clinical can still consume that real artifact;
+            # ROI remains terminal with the producer's exact reason.
+            if isinstance(document, dict):
+                try:
+                    clinical_input = assemble_clinical_thesis(
+                        graph=graph,
+                        focus=branch["focus"],
+                        hypothesis_document=document,
+                        frame=frame,
+                        branch_id=branch["branch_id"],
+                    )
+                    clinical_node = self._invoke(
+                        clinical_module,
+                        input_value=clinical_input,
+                        node_dir=branch_dir / "clinical_simulation",
+                        execution_mode=execution_mode,
+                    )
+                except ContractError as exc:
                     clinical_node = self._dependency_failure(
                         clinical_module,
                         node_dir=branch_dir / "clinical_simulation",
-                        dependency="hypothesis_generator.hypothesis",
-                        execution_mode=execution_mode,
-                    )
-                if isinstance(roi_request, dict):
-                    roi_node = self._invoke(
-                        roi_module,
-                        input_value=roi_request,
-                        node_dir=branch_dir / "roi_calculator",
-                        execution_mode=execution_mode,
-                    )
-                else:
-                    roi_node = self._dependency_failure(
-                        roi_module,
-                        node_dir=branch_dir / "roi_calculator",
-                        dependency="hypothesis_generator.roi_request",
+                        dependency=str(exc),
                         execution_mode=execution_mode,
                     )
             else:
                 clinical_node = self._dependency_failure(
                     clinical_module,
                     node_dir=branch_dir / "clinical_simulation",
-                    dependency="hypothesis_generator",
+                    dependency="hypothesis_generator.hypothesis",
                     execution_mode=execution_mode,
                 )
+            if isinstance(roi_request, dict):
+                roi_node = self._invoke(
+                    roi_module,
+                    input_value=roi_request,
+                    node_dir=branch_dir / "roi_calculator",
+                    execution_mode=execution_mode,
+                )
+            else:
                 roi_node = self._dependency_failure(
                     roi_module,
                     node_dir=branch_dir / "roi_calculator",
-                    dependency="hypothesis_generator",
+                    dependency="hypothesis_generator.roi_request",
                     execution_mode=execution_mode,
                 )
             branch["nodes"]["clinical_simulation"] = clinical_node

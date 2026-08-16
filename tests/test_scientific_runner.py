@@ -26,6 +26,7 @@ parser.add_argument("--stage", required=True)
 parser.add_argument("--input", required=True)
 parser.add_argument("--output", required=True)
 parser.add_argument("--fail-focus")
+parser.add_argument("--roi-fail-focus")
 parser.add_argument("--sleep", action="store_true")
 args = parser.parse_args()
 value = json.loads(Path(args.input).read_text(encoding="utf-8"))
@@ -92,18 +93,32 @@ elif args.stage == "hypothesis_generator":
         },
         "asks": [],
     }
-    output = {
-        "status": "COMPLETE",
-        "execution_mode": "REPLAY",
-        "output_origin": "DETERMINISTIC_REPLAY",
-        "hypothesis": document,
-        "cards": {"interpretability": {}},
-        "roi_request": {
-            "request_id": value["roi"]["request_id"],
-            "program": {"program_id": "P-" + focus},
-        },
-        "error": None,
-    }
+    if args.roi_fail_focus == focus:
+        output = {
+            "status": "CANNOT_COMPLETE",
+            "execution_mode": "REPLAY",
+            "output_origin": "DETERMINISTIC_REPLAY",
+            "hypothesis": document,
+            "cards": {"interpretability": {}},
+            "roi_request": None,
+            "error": {
+                "reason_code": "ROI_ADAPTER_ERROR",
+                "message": "valuation frame could not produce a program",
+            },
+        }
+    else:
+        output = {
+            "status": "COMPLETE",
+            "execution_mode": "REPLAY",
+            "output_origin": "DETERMINISTIC_REPLAY",
+            "hypothesis": document,
+            "cards": {"interpretability": {}},
+            "roi_request": {
+                "request_id": value["roi"]["request_id"],
+                "program": {"program_id": "P-" + focus},
+            },
+            "error": None,
+        }
 elif args.stage == "clinical_simulation":
     output = {
         "status": "ok",
@@ -204,7 +219,11 @@ def scientific_request(*, presentation: str = "SCIENTIFIC", mode: str = "REPLAY"
 
 
 def configure_scientific_fixture(
-    fixture: FixtureProject, *, fail_focus: str | None = None, slow_simulation: bool = False
+    fixture: FixtureProject,
+    *,
+    fail_focus: str | None = None,
+    roi_fail_focus: str | None = None,
+    slow_simulation: bool = False,
 ) -> None:
     script = fixture.root / "fake_scientific.py"
     script.write_text(FAKE_SCIENTIFIC_SOURCE, encoding="utf-8")
@@ -224,6 +243,8 @@ def configure_scientific_fixture(
         ]
         if fail_focus is not None and module["id"] == "hypothesis_generator":
             command.extend(["--fail-focus", fail_focus])
+        if roi_fail_focus is not None and module["id"] == "hypothesis_generator":
+            command.extend(["--roi-fail-focus", roi_fail_focus])
         if slow_simulation and module["id"] == "simulation":
             command.append("--sleep")
             module["timeout_seconds"] = 0.02
@@ -353,6 +374,30 @@ class ScientificRunnerTests(unittest.TestCase):
                 self.assertEqual(simulation["status"], "CANNOT_COMPLETE")
                 self.assertEqual(simulation["reason_code"], "MODULE_TIMEOUT")
                 self.assertEqual(simulation["output_origin"], "NOT_RUN")
+
+    def test_preserved_hypothesis_still_reaches_clinical_when_roi_adaptation_fails(self) -> None:
+        with FixtureProject() as fixture:
+            configure_scientific_fixture(fixture, roi_fail_focus="b2")
+            registry = ModuleRegistry.load(fixture.root)
+            store = RunStore(fixture.root, registry)
+            created = store.create(validate_setup(scientific_request(), registry=registry))
+
+            final = SequentialRunner(fixture.root, registry, store).run(created["run_id"])
+
+            failed = next(
+                branch
+                for branch in final["scientific"]["branches"]
+                if branch["focus"]["thing_id"] == "b2"
+            )
+            self.assertEqual(
+                failed["nodes"]["hypothesis_generator"]["reason_code"],
+                "ROI_ADAPTER_ERROR",
+            )
+            self.assertEqual(failed["nodes"]["clinical_simulation"]["status"], "COMPLETE")
+            self.assertEqual(failed["nodes"]["roi_calculator"]["status"], "CANNOT_COMPLETE")
+            self.assertEqual(
+                failed["nodes"]["roi_calculator"]["reason_code"], "UPSTREAM_FAILED"
+            )
 
     def test_representative_mode_cannot_change_scientific_artifact_hashes(self) -> None:
         with FixtureProject() as fixture:
