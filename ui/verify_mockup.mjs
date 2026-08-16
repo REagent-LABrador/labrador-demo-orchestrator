@@ -181,8 +181,8 @@ for (const stage of values(graphStages, "data-graph-stage")) {
   }
 }
 
-// Contract 6: the Highlander screen has stable comparison, detail, chat, and action surfaces.
-const expectedHighlanderSections = ["comparison", "detail", "chat", "actions"];
+// Contract 6: the Highlander screen has stable comparison, detail, and chat surfaces.
+const expectedHighlanderSections = ["comparison", "detail", "chat"];
 const highlanderSections = hooks("data-highlander-section");
 assertExactSequence(
   values(highlanderSections, "data-highlander-section"),
@@ -190,6 +190,25 @@ assertExactSequence(
   "data-highlander-section hooks",
 );
 assertInside(highlanderSections, highlanderStart, Number.POSITIVE_INFINITY, "data-highlander-section");
+
+// Contract 6a: the Pareto view includes one labeled nominal frontier projection.
+const paretoFrontierPlots = hooks("data-pareto-frontier", "svg");
+assertExactSequence(
+  values(paretoFrontierPlots, "data-pareto-frontier"),
+  ["nominal-projection"],
+  "data-pareto-frontier hooks",
+);
+assertInside(paretoFrontierPlots, highlanderStart, Number.POSITIVE_INFINITY, "data-pareto-frontier");
+const paretoFrontierLines = hooks("data-pareto-frontier-line", "polyline");
+assertExactSequence(
+  values(paretoFrontierLines, "data-pareto-frontier-line"),
+  ["nominal-projection"],
+  "data-pareto-frontier-line hooks",
+);
+assertInside(paretoFrontierLines, highlanderStart, Number.POSITIVE_INFINITY, "data-pareto-frontier-line");
+if (!html.includes('frontierLine.setAttribute("points"')) {
+  fail("The nominal Pareto frontier line must be positioned from rendered non-dominated records.");
+}
 
 // Contract 7: status changes have at least one polite announcement region.
 const politeRegions = tags.filter((tag) => tag.attrs.get("aria-live")?.toLowerCase() === "polite");
@@ -290,5 +309,6 @@ console.log("  Setup ranges: biomarker 1-10; hypothesis boldness 1-10");
 console.log("  Graph geometry: 224x144 nodes; 272px lanes; 440px bands");
 console.log(`  Graph: 1 indication root + ${expectedGraphStages.length} stage bands`);
 console.log(`  Highlander surfaces: ${expectedHighlanderSections.join(", ")}`);
+console.log("  Pareto: nominal 2-D frontier projection");
 console.log(`  Unique static ids: ${ids.size}`);
 console.log("  Transport: no external assets or remote URLs; one guarded same-origin fetch; explicit fixture mode");

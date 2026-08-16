@@ -913,7 +913,7 @@
     .region-stack { min-height: 0; display: grid; gap: 12px; overflow: auto; }
     .left-stack { grid-template-rows: auto minmax(260px, 1fr); }
     .middle-stack { grid-template-rows: minmax(350px, 1.25fr) minmax(230px, .75fr); }
-    .right-stack { grid-template-rows: minmax(330px, 1.1fr) minmax(250px, .9fr); }
+    .right-stack { grid-template-rows: minmax(330px, 1fr); }
 
     .card {
       min-width: 0;
@@ -935,7 +935,6 @@
     .weight-row { display: grid; grid-template-columns: 1fr 70px; align-items: center; gap: 10px; font-size: 9px; }
     .weight-track { height: 7px; background: #dbd7cb; border-radius: 7px; overflow: hidden; }
     .weight-track span { display: block; height: 100%; background: var(--violet); }
-    .constraint-box { padding: 9px; color: #684000; background: var(--amber-soft); border: 1px solid #dfba79; border-radius: 7px; font-size: 8px; }
 
     .program-filters { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; font-size: 9px; }
     .program-filters label { display: flex; align-items: center; gap: 4px; }
@@ -965,7 +964,10 @@
 
     .pareto-figure { margin: 12px 0 0; padding: 10px; background: #f0eee6; border-radius: 9px; }
     .pareto-figure figcaption { color: #5e665f; font-size: 8px; }
+    .pareto-frontier-key { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; color: var(--green-dark); font-weight: 900; }
+    .pareto-frontier-key::before { width: 24px; border-top: 3px dashed var(--green-dark); content: ""; }
     .pareto-plot { display: block; width: 100%; height: 154px; margin-top: 6px; }
+    .pareto-frontier-line { fill: none; stroke: var(--green-dark); stroke-width: 3; stroke-dasharray: 7 5; stroke-linecap: round; stroke-linejoin: round; opacity: .9; pointer-events: none; }
     .plot-point { cursor: pointer; fill: var(--green-dark); stroke: white; stroke-width: 2; }
     .plot-point.dominated { fill: #92988f; }
     .plot-point.incomparable { fill: var(--amber); stroke-dasharray: 2 1; }
@@ -992,10 +994,6 @@
     .starter-row { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
     .chat-form { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 8px; }
     .chat-form input { min-width: 0; height: 37px; padding: 0 9px; border: 1px solid #aaa596; border-radius: 8px; }
-
-    .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-    .audit-log { margin: 10px 0 0; padding-left: 0; list-style: none; }
-    .audit-log li { margin: 5px 0; padding: 7px; background: #efede4; border-radius: 6px; font-size: 7px; }
 
     dialog {
       width: min(520px, calc(100% - 48px));
@@ -1343,7 +1341,6 @@
             </select>
             <div id="scenario-meta" class="scenario-meta"></div>
             <div id="weight-list" class="weight-list" aria-label="Viewing preference weights"></div>
-            <div class="constraint-box"><strong>Hard constraints are separate.</strong><br>Applying one requires rationale and creates a new decision-set version. No constraint has been applied.</div>
           </section>
 
           <section class="card" data-region="program-list" aria-labelledby="program-list-title">
@@ -1361,8 +1358,8 @@
             <div class="card-head"><div><h2 id="comparison-title">Raw objective comparison</h2><p>Original units, uncertainty, qualifiers, and baseline frontier membership. No global winner.</p></div><span class="badge proxy">illustrative</span></div>
             <div class="comparison-wrap"><table class="comparison-table"><thead><tr><th>Program</th><th>P50 rNPV</th><th>Positive rNPV</th><th>Recruitability</th><th>Enroll</th><th>Plausibility</th><th>Simulation</th><th>Baseline status</th></tr></thead><tbody id="comparison-body"></tbody></table></div>
             <figure class="pareto-figure">
-              <figcaption><strong>Pareto view:</strong> recruitability vs P50 rNPV. Shape/status retains incomplete records; axes do not collapse missing values to zero.</figcaption>
-              <svg id="pareto-plot" class="pareto-plot" viewBox="0 0 640 154" role="img" aria-label="Illustrative Pareto comparison plot"></svg>
+              <figcaption><strong>Pareto view:</strong> recruitability vs P50 rNPV. <span class="pareto-frontier-key">Nominal frontier projection</span> The line is a 2-D visual guide through complete non-dominated records, not a decision threshold. Shape/status retains incomplete records; axes do not collapse missing values to zero.</figcaption>
+              <svg id="pareto-plot" class="pareto-plot" data-pareto-frontier="nominal-projection" viewBox="0 0 640 154" role="img" aria-label="Illustrative Pareto comparison plot with nominal frontier projection"><polyline id="nominal-pareto-frontier" class="pareto-frontier-line" data-pareto-frontier-line="nominal-projection" points="" role="img" aria-label="Nominal Pareto frontier projection"></polyline></svg>
             </figure>
           </section>
 
@@ -1382,17 +1379,6 @@
             </div>
             <div id="chat-log" class="chat-log" aria-live="polite"><div id="chat-scope-message" class="chat-message assistant"><span class="answer-label">Scope</span> I can synthesize only the immutable mock packet snapshot. I cannot browse, mutate a record, or create new evidence.</div></div>
             <form id="chat-form" class="chat-form"><label class="sr-only" for="chat-input">Ask about this mock run</label><input id="chat-input" type="text" placeholder="Ask about this run…" autocomplete="off"><button class="button dark" type="submit">Ask</button></form>
-          </section>
-
-          <section class="card" data-region="human-review-actions" data-highlander-section="actions" aria-labelledby="actions-title">
-            <div class="card-head"><div><h2 id="actions-title">Human review actions</h2><p>Prototype-only audit events. Actor identity and authorization are unverified.</p></div></div>
-            <div class="action-grid">
-              <button class="button review-action" type="button" data-action="Shortlist">Shortlist</button>
-              <button class="button review-action" type="button" data-action="Add hard constraint">Add hard constraint</button>
-              <button class="button review-action" type="button" data-action="Request another run">Request another run</button>
-              <button class="button danger review-action" type="button" data-action="Exclude">Exclude</button>
-            </div>
-            <ol id="audit-log" class="audit-log"><li>No review events yet. Source scientific records remain unchanged.</li></ol>
           </section>
         </div>
       </div>
@@ -1414,20 +1400,6 @@
     </div>
     <div class="dialog-actions"><button class="button dark" type="button" data-close-dialog="module-dialog">Close</button></div>
   </dialog>
-
-  <dialog id="action-dialog" aria-labelledby="action-dialog-title">
-    <form id="action-form" method="dialog" novalidate>
-      <div class="dialog-head"><div><p class="eyebrow">Prototype audit event</p><h2 id="action-dialog-title">Record review action</h2></div><button class="dialog-close" type="button" data-close-dialog="action-dialog" aria-label="Cancel review action">×</button></div>
-      <div class="dialog-body">
-        <p id="action-description" class="micro"></p>
-        <label for="action-rationale"><strong>Required rationale</strong></label>
-        <textarea id="action-rationale" required placeholder="Explain why this human review action is appropriate…"></textarea>
-        <p id="action-error" class="field-error"></p>
-      </div>
-      <div class="dialog-actions"><button class="button" type="button" data-close-dialog="action-dialog">Cancel</button><button class="button primary" type="submit">Record mock event</button></div>
-    </form>
-  </dialog>
-
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
@@ -1577,9 +1549,6 @@
         highlanderPrograms: [],
         selectedProgramId: null,
         scenario: "balanced",
-        pendingAction: null,
-        decisionSetVersion: 1,
-        auditEvents: [],
         pollTimer: null,
         pollAbortController: null,
         pollGeneration: 0,
@@ -1637,13 +1606,7 @@
         programDetail: document.getElementById("program-detail"),
         scenarioMeta: document.getElementById("scenario-meta"),
         weightList: document.getElementById("weight-list"),
-        chatLog: document.getElementById("chat-log"),
-        actionDialog: document.getElementById("action-dialog"),
-        actionTitle: document.getElementById("action-dialog-title"),
-        actionDescription: document.getElementById("action-description"),
-        actionRationale: document.getElementById("action-rationale"),
-        actionError: document.getElementById("action-error"),
-        auditLog: document.getElementById("audit-log")
+        chatLog: document.getElementById("chat-log")
       };
 
       elements.truthDesignStatus = document.getElementById("truth-design-status");
@@ -3213,14 +3176,37 @@
 
       function renderParetoPlot() {
         var svg = elements.paretoPlot;
-        svg.innerHTML = '<line x1="46" y1="126" x2="616" y2="126" stroke="#7f857e"/><line x1="46" y1="12" x2="46" y2="126" stroke="#7f857e"/><text x="330" y="149" text-anchor="middle" font-size="9" fill="#56615a">P50 rNPV · $M modeled →</text><text x="12" y="75" transform="rotate(-90 12 75)" text-anchor="middle" font-size="9" fill="#56615a">Recruitability /100 →</text><text x="48" y="10" font-size="7" fill="#7a817b">high</text><text x="48" y="138" font-size="7" fill="#7a817b">missing shelf</text>';
-        comparisonPrograms().forEach(function (program) {
-          var status = programStatus(program);
-          var x = !Number.isFinite(program.metrics.rnpv) ? 58 : 46 + Math.max(0, Math.min(300, program.metrics.rnpv)) / 300 * 570;
-          var y = !Number.isFinite(program.metrics.recruit) ? 133 : 126 - program.metrics.recruit / 100 * 108;
+        svg.innerHTML = '<line x1="46" y1="126" x2="616" y2="126" stroke="#7f857e"/><line x1="46" y1="12" x2="46" y2="126" stroke="#7f857e"/><text x="330" y="149" text-anchor="middle" font-size="9" fill="#56615a">P50 rNPV · $M modeled →</text><text x="12" y="75" transform="rotate(-90 12 75)" text-anchor="middle" font-size="9" fill="#56615a">Recruitability /100 →</text><text x="48" y="10" font-size="7" fill="#7a817b">high</text><text x="48" y="138" font-size="7" fill="#7a817b">missing shelf</text><polyline id="nominal-pareto-frontier" class="pareto-frontier-line" data-pareto-frontier-line="nominal-projection" points="" role="img" aria-label="Nominal Pareto frontier projection"></polyline>';
+        var plottedPrograms = comparisonPrograms().map(function (program) {
+          return {
+            program: program,
+            status: programStatus(program),
+            x: !Number.isFinite(program.metrics.rnpv) ? 58 : 46 + Math.max(0, Math.min(300, program.metrics.rnpv)) / 300 * 570,
+            y: !Number.isFinite(program.metrics.recruit) ? 133 : 126 - program.metrics.recruit / 100 * 108
+          };
+        });
+        var nominalFrontier = plottedPrograms.filter(function (point) {
+          return point.status === "non-dominated" && Number.isFinite(point.program.metrics.rnpv) && Number.isFinite(point.program.metrics.recruit);
+        }).sort(function (a, b) {
+          return a.x - b.x || a.y - b.y || a.program.id.localeCompare(b.program.id);
+        }).filter(function (point, index, points) {
+          return index === 0 || point.x !== points[index - 1].x || point.y !== points[index - 1].y;
+        });
+        var frontierLine = document.getElementById("nominal-pareto-frontier");
+        if (nominalFrontier.length === 1) {
+          var onlyPoint = nominalFrontier[0];
+          frontierLine.setAttribute("points", Math.max(46, onlyPoint.x - 20) + "," + onlyPoint.y + " " + Math.min(616, onlyPoint.x + 20) + "," + onlyPoint.y);
+        } else if (nominalFrontier.length > 1) {
+          frontierLine.setAttribute("points", nominalFrontier.map(function (point) { return point.x + "," + point.y; }).join(" "));
+        } else {
+          frontierLine.setAttribute("visibility", "hidden");
+        }
+        plottedPrograms.forEach(function (point) {
+          var program = point.program;
+          var status = point.status;
           var circle = document.createElementNS(svg.namespaceURI, "circle");
-          circle.setAttribute("cx", String(x));
-          circle.setAttribute("cy", String(y));
+          circle.setAttribute("cx", String(point.x));
+          circle.setAttribute("cy", String(point.y));
           circle.setAttribute("r", program.id === state.selectedProgramId ? "7" : "5");
           circle.setAttribute("class", "plot-point " + status + (program.id === state.selectedProgramId ? " selected" : ""));
           circle.setAttribute("tabindex", "0");
@@ -3372,53 +3358,6 @@
         }, 0);
       }
 
-      function openActionDialog(action) {
-        var program = selectedProgram();
-        if (!program) return;
-        state.pendingAction = action;
-        elements.actionTitle.textContent = action;
-        elements.actionDescription.textContent = action + " for " + program.short + ". This creates a mock audit event only and does not change source scientific records.";
-        elements.actionRationale.value = "";
-        elements.actionError.textContent = "";
-        elements.actionDialog.showModal();
-        elements.actionRationale.focus();
-      }
-
-      function recordAction(event) {
-        event.preventDefault();
-        var rationale = elements.actionRationale.value.trim();
-        if (!rationale) {
-          elements.actionError.textContent = "A rationale is required; no event has been recorded.";
-          return;
-        }
-        var program = selectedProgram();
-        var before = "decision-set-v" + state.decisionSetVersion;
-        if (state.pendingAction === "Add hard constraint") state.decisionSetVersion += 1;
-        var after = "decision-set-v" + state.decisionSetVersion;
-        state.auditEvents.unshift({
-          action: state.pendingAction,
-          program: program.short,
-          rationale: rationale,
-          timestamp: new Date().toLocaleTimeString(),
-          actor: "UNVERIFIED MOCK ACTOR",
-          before: before,
-          after: after
-        });
-        elements.actionDialog.close();
-        renderAuditLog();
-        showToast(state.pendingAction + " recorded as a prototype audit event; scientific records unchanged.");
-      }
-
-      function renderAuditLog() {
-        elements.auditLog.innerHTML = "";
-        state.auditEvents.forEach(function (event) {
-          var item = document.createElement("li");
-          item.innerHTML = "<strong>" + escapeHTML(event.action) + " · " + escapeHTML(event.program) + "</strong><br>actor " + escapeHTML(event.actor) + " · " + escapeHTML(event.timestamp) + "<br>rationale: " + escapeHTML(event.rationale) + "<br>source " + escapeHTML(event.before) + " → " + escapeHTML(event.after);
-          elements.auditLog.appendChild(item);
-        });
-        if (!state.auditEvents.length) elements.auditLog.innerHTML = "<li>No review events yet. Source scientific records remain unchanged.</li>";
-      }
-
       async function launchHighlander() {
         if (!state.highlanderReady || !elements.gapConfirmInput.checked) return;
         if (state.transportMode === "api") {
@@ -3551,7 +3490,7 @@
         });
         elements.inspector.querySelector(".close-inspector").addEventListener("click", clearSelection);
         document.addEventListener("keydown", function (event) {
-          if (event.key === "Escape" && state.screen === "graph" && state.inspectorVisible && !elements.actionDialog.open) {
+          if (event.key === "Escape" && state.screen === "graph" && state.inspectorVisible) {
             event.preventDefault();
             collapseInspector(true);
           }
@@ -3577,12 +3516,6 @@
           input.value = "";
           answerChat(question);
         });
-
-        document.querySelectorAll(".review-action").forEach(function (button) {
-          button.addEventListener("click", function () { openActionDialog(button.dataset.action); });
-        });
-        document.getElementById("action-form").addEventListener("submit", recordAction);
-
         document.querySelectorAll("[data-close-dialog]").forEach(function (button) {
           button.addEventListener("click", function () {
             var dialog = document.getElementById(button.dataset.closeDialog);
@@ -3598,7 +3531,6 @@
         bindEvents();
         validateSetup();
         renderProgress();
-        renderAuditLog();
       }
 
       initialize();
