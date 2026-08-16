@@ -41,6 +41,12 @@ class BootstrapTests(unittest.TestCase):
                     "commit": "frontend-sha",
                     "module_root": ".frontend",
                 },
+                "portfolio_consumer": {
+                    "id": "hypothesis_highlander",
+                    "repository_url": "https://example.invalid/highlander.git",
+                    "commit": "highlander-sha",
+                    "module_root": ".modules/hypothesis-highlander",
+                },
                 "modules": [
                     {
                         "id": "hypothesis_generator",
@@ -72,7 +78,12 @@ class BootstrapTests(unittest.TestCase):
 
             self.assertEqual(
                 [call.args[0]["id"] for call in clone.call_args_list],
-                ["frontend", "hypothesis_generator", "roi_calculator"],
+                [
+                    "frontend",
+                    "hypothesis_highlander",
+                    "hypothesis_generator",
+                    "roi_calculator",
+                ],
             )
 
     def test_main_keeps_replay_profile_available_without_bun(self) -> None:
@@ -84,6 +95,12 @@ class BootstrapTests(unittest.TestCase):
                     "repository_url": "https://example.invalid/frontend.git",
                     "commit": "frontend-sha",
                     "module_root": ".frontend",
+                },
+                "portfolio_consumer": {
+                    "id": "hypothesis_highlander",
+                    "repository_url": "https://example.invalid/highlander.git",
+                    "commit": "highlander-sha",
+                    "module_root": ".modules/hypothesis-highlander",
                 },
                 "modules": [
                     {

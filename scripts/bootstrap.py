@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clone the pinned frontend and five modules, then prepare Python runtimes."""
+"""Clone the pinned frontend, producers, and Highlander, then prepare runtimes."""
 
 from __future__ import annotations
 
@@ -48,6 +48,7 @@ def main() -> int:
         return 2
     lock = json.loads((ROOT / "module-lock.json").read_text(encoding="utf-8"))
     clone_or_verify(lock["frontend"])
+    portfolio_root = clone_or_verify(lock["portfolio_consumer"])
     roots: dict[str, Path] = {}
     for module in lock["modules"]:
         roots[str(module["id"])] = clone_or_verify(module)
@@ -57,6 +58,7 @@ def main() -> int:
         ["uv", "sync", "--locked", "--extra", "dev", "--no-editable"],
         cwd=roots["roi_calculator"],
     )
+    run(["uv", "sync", "--extra", "dev"], cwd=portfolio_root)
     bun = shutil.which("bun")
     if bun is None:
         print(
@@ -69,7 +71,8 @@ def main() -> int:
             if module_id in roots:
                 run([bun, "install", "--frozen-lockfile"], cwd=roots[module_id])
     print(
-        "\nPinned frontend and modules are present. Bun and Python module dependencies are ready."
+        "\nPinned frontend, producers, and Highlander are present. "
+        "Bun and Python dependencies are ready."
     )
     print("Next: uv run python app.py preflight")
     return 0

@@ -14,6 +14,11 @@ from urllib.parse import unquote, urlsplit
 
 from .contracts import ContractError, dump_json_atomic, loads_json, resolve_within, sha256_json
 from .frontend_projection import project_frontend_meta, project_frontend_snapshot
+from .highlander_packet import (
+    HighlanderInvocationError,
+    HighlanderSpec,
+    invoke_highlander,
+)
 from .projection import project_ui_state
 from .registry import ModuleRegistry
 from .runner import RunCoordinator, SequentialRunner
@@ -39,7 +44,13 @@ class LabradorApplication:
         self.coordinator = RunCoordinator(self.runner)
         self._idempotency_lock = threading.Lock()
         self._idempotency: dict[str, tuple[str, str]] = {}
+        self._highlander_guard = threading.Lock()
+        self._highlander_locks: dict[str, threading.Lock] = {}
         self._load_idempotency_index()
+
+    def _highlander_lock(self, run_id: str) -> threading.Lock:
+        with self._highlander_guard:
+            return self._highlander_locks.setdefault(run_id, threading.Lock())
 
     def _terminalize_orphans(self) -> None:
         for path in sorted(self.store.runs_root.glob("LR-*/manifest.json")):
@@ -113,6 +124,11 @@ class LabradorApplication:
         if not isinstance(payload, dict) or set(payload) - {"acknowledgeGaps"}:
             raise ContractError("Highlander body accepts only acknowledgeGaps")
         acknowledge = payload.get("acknowledgeGaps") is True
+        current = self.store.read(run_id)
+        if current.get("scientific", {}).get("enabled"):
+            return self._launch_scientific_highlander(
+                run_id, acknowledge_gaps=acknowledge
+            )
         packet_path = self.store.run_dir(run_id) / "highlander_packet.json"
 
         def update(value: dict[str, Any]) -> bool:
@@ -167,6 +183,99 @@ class LabradorApplication:
 
         updated, _ = self.store.mutate_if(run_id, "HIGHLANDER_LAUNCHED", update)
         return project_ui_state(self.root, self.registry, updated)
+
+    def _launch_scientific_highlander(
+        self, run_id: str, *, acknowledge_gaps: bool
+    ) -> dict[str, Any]:
+        with self._highlander_lock(run_id):
+            manifest = self.store.read(run_id)
+            highlander = manifest["highlander"]
+            if not highlander["ready"]:
+                raise ApplicationConflict(
+                    "HIGHLANDER_NOT_READY", "a terminal candidate packet is required"
+                )
+            if highlander["requires_gap_acknowledgement"] and not acknowledge_gaps:
+                raise ApplicationConflict(
+                    "GAP_ACKNOWLEDGEMENT_REQUIRED", "terminal gaps must be acknowledged"
+                )
+            if highlander["launched"]:
+                return project_ui_state(self.root, self.registry, manifest)
+
+            created_at = utc_now()
+            try:
+                spec = HighlanderSpec.load(self.root)
+                artifacts = invoke_highlander(
+                    self.root,
+                    run_id,
+                    manifest,
+                    spec,
+                    created_at=created_at,
+                )
+            except (HighlanderInvocationError, ContractError) as exc:
+                failure_code = (
+                    exc.code
+                    if isinstance(exc, HighlanderInvocationError)
+                    else "HIGHLANDER_PACKET_INVALID"
+                )
+                failure_message = str(exc)
+
+                def record_failure(value: dict[str, Any]) -> None:
+                    value["highlander"]["last_error"] = {
+                        "code": failure_code,
+                        "message": failure_message,
+                        "at": utc_now(),
+                    }
+
+                self.store.mutate(
+                    run_id,
+                    "HIGHLANDER_FAILED",
+                    record_failure,
+                    {"code": failure_code},
+                )
+                raise ApplicationConflict(failure_code, failure_message) from exc
+
+            def record_success(value: dict[str, Any]) -> bool:
+                target = value["highlander"]
+                if target["launched"]:
+                    return False
+                target.update(
+                    {
+                        "launched": True,
+                        "job_id": f"HL-{run_id[3:]}",
+                        "request_ref": artifacts.request_ref,
+                        "request_raw_hash": artifacts.request_raw_sha256,
+                        "request_canonical_hash": artifacts.request_canonical_sha256,
+                        "result_ref": artifacts.result_ref,
+                        "result_hash": "sha256:" + artifacts.result_raw_sha256,
+                        "result_raw_hash": artifacts.result_raw_sha256,
+                        "result_canonical_hash": artifacts.result_canonical_sha256,
+                        "execution_ref": artifacts.execution_ref,
+                        "last_error": None,
+                        "packet_snapshot": {
+                            "id": f"PKT-{run_id[3:]}-R{value['revision'] + 1}",
+                            "schemaVersion": "highlander.packet-comparison-request.v1",
+                            "createdAt": created_at,
+                            "candidateCount": len(artifacts.candidate_hashes),
+                            "candidateHashes": list(artifacts.candidate_hashes),
+                            "requestRef": artifacts.request_ref,
+                            "requestRawSha256": artifacts.request_raw_sha256,
+                            "requestCanonicalSha256": artifacts.request_canonical_sha256,
+                            "resultRef": artifacts.result_ref,
+                            "resultRawSha256": artifacts.result_raw_sha256,
+                            "resultCanonicalSha256": artifacts.result_canonical_sha256,
+                            "gapAcknowledged": True,
+                        },
+                    }
+                )
+                return True
+
+            updated, _ = self.store.mutate_if(
+                run_id,
+                "SCIENTIFIC_HIGHLANDER_LAUNCHED",
+                record_success,
+                {"candidates": len(artifacts.candidate_hashes)},
+            )
+            return project_ui_state(self.root, self.registry, updated)
 
 
 class ApplicationConflict(RuntimeError):

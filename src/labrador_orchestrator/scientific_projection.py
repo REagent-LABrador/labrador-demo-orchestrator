@@ -112,7 +112,19 @@ def project_scientific_snapshot(
             "launched": bool(manifest["highlander"]["launched"]),
             "job_id": manifest["highlander"]["job_id"],
             "packet_snapshot": copy.deepcopy(manifest["highlander"]["packet_snapshot"]),
+            "request_ref": manifest["highlander"].get("request_ref"),
+            "request_raw_hash": manifest["highlander"].get("request_raw_hash"),
+            "request_canonical_hash": manifest["highlander"].get(
+                "request_canonical_hash"
+            ),
+            "result_ref": manifest["highlander"].get("result_ref"),
             "result_hash": manifest["highlander"].get("result_hash"),
+            "result_raw_hash": manifest["highlander"].get("result_raw_hash"),
+            "result_canonical_hash": manifest["highlander"].get(
+                "result_canonical_hash"
+            ),
+            "execution_ref": manifest["highlander"].get("execution_ref"),
+            "last_error": copy.deepcopy(manifest["highlander"].get("last_error")),
             "result": result,
         },
         "modules": [
