@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from labrador_orchestrator.registry import ModuleRegistry
 from labrador_orchestrator.runner import SequentialRunner
-from labrador_orchestrator.scientific_runner import select_focus_nodes
+from labrador_orchestrator.scientific_runner import _terminal_from_stderr, select_focus_nodes
 from labrador_orchestrator.store import RunStore, validate_setup
 from tests._support import OBJECT_SCHEMA, FixtureProject, write_json
 from tests.test_api import RunningServer
@@ -254,6 +254,21 @@ def configure_scientific_fixture(
 
 
 class ScientificRunnerTests(unittest.TestCase):
+    def test_structured_stderr_terminal_reason_is_preserved(self) -> None:
+        parsed = _terminal_from_stderr(
+            'bun noise\n{"message":"bad thesis","reason_code":"INPUT_SCHEMA_INVALID",'
+            '"status":"CANNOT_COMPLETE"}\n'
+        )
+
+        self.assertEqual(
+            parsed,
+            {
+                "message": "bad thesis",
+                "reason_code": "INPUT_SCHEMA_INVALID",
+                "status": "CANNOT_COMPLETE",
+            },
+        )
+
     def test_focus_selection_uses_real_biomarkers_then_supported_processes(self) -> None:
         graph = {
             "things": [

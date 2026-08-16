@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import re
 import shutil
 import subprocess
@@ -37,6 +38,17 @@ def _safe_segment(value: str) -> str:
 
 def _matches_focus(record: dict[str, Any], focus_id: str) -> bool:
     return record.get("from") == focus_id or record.get("to") == focus_id
+
+
+def _terminal_from_stderr(value: str) -> dict[str, Any] | None:
+    for line in reversed(value.splitlines()):
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict) and parsed.get("status") == "CANNOT_COMPLETE":
+            return parsed
+    return None
 
 
 def select_focus_nodes(graph: dict[str, Any], *, maximum: int) -> list[dict[str, Any]]:
@@ -439,15 +451,25 @@ class ScientificBranchRunner:
                         output_path, reason_code="INVALID_OUTPUT", message=str(exc)
                     )
             else:
-                output = self._cannot_complete(
-                    output_path,
-                    reason_code="OUTPUT_MISSING" if process.returncode == 0 else "PROCESS_FAILED",
-                    message=(
-                        "module exited without an output artifact"
-                        if process.returncode == 0
-                        else (process.stderr.strip() or f"module exited {process.returncode}")
-                    ),
-                )
+                terminal = _terminal_from_stderr(process.stderr)
+                if terminal is not None:
+                    dump_json_atomic(output_path, terminal)
+                    output = terminal
+                else:
+                    output = self._cannot_complete(
+                        output_path,
+                        reason_code=(
+                            "OUTPUT_MISSING" if process.returncode == 0 else "PROCESS_FAILED"
+                        ),
+                        message=(
+                            "module exited without an output artifact"
+                            if process.returncode == 0
+                            else (
+                                process.stderr.strip()
+                                or f"module exited {process.returncode}"
+                            )
+                        ),
+                    )
             if process.returncode != 0 and output.get("status") != "CANNOT_COMPLETE":
                 output = self._cannot_complete(
                     output_path,
