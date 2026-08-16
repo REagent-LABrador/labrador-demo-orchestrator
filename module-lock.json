@@ -1,5 +1,11 @@
 {
   "registry_version": "1.0",
+  "contracts": {
+    "repository": "REagent-LABrador/platform-contracts",
+    "commit": "755499b42ab65d3b01f959b11624dd4e61bdd561",
+    "interpretability_schema_sha256": "ac7b27908688851b4fc3de5e3d31642a6e9d4422b422f57161f2c9ab42c3d6bb",
+    "indication_thesis_schema_sha256": "ea580e9a17eb5e25818a8f089a9f0b1fa38ffc7959e2966a2c2328d124ff7b7c"
+  },
   "golden_program": {
     "indication": "Rheumatoid arthritis",
     "target": "IRAK4",
@@ -21,7 +27,8 @@
     "repository_url": "https://github.com/REagent-LABrador/hypothesis-highlander.git",
     "commit": "7a58c63fc2349eb7dc449a7b352997ec77904070",
     "mode": "NOT_WIRED",
-    "active_comparison": "FRONTEND_CLIENT_SIDE"
+    "active_comparison": "FRONTEND_CLIENT_SIDE",
+    "timeout_seconds": 240
   },
   "modules": [
     {
@@ -35,7 +42,7 @@
       "mode": "replay",
       "setup_command": ["bun", "install", "--frozen-lockfile"],
       "command": ["python3", "{orchestrator_root}/scripts/run_evidence_replay.py", "--module-root", "{module_root}", "--recorded-input", "{orchestrator_root}/fixtures/golden/evidence.request.json", "--recorded-output", "{orchestrator_root}/fixtures/golden/fallbacks/evidence.json", "--input", "{input}", "--output", "{output}"],
-      "timeout_seconds": 180,
+      "timeout_seconds": 1200,
       "input_schema": "schemas/evidence-input.schema.json",
       "output_schema": ".modules/research-evidence-mapper/schema/graph.schema.json",
       "example_input": "fixtures/golden/evidence.request.json",
@@ -56,7 +63,7 @@
       "mode": "auto",
       "setup_command": ["uv", "sync", "--extra", "dev"],
       "command": ["python3", "{orchestrator_root}/scripts/run_hypothesis.py", "--module-root", "{module_root}", "--input", "{input}", "--output", "{output}"],
-      "timeout_seconds": 30,
+      "timeout_seconds": 1200,
       "input_schema": ".modules/Hypothesis_Generator/schemas/knowledge-graph.schema.json",
       "output_schema": ".modules/Hypothesis_Generator/schemas/cards.schema.json",
       "example_input": "fixtures/golden/fallbacks/evidence.json",
@@ -77,7 +84,7 @@
       "mode": "replay",
       "setup_command": ["bun", "install", "--frozen-lockfile"],
       "command": ["python3", "{orchestrator_root}/scripts/run_clinical_replay.py", "--recorded-output", "{orchestrator_root}/fixtures/golden/fallbacks/recruitability.json", "--input", "{input}", "--output", "{output}"],
-      "timeout_seconds": 75,
+      "timeout_seconds": 600,
       "input_schema": ".modules/clinical_simulation/schemas/input.schema.json",
       "output_schema": ".modules/clinical_simulation/schemas/output.schema.json",
       "example_input": ".modules/clinical_simulation/schemas/examples/irak4-ra-sourced.request.json",
@@ -98,7 +105,7 @@
       "mode": "auto",
       "setup_command": ["uv", "sync", "--locked", "--extra", "dev", "--no-editable"],
       "command": ["{module_root}/.venv/bin/rnpv-roi", "run", "--input", "{input}", "--output", "{output}"],
-      "timeout_seconds": 45,
+      "timeout_seconds": 240,
       "input_schema": ".modules/rnpv-roi-calculator/schemas/input.schema.json",
       "output_schema": ".modules/rnpv-roi-calculator/schemas/output.schema.json",
       "example_input": ".modules/rnpv-roi-calculator/examples/input.json",
@@ -119,7 +126,7 @@
       "mode": "replay",
       "setup_command": ["python3", "-m", "pip", "install", "-r", "simulation/requirements.txt"],
       "command": ["python3", "{orchestrator_root}/scripts/run_simulation_replay.py", "--module-root", "{module_root}", "--recorded-output", "{orchestrator_root}/fixtures/golden/fallbacks/simulation.json", "--input", "{input}", "--output", "{output}"],
-      "timeout_seconds": 30,
+      "timeout_seconds": 5400,
       "input_schema": ".modules/simulation/schemas/input.schema.json",
       "output_schema": ".modules/simulation/schemas/output.schema.json",
       "example_input": ".modules/simulation/examples/input.json",

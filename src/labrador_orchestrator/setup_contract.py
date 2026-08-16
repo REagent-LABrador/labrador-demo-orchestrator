@@ -439,11 +439,360 @@ def _v2(raw: dict[str, Any], registry: ModuleRegistry | None) -> dict[str, Any]:
     )
 
 
+def _nullable_text(value: Any, *, label: str) -> str | None:
+    if value is None:
+        return None
+    return _text(value, label=label)
+
+
+def _number(
+    value: Any,
+    *,
+    label: str,
+    minimum: float | None = None,
+    maximum: float | None = None,
+) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ContractError(f"{label} must be a number")
+    result = float(value)
+    if minimum is not None and result < minimum:
+        raise ContractError(f"{label} must be at least {minimum}")
+    if maximum is not None and result > maximum:
+        raise ContractError(f"{label} must be at most {maximum}")
+    return result
+
+
+def _v3(raw: dict[str, Any], registry: ModuleRegistry | None) -> dict[str, Any]:
+    """Validate the explicit multi-branch scientific runner request.
+
+    Version 3 is intentionally separate from the presentation profile contract.  It
+    has no fixture fallback and keeps the scientific program frame separate from the
+    economic valuation frame consumed by HypGen's ROI adapter.
+    """
+
+    if registry is None:
+        raise ContractError("labrador.run-setup.v3 validation requires a module registry")
+    _exact_object(
+        raw,
+        label="labrador.run-setup.v3",
+        required={"schemaVersion", "execution", "exploration", "program"},
+    )
+    execution = _exact_object(
+        raw["execution"],
+        label="execution",
+        required={"mode", "presentationMode"},
+    )
+    execution_mode = execution["mode"]
+    if execution_mode not in {"LIVE", "REPLAY"}:
+        raise ContractError("execution.mode must be LIVE or REPLAY")
+    presentation_mode = execution["presentationMode"]
+    if presentation_mode not in {"SCIENTIFIC", "REPRESENTATIVE_DEMO"}:
+        raise ContractError(
+            "execution.presentationMode must be SCIENTIFIC or REPRESENTATIVE_DEMO"
+        )
+
+    exploration = _exact_object(
+        raw["exploration"],
+        label="exploration",
+        required={"evidenceRequest", "focus", "hypothesis"},
+    )
+    evidence_request = copy.deepcopy(exploration["evidenceRequest"])
+    validate_json(
+        load_json(registry.by_id("evidence_mapper").input_schema),
+        evidence_request,
+        label="evidence_mapper scientific request",
+        schema_path=registry.by_id("evidence_mapper").input_schema,
+    )
+    focus = _exact_object(
+        exploration["focus"], label="exploration.focus", required={"maxBranches"}
+    )
+    max_branches = _ceiling(
+        focus["maxBranches"], label="exploration.focus.maxBranches", upper=5
+    )
+    hypothesis = _exact_object(
+        exploration["hypothesis"],
+        label="exploration.hypothesis",
+        required={"profile", "roi"},
+    )
+    profile = hypothesis["profile"]
+    allowed_profiles = {
+        "conservative",
+        "default",
+        "mechanism",
+        "repurposing",
+        "speculative",
+        "valuation",
+    }
+    if profile not in allowed_profiles:
+        raise ContractError(
+            "exploration.hypothesis.profile must be one of "
+            + ", ".join(sorted(allowed_profiles))
+        )
+    roi = _exact_object(
+        hypothesis["roi"],
+        label="exploration.hypothesis.roi",
+        required={"requestId", "comparables", "execution"},
+    )
+    _text(roi["requestId"], label="exploration.hypothesis.roi.requestId")
+    if not isinstance(roi["comparables"], list):
+        raise ContractError("exploration.hypothesis.roi.comparables must be an array")
+    roi_execution = _exact_object(
+        roi["execution"],
+        label="exploration.hypothesis.roi.execution",
+        required={"simulations", "seed", "simulationAssumptions"},
+    )
+    _ceiling(
+        roi_execution["simulations"],
+        label="exploration.hypothesis.roi.execution.simulations",
+        upper=100_000,
+    )
+    if isinstance(roi_execution["seed"], bool) or not isinstance(
+        roi_execution["seed"], int
+    ):
+        raise ContractError("exploration.hypothesis.roi.execution.seed must be an integer")
+    if not isinstance(roi_execution["simulationAssumptions"], dict):
+        raise ContractError(
+            "exploration.hypothesis.roi.execution.simulationAssumptions must be an object"
+        )
+
+    program = _exact_object(
+        raw["program"],
+        label="program",
+        required={"frame", "valuationFrame"},
+    )
+    frame = copy.deepcopy(
+        _exact_object(
+            program["frame"],
+            label="program.frame",
+            required={
+                "schemaVersion",
+                "frameId",
+                "basis",
+                "asset",
+                "target",
+                "disease",
+                "biomarkerDefaults",
+                "endpoint",
+                "tissue",
+                "simulationContext",
+                "notes",
+            },
+        )
+    )
+    if frame["schemaVersion"] != "labrador.scientific-program-frame.v1":
+        raise ContractError(
+            "program.frame must use labrador.scientific-program-frame.v1"
+        )
+    if frame["basis"] != "ANALYST_SUPPLIED":
+        raise ContractError("program.frame.basis must be ANALYST_SUPPLIED")
+    frame_id = _text(frame["frameId"], label="program.frame.frameId")
+    asset = _exact_object(
+        frame["asset"],
+        label="program.frame.asset",
+        required={"name", "modality", "sponsor"},
+    )
+    asset_name = _text(asset["name"], label="program.frame.asset.name")
+    if asset["modality"] not in {
+        "antibody",
+        "small_molecule",
+        "peptide",
+        "oligonucleotide",
+        "cell_therapy",
+        "other",
+    }:
+        raise ContractError("program.frame.asset.modality is unsupported")
+    _nullable_text(asset["sponsor"], label="program.frame.asset.sponsor")
+    target = _exact_object(
+        frame["target"],
+        label="program.frame.target",
+        required={"symbol", "direction", "uniprotAccession"},
+    )
+    target_symbol = _text(target["symbol"], label="program.frame.target.symbol")
+    if target["direction"] not in {"inhibit", "activate", "degrade", "block", "modulate"}:
+        raise ContractError("program.frame.target.direction is unsupported")
+    accession = _nullable_text(
+        target["uniprotAccession"], label="program.frame.target.uniprotAccession"
+    )
+    disease = _exact_object(
+        frame["disease"],
+        label="program.frame.disease",
+        required={"name", "subtype"},
+    )
+    disease_name = _text(disease["name"], label="program.frame.disease.name")
+    _nullable_text(disease["subtype"], label="program.frame.disease.subtype")
+    biomarker = _exact_object(
+        frame["biomarkerDefaults"],
+        label="program.frame.biomarkerDefaults",
+        required={"prevalenceInDisease", "assayAvailable"},
+    )
+    _number(
+        biomarker["prevalenceInDisease"],
+        label="program.frame.biomarkerDefaults.prevalenceInDisease",
+        minimum=0,
+        maximum=1,
+    )
+    if not isinstance(biomarker["assayAvailable"], bool):
+        raise ContractError("program.frame.biomarkerDefaults.assayAvailable must be boolean")
+    endpoint = _exact_object(
+        frame["endpoint"],
+        label="program.frame.endpoint",
+        required={"name", "type", "expectedEffectSize"},
+    )
+    _text(endpoint["name"], label="program.frame.endpoint.name")
+    if endpoint["type"] not in {"continuous", "binary", "time_to_event"}:
+        raise ContractError("program.frame.endpoint.type is unsupported")
+    if endpoint["expectedEffectSize"] is not None:
+        _number(
+            endpoint["expectedEffectSize"],
+            label="program.frame.endpoint.expectedEffectSize",
+            minimum=0,
+        )
+    _nullable_text(frame["tissue"], label="program.frame.tissue")
+    simulation = _exact_object(
+        frame["simulationContext"],
+        label="program.frame.simulationContext",
+        required={"interactionToDisrupt", "mechanismHypothesis", "asOfDate"},
+    )
+    _nullable_text(
+        simulation["interactionToDisrupt"],
+        label="program.frame.simulationContext.interactionToDisrupt",
+    )
+    if simulation["mechanismHypothesis"] not in {
+        "orthosteric",
+        "allosteric",
+        "oligomer_destabilisation",
+        "unknown",
+        None,
+    }:
+        raise ContractError("program.frame.simulationContext.mechanismHypothesis is unsupported")
+    _nullable_text(
+        simulation["asOfDate"], label="program.frame.simulationContext.asOfDate"
+    )
+    if not isinstance(frame["notes"], list) or not all(
+        isinstance(note, str) for note in frame["notes"]
+    ):
+        raise ContractError("program.frame.notes must be an array of strings")
+
+    valuation = copy.deepcopy(
+        _exact_object(
+            program["valuationFrame"],
+            label="program.valuationFrame",
+            required={
+                "base_year",
+                "valuation_year",
+                "launch_year",
+                "filing_year",
+                "currency",
+                "geography",
+                "therapeutic_area",
+                "target_population",
+                "line_of_therapy",
+                "route",
+                "current_stage",
+                "modality",
+                "target",
+                "expansion_launch_year",
+                "notes",
+            },
+        )
+    )
+    for field in ("base_year", "valuation_year", "launch_year", "filing_year"):
+        if isinstance(valuation[field], bool) or not isinstance(valuation[field], int):
+            raise ContractError(f"program.valuationFrame.{field} must be an integer")
+    for field in (
+        "currency",
+        "geography",
+        "therapeutic_area",
+        "target_population",
+        "line_of_therapy",
+        "current_stage",
+        "notes",
+    ):
+        _text(valuation[field], label=f"program.valuationFrame.{field}")
+    if valuation["route"] not in {
+        "ORAL",
+        "SUBCUTANEOUS_SELF",
+        "SUBCUTANEOUS_CLINIC",
+        "INTRAMUSCULAR",
+        "INTRAVENOUS",
+        "OTHER",
+    }:
+        raise ContractError("program.valuationFrame.route is unsupported")
+    if valuation["modality"] not in {"SMALL_MOLECULE", "PEPTIDE", None}:
+        raise ContractError("program.valuationFrame.modality is unsupported")
+    _nullable_text(valuation["target"], label="program.valuationFrame.target")
+    if valuation["expansion_launch_year"] is not None and (
+        isinstance(valuation["expansion_launch_year"], bool)
+        or not isinstance(valuation["expansion_launch_year"], int)
+    ):
+        raise ContractError(
+            "program.valuationFrame.expansion_launch_year must be an integer or null"
+        )
+
+    # Compatibility identity keeps the existing projections useful while all scientific
+    # assembly reads the explicit scientificFrame below.
+    compatible_frame = {
+        "schemaVersion": "labrador.program-frame.v2",
+        "frameId": frame_id,
+        "basis": "ANALYST_SUPPLIED",
+        "identity": {
+            "programId": frame_id,
+            "displayName": asset_name,
+            "indication": disease_name,
+            "targetSymbol": target_symbol,
+            "uniprotAccession": accession,
+            "modality": asset["modality"],
+        },
+        "evidenceRequest": evidence_request,
+        "clinicalThesis": None,
+        "plannedEnrollmentMonths": None,
+        "simulationContext": copy.deepcopy(simulation),
+        "roiRequest": None,
+        "notes": list(frame["notes"]),
+        "scientificFrame": frame,
+        "valuationFrame": valuation,
+    }
+    result = _resolved(
+        submitted_indication=disease_name,
+        indication=disease_name,
+        biomarker_range=[1, 10],
+        max_biomarkers=max_branches,
+        max_papers=100,
+        hypothesis_range=[1, 10],
+        max_hypotheses=1,
+        request_schema="labrador.run-setup.v3",
+        profile_ref=None,
+        frame=compatible_frame,
+    )
+    result.update(
+        {
+            "executionMode": execution_mode,
+            "presentationMode": presentation_mode,
+            "maxFocusBranches": max_branches,
+            "hypothesisProfile": profile,
+            "hypothesisRoi": {
+                "request_id": roi["requestId"],
+                "comparables": copy.deepcopy(roi["comparables"]),
+                "execution": {
+                    "simulations": roi_execution["simulations"],
+                    "seed": roi_execution["seed"],
+                    "simulation_assumptions": copy.deepcopy(
+                        roi_execution["simulationAssumptions"]
+                    ),
+                },
+            },
+        }
+    )
+    return result
+
+
 def validate_setup(raw: Any, *, registry: ModuleRegistry | None = None) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise ContractError("request body must be a JSON object")
     if raw.get("schemaVersion") == "labrador.run-setup.v2":
         return _v2(raw, registry)
+    if raw.get("schemaVersion") == "labrador.run-setup.v3":
+        return _v3(raw, registry)
     if is_frontend_v0_request(raw):
         return _frontend_v0(raw, registry)
     return _legacy(raw, registry)

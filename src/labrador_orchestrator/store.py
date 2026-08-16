@@ -120,6 +120,14 @@ class RunStore:
                 "job_id": None,
                 "packet_snapshot": None,
                 "requires_gap_acknowledgement": True,
+                "result_ref": None,
+                "result_hash": None,
+            },
+            "scientific": {
+                "enabled": setup.get("requestSchemaVersion") == "labrador.run-setup.v3",
+                "execution_mode": setup.get("executionMode"),
+                "presentation_mode": setup.get("presentationMode"),
+                "branches": [],
             },
             "warnings": (
                 [

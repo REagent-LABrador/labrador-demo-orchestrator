@@ -23,6 +23,8 @@ class ModuleSpec:
     mode: str
     setup_command: tuple[str, ...]
     command: tuple[str, ...]
+    live_command: tuple[str, ...] | None
+    replay_command: tuple[str, ...] | None
     timeout_seconds: float
     input_schema: Path
     output_schema: Path
@@ -65,6 +67,14 @@ class ModuleSpec:
             isinstance(item, str) for item in raw["command"]
         ):
             raise ContractError(f"{raw['id']}: command must be an argument array")
+        for field in ("live_command", "replay_command"):
+            value = raw.get(field)
+            if value is not None and (
+                not isinstance(value, list)
+                or not value
+                or not all(isinstance(item, str) for item in value)
+            ):
+                raise ContractError(f"{raw['id']}: {field} must be a non-empty argument array")
         return cls(
             module_id=str(raw["id"]),
             ui_stage=str(raw["ui_stage"]),
@@ -76,6 +86,16 @@ class ModuleSpec:
             mode=str(raw["mode"]),
             setup_command=tuple(str(item) for item in raw["setup_command"]),
             command=tuple(str(item) for item in raw["command"]),
+            live_command=(
+                tuple(str(item) for item in raw["live_command"])
+                if raw.get("live_command") is not None
+                else None
+            ),
+            replay_command=(
+                tuple(str(item) for item in raw["replay_command"])
+                if raw.get("replay_command") is not None
+                else None
+            ),
             timeout_seconds=float(raw["timeout_seconds"]),
             input_schema=root / str(raw["input_schema"]),
             output_schema=root / str(raw["output_schema"]),
@@ -87,7 +107,14 @@ class ModuleSpec:
             qualifiers=tuple(str(item) for item in raw["qualifiers"]),
         )
 
-    def expand_command(self, *, root: Path, input_path: Path, output_path: Path) -> list[str]:
+    def expand_command(
+        self,
+        *,
+        root: Path,
+        input_path: Path,
+        output_path: Path,
+        execution_mode: str | None = None,
+    ) -> list[str]:
         values = {
             "orchestrator_root": str(root.resolve()),
             "module_root": str(self.module_root.resolve()),
@@ -95,7 +122,12 @@ class ModuleSpec:
             "output": str(output_path.resolve()),
             "output_dir": str(output_path.resolve().parent),
         }
-        return [part.format(**values) for part in self.command]
+        command = self.command
+        if execution_mode == "LIVE" and self.live_command is not None:
+            command = self.live_command
+        elif execution_mode == "REPLAY" and self.replay_command is not None:
+            command = self.replay_command
+        return [part.format(**values) for part in command]
 
 
 class ModuleRegistry:

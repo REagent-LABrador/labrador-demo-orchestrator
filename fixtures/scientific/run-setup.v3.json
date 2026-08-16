@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "labrador.run-setup.v3",
+  "execution": {
+    "mode": "REPLAY",
+    "presentationMode": "SCIENTIFIC"
+  },
+  "exploration": {
+    "evidenceRequest": {
+      "ask": "new_question",
+      "target": "Can IRAK4 inhibition suppress synovial inflammation in rheumatoid arthritis?",
+      "depth": "deep"
+    },
+    "focus": {
+      "maxBranches": 3
+    },
+    "hypothesis": {
+      "profile": "default",
+      "roi": {
+        "requestId": "IRAK4-RA-scientific-roi",
+        "comparables": [],
+        "execution": {
+          "simulations": 128,
+          "seed": 42,
+          "simulationAssumptions": {}
+        }
+      }
+    }
+  },
+  "program": {
+    "frame": {
+      "schemaVersion": "labrador.scientific-program-frame.v1",
+      "frameId": "IRAK4-RA-scientific",
+      "basis": "ANALYST_SUPPLIED",
+      "asset": {
+        "name": "IRAK4 inhibitor",
+        "modality": "small_molecule",
+        "sponsor": null
+      },
+      "target": {
+        "symbol": "IRAK4",
+        "direction": "inhibit",
+        "uniprotAccession": "Q9NWZ3"
+      },
+      "disease": {
+        "name": "Rheumatoid arthritis",
+        "subtype": null
+      },
+      "biomarkerDefaults": {
+        "prevalenceInDisease": 0.4,
+        "assayAvailable": true
+      },
+      "endpoint": {
+        "name": "ACR50 response",
+        "type": "binary",
+        "expectedEffectSize": 0.3
+      },
+      "tissue": "synovium",
+      "simulationContext": {
+        "interactionToDisrupt": "IRAK4 catalytic function",
+        "mechanismHypothesis": "orthosteric",
+        "asOfDate": null
+      },
+      "notes": [
+        "Scientific assembly may use only this frame plus branch evidence and hypothesis output."
+      ]
+    },
+    "valuationFrame": {
+      "base_year": 2026,
+      "valuation_year": 2026,
+      "launch_year": 2034,
+      "filing_year": 2026,
+      "currency": "USD",
+      "geography": "United States",
+      "therapeutic_area": "Immunology",
+      "target_population": "Adults with active rheumatoid arthritis",
+      "line_of_therapy": "Second line",
+      "route": "ORAL",
+      "current_stage": "Preclinical",
+      "modality": "SMALL_MOLECULE",
+      "target": "IRAK4",
+      "expansion_launch_year": null,
+      "notes": "Analyst-supplied valuation assumptions; separate from scientific thesis fields."
+    }
+  }
+}
