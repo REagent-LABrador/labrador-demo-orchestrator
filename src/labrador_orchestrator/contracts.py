@@ -9,9 +9,12 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Any
+from urllib.parse import urljoin
 
 from jsonschema import ValidationError
 from jsonschema.validators import validator_for
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
 
 
 class ContractError(ValueError):
@@ -115,14 +118,45 @@ def dump_json_atomic(path: Path, value: Any) -> None:
             temporary.unlink()
 
 
-def validate_json(schema: dict[str, Any], instance: Any, *, label: str) -> None:
+def _local_schema_registry(schema: dict[str, Any], schema_path: Path) -> Registry:
+    """Register sibling schema documents under both file and declared URI identities."""
+
+    schema_path = schema_path.resolve()
+    root_id = schema.get("$id") if isinstance(schema.get("$id"), str) else None
+    registry = Registry()
+    for path in sorted(schema_path.parent.glob("*.json")):
+        contents = schema if path.resolve() == schema_path else load_json(path)
+        if not isinstance(contents, dict):
+            continue
+        resource = Resource.from_contents(contents, default_specification=DRAFT202012)
+        registry = registry.with_resource(path.resolve().as_uri(), resource)
+        declared_id = contents.get("$id")
+        if isinstance(declared_id, str):
+            registry = registry.with_resource(declared_id, resource)
+        if root_id:
+            registry = registry.with_resource(urljoin(root_id, path.name), resource)
+    return registry
+
+
+def validate_json(
+    schema: dict[str, Any],
+    instance: Any,
+    *,
+    label: str,
+    schema_path: Path | None = None,
+) -> None:
     """Validate an instance and raise one bounded, stable error message."""
 
     validator_cls = validator_for(schema)
     try:
         validator_cls.check_schema(schema)
+        options = (
+            {"registry": _local_schema_registry(schema, schema_path)}
+            if schema_path is not None
+            else {}
+        )
         errors = sorted(
-            validator_cls(schema).iter_errors(instance),
+            validator_cls(schema, **options).iter_errors(instance),
             key=lambda error: [str(part) for part in error.absolute_path],
         )
     except ValidationError as exc:

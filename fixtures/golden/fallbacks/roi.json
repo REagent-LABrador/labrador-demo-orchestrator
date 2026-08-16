@@ -1407,9 +1407,9 @@
         "synthetic": null,
         "unit": "years",
         "value": {
-          "high": 96.0,
-          "low": 6.0,
-          "mode": 36.0
+          "high": 84.0,
+          "low": 5.0,
+          "mode": 32.0
         }
       },
       {
@@ -2698,9 +2698,9 @@
             "mode": 0.0
           },
           "launch_delay_years": {
-            "high": 96.0,
-            "low": 6.0,
-            "mode": 36.0
+            "high": 84.0,
+            "low": 5.0,
+            "mode": 32.0
           },
           "loe_retention_multiplier": {
             "high": 1.25,
@@ -6513,8 +6513,8 @@
         "synthetic": true
       }
     ],
-    "generated_at": "2026-08-16T08:29:36.656266Z",
-    "input_digest": "sha256:ce28212620a71f8c1305d9779a077613c75fb4cbd18404066e8cf16af0612610",
+    "generated_at": "2026-08-16T08:50:27.491452Z",
+    "input_digest": "sha256:c278d86e725f564a76eaacd161d199b1580803f8197470d8754c2765084270df",
     "input_snapshot": {
       "comparables": {
         "comparables": [
@@ -7758,7 +7758,7 @@
       }
     ],
     "recommendation": "NOT_DECISION_GRADE",
-    "run_id": "run_ce28212620a71f8c1305",
+    "run_id": "run_c278d86e725f564a76ea",
     "schema_version": "1.3.0",
     "seed": 42,
     "simulation_assumptions": {
@@ -7773,9 +7773,9 @@
         "mode": 0.0
       },
       "launch_delay_years": {
-        "high": 96.0,
-        "low": 6.0,
-        "mode": 36.0
+        "high": 84.0,
+        "low": 5.0,
+        "mode": 32.0
       },
       "loe_retention_multiplier": {
         "high": 1.25,
@@ -7819,7 +7819,7 @@
       "commercial_driver_correlation": "one shared draw per driver across indications",
       "draw_order_contract_version": "1.0.0",
       "effective_protected_years": {
-        "mean": 0.00390625,
+        "mean": 0.02734375,
         "p10": 0.0,
         "p50": 0.0,
         "p90": 0.0,

@@ -26,7 +26,12 @@ MAX_REQUEST_BYTES = 1_000_000
 class LabradorApplication:
     def __init__(self, root: Path):
         self.root = root.resolve()
-        self.ui_root = self.root / "ui"
+        functional_ui = self.root / ".frontend" / "app"
+        self.ui_root = (
+            functional_ui
+            if (functional_ui / "index.html").is_file()
+            else self.root / "ui"
+        )
         self.registry = ModuleRegistry.load(self.root)
         self.store = RunStore(self.root, self.registry)
         self._terminalize_orphans()
@@ -128,7 +133,8 @@ class LabradorApplication:
                 "run_id": run_id,
                 "created_at": created_at,
                 "comparison_basis": (
-                    "one integrated candidate plus two illustrative proxy shells; "
+                    "the native HypGen slate is contextualized across the configured "
+                    "evidence-graph signals with shared downstream outputs; "
                     "no Highlander module repository is wired"
                 ),
                 "stage_outputs": [
@@ -370,7 +376,7 @@ def _handler(application: LabradorApplication) -> type[BaseHTTPRequestHandler]:
 def create_server(
     root: Path,
     host: str = "127.0.0.1",
-    port: int = 8765,
+    port: int = 8787,
 ) -> ThreadingHTTPServer:
     application = LabradorApplication(root)
     server = ThreadingHTTPServer((host, port), _handler(application))

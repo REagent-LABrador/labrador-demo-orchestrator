@@ -9,6 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from labrador_orchestrator.contracts import ContractError
+from labrador_orchestrator.frontend_projection import project_frontend_snapshot
 from labrador_orchestrator.projection import project_ui_state
 from labrador_orchestrator.registry import ModuleRegistry
 from labrador_orchestrator.runner import SequentialRunner
@@ -294,6 +295,7 @@ class GeneralizedRunContractTests(unittest.TestCase):
             final = SequentialRunner(fixture.root, registry, store).run(created["run_id"])
 
             projected = project_ui_state(fixture.root, registry, final)
+            frontend = project_frontend_snapshot(fixture.root, registry, final)
             serialized = json.dumps(projected)
 
             self.assertIn("EGFR", serialized)
@@ -310,6 +312,7 @@ class GeneralizedRunContractTests(unittest.TestCase):
                 "Cached integration fixture",
             ):
                 self.assertNotIn(fixture_claim, serialized)
+            self.assertNotIn("display_metric_basis", json.dumps(frontend))
 
 
 if __name__ == "__main__":

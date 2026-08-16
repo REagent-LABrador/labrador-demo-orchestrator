@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Normalize Hypothesis_Generator's directory output to one file-in/file-out command."""
+"""Emit three deterministic structural candidates through HypGen's official cards adapter."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 
@@ -20,39 +19,74 @@ def main() -> int:
     parser.add_argument("--craziness", type=float, default=0.5)
     args = parser.parse_args()
 
-    executable = args.module_root / ".venv" / "bin" / "hypgen"
-    if not executable.exists():
-        print(f"hypgen environment missing at {executable}", file=sys.stderr)
+    args.module_root = args.module_root.resolve()
+    args.input = args.input.resolve()
+    args.output = args.output.resolve()
+    environment_python = args.module_root / ".venv" / "bin" / "python"
+    if not environment_python.exists():
+        print(f"hypgen environment missing at {environment_python}", file=sys.stderr)
         return 2
-    with tempfile.TemporaryDirectory(prefix="labrador-hypgen-") as temporary:
-        output_dir = Path(temporary)
+
+    if os.environ.get("LABRADOR_HYPGEN_ENV") != "1":
         environment = os.environ.copy()
-        import_paths = [str(args.module_root / "src"), str(args.module_root)]
-        if environment.get("PYTHONPATH"):
-            import_paths.append(environment["PYTHONPATH"])
-        environment["PYTHONPATH"] = os.pathsep.join(import_paths)
-        result = subprocess.run(
+        environment["LABRADOR_HYPGEN_ENV"] = "1"
+        return subprocess.run(
             [
-                str(executable),
-                "--graph",
+                str(environment_python),
+                str(Path(__file__).resolve()),
+                "--module-root",
+                str(args.module_root),
+                "--input",
                 str(args.input),
-                "--profile",
-                "default",
+                "--output",
+                str(args.output),
                 "--craziness",
-                str(max(0.0, min(1.0, args.craziness))),
-                "--dry-run",
-                "--out",
-                str(output_dir),
+                str(args.craziness),
             ],
             cwd=args.module_root,
             env=environment,
             check=False,
+        ).returncode
+
+    import_paths = [str(args.module_root / "src"), str(args.module_root)]
+    if os.environ.get("PYTHONPATH"):
+        import_paths.append(os.environ["PYTHONPATH"])
+    sys.path[:0] = import_paths
+
+    try:
+        from adapters.common import Bundle
+        from adapters.webui.payload import emit
+        from hyp_gen import Generator, KnowledgeGraph, Params
+
+        graph = KnowledgeGraph.model_validate(json.loads(args.input.read_text(encoding="utf-8")))
+        params = Params.at_craziness(max(0.0, min(1.0, args.craziness)))
+        result = Generator(graph=graph, params=params).run()
+        candidates = result.hypotheses[:3]
+        if len(candidates) < 2:
+            print("HYPOTHESIS_SLATE_TOO_SMALL", file=sys.stderr)
+            return 3
+        bundle = Bundle(
+            provenance=result.provenance,
+            hypotheses=candidates,
+            asks=[
+                ask
+                for ask in result.asks
+                if ask.for_hypothesis is None
+                or ask.for_hypothesis in {candidate.id for candidate in candidates}
+            ],
         )
-        generated = output_dir / "hypothesis.json"
-        if result.returncode != 0 or not generated.exists():
-            return result.returncode or 3
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(generated, args.output)
+        payload = emit(bundle).model_dump(mode="json")
+    except Exception as exc:  # noqa: BLE001 - file/CLI boundary reports a clean nonzero
+        print(f"HYPOTHESIS_SLATE_FAILED: {exc}", file=sys.stderr)
+        return 4
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = args.output.with_name(f".{args.output.name}.tmp")
+    temporary.write_text(
+        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(args.output)
     return 0
 
 

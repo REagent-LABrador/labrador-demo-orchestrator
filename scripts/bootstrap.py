@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clone the five pinned modules and prepare the two local Python runtimes."""
+"""Clone the pinned frontend and five modules, then prepare Python runtimes."""
 
 from __future__ import annotations
 
@@ -47,6 +47,7 @@ def main() -> int:
         print("bootstrap requires git and uv on PATH", file=sys.stderr)
         return 2
     lock = json.loads((ROOT / "module-lock.json").read_text(encoding="utf-8"))
+    clone_or_verify(lock["frontend"])
     roots: dict[str, Path] = {}
     for module in lock["modules"]:
         roots[str(module["id"])] = clone_or_verify(module)
@@ -56,9 +57,19 @@ def main() -> int:
         ["uv", "sync", "--locked", "--extra", "dev", "--no-editable"],
         cwd=roots["roi_calculator"],
     )
+    bun = shutil.which("bun")
+    if bun is None:
+        print(
+            "Bun not found; skipping optional evidence and recruitment dependency installs. "
+            "The pinned judging replays remain available.",
+            file=sys.stderr,
+        )
+    else:
+        for module_id in ("evidence_mapper", "clinical_simulation"):
+            if module_id in roots:
+                run([bun, "install", "--frozen-lockfile"], cwd=roots[module_id])
     print(
-        "\nPinned modules are present. Bun-dependent modules remain fallback-backed "
-        "if Bun is absent."
+        "\nPinned frontend and modules are present. Bun and Python module dependencies are ready."
     )
     print("Next: uv run python app.py preflight")
     return 0

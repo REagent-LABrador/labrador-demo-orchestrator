@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import sys
 import unittest
 from pathlib import Path
@@ -8,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from labrador_orchestrator.contracts import ContractError
 from labrador_orchestrator.registry import ModuleRegistry
-from tests._support import STAGES, FixtureProject, write_json
+from tests._support import OUTPUT_SCHEMA, STAGES, FixtureProject, write_json
 
 
 class RegistryPreflightTests(unittest.TestCase):
@@ -46,6 +47,37 @@ class RegistryPreflightTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ContractError, "evidence mapper payload status"):
                 ModuleRegistry.load(fixture.root).preflight(check_git=False)
+
+    def test_preflight_resolves_module_owned_sibling_schema_without_network(self) -> None:
+        with FixtureProject() as fixture:
+            module_root = fixture.root / "modules" / "clinical_simulation"
+            schema = copy.deepcopy(OUTPUT_SCHEMA)
+            schema["$id"] = "https://example.invalid/clinical/output.schema.json"
+            schema["required"] = [*schema["required"], "interpretability"]
+            schema["properties"]["interpretability"] = {
+                "$ref": "./interpretability.schema.json"
+            }
+            write_json(module_root / "output.schema.json", schema)
+            write_json(
+                module_root / "interpretability.schema.json",
+                {
+                    "$schema": "https://json-schema.org/draft/2020-12/schema",
+                    "$id": "https://example.invalid/clinical/interpretability.schema.json",
+                    "type": "object",
+                    "required": ["schema_version"],
+                    "properties": {"schema_version": {"const": "1.0.0"}},
+                    "additionalProperties": True,
+                },
+            )
+            for filename in ("example-output.json", "fallback-output.json"):
+                path = module_root / filename
+                value = __import__("json").loads(path.read_text())
+                value["interpretability"] = {"schema_version": "1.0.0"}
+                write_json(path, value)
+
+            reports = ModuleRegistry.load(fixture.root).preflight(check_git=False)
+
+            self.assertTrue(all(report["ok"] for report in reports))
 
     def test_preflight_rejects_missing_contract_file(self) -> None:
         with FixtureProject() as fixture:

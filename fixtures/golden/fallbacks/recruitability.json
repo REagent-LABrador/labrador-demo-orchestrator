@@ -2,25 +2,25 @@
   "as_of_date": null,
   "counterfactual": {
     "achieves": "none",
-    "change": "No biomarker relaxation works: even all-comers (100%) predicts 282 months at 85 sites. The binding constraints are elsewhere — N=340 against 189 competing trials; feasibility would need ~510 sites even without the biomarker.",
-    "simulated_months_after": 282
+    "change": "No biomarker relaxation works: even all-comers (100%) predicts 247 months at 85 sites. The binding constraints are elsewhere — N=340 against 189 competing trials; feasibility would need ~447 sites even without the biomarker.",
+    "simulated_months_after": 247
   },
   "eligibility": {
     "cited_trials": [
       "NCT01061736",
-      "NCT00810836",
       "NCT01194414",
+      "NCT00810836",
       "NCT00563849"
     ],
     "drivers": [
-      "active disease thresholds (tender/swollen joint counts, elevated CRP/ESR) exclude many seropositive patients with low disease activity",
-      "requirement for inadequate response/stable dose on background DMARD/MTX therapy for defined duration excludes new or unstable patients",
-      "exclusion of prior biologic/TNF non-responders or any biologic use removes a substantial subset",
-      "restrictions on corticosteroid dose/timing and recent intra-articular/parenteral steroid use exclude additional patients",
-      "age and comorbidity exclusions (hepatic, renal, infection) further reduce eligible pool"
+      "active disease thresholds (tender/swollen joint counts, elevated hs-CRP/ESR)",
+      "stable background DMARD/MTX dose requirements for several weeks prior to screening",
+      "exclusion of prior biologic/TNF failures or biologic use within recent months",
+      "restrictions on oral/parenteral corticosteroid dose and timing",
+      "exclusion of other autoimmune or active infectious disease"
     ],
-    "multiplier": 0.35,
-    "reasoning": "Across precedent RA trials, the combination of strict active-disease thresholds (joint counts, CRP/ESR), required stable background DMARD/MTX therapy, and exclusion of prior biologic or TNF failures typically screens out a majority of otherwise biomarker-positive patients. Applying these compounded but partially overlapping filters to seropositive RA patients yields roughly a third passing all remaining inclusion/exclusion criteria."
+    "multiplier": 0.4,
+    "reasoning": "Precedent RA trials (NCT01061736, NCT01194414, NCT00563849) impose strict active-disease thresholds, stable background therapy, and biologic-naive requirements that exclude a large share of seropositive patients regardless of biomarker status. Combining these overlapping but non-identical filters typically leaves less than half of biomarker-positive patients eligible."
   },
   "evidence": {
     "competing_trials": 189,
@@ -98,16 +98,1187 @@
     "tissue": "synovium",
     "uncertainty": 0.45
   },
+  "interpretability": {
+    "assumptions": [
+      {
+        "basis": "Share of rheumatoid arthritis patients carrying \"seropositive RA (RF and/or anti-CCP positive)\" — supplied by the thesis and echoed verbatim, never inferred by this module; thesis-supplied evidence entries are linked from the narrowing step.",
+        "id": "assumption.prevalence_in_disease",
+        "path": "input.biomarker_population.prevalence_in_disease",
+        "synthetic": false,
+        "unit": "fraction",
+        "value": 0.62
+      },
+      {
+        "basis": "Precedent RA trials (NCT01061736, NCT01194414, NCT00563849) impose strict active-disease thresholds, stable background therapy, and biologic-naive requirements that exclude a large share of seropositive patients regardless of biomarker status. Combining these overlapping but non-identical filters typically leaves less than half of biomarker-positive patients eligible. Median of 3 language-model reads of real precedent I/E prose — a judgement, not arithmetic; treat as ASSUMED-grade.",
+        "id": "assumption.eligibility_multiplier",
+        "path": "output.eligibility.multiplier",
+        "synthetic": false,
+        "unit": "fraction",
+        "value": 0.4
+      },
+      {
+        "basis": "Thesis-predicted standardized effect size for the primary endpoint; drives the two-arm powering formula.",
+        "id": "assumption.effect_size",
+        "path": "input.endpoint.expected_effect_size",
+        "synthetic": false,
+        "unit": "Cohen's d",
+        "value": 0.35
+      },
+      {
+        "basis": "Each concurrently recruiting competitor takes this share of the patient pool: penalty = 1 / (1 + share × competitors).",
+        "id": "assumption.competition_share",
+        "path": "model.constants.competition_share",
+        "synthetic": false,
+        "unit": "fraction",
+        "value": 0.08
+      },
+      {
+        "basis": "Below this, sites pre-screen for the marker instead of waiting on clinic flow, so velocity narrowing saturates; the residual low-prevalence cost is reported as screens per enrollee, never hidden.",
+        "id": "assumption.narrowing_floor",
+        "path": "model.constants.narrowing_floor",
+        "synthetic": false,
+        "unit": "fraction",
+        "value": 0.1
+      },
+      {
+        "basis": "At or under this many simulated months a design enrols comfortably (score 1, FEASIBLE).",
+        "id": "assumption.good_months",
+        "path": "model.constants.good_months",
+        "synthetic": false,
+        "unit": "months",
+        "value": 18
+      },
+      {
+        "basis": "At or beyond this many simulated months a sponsor treats enrolment as infeasible (score 0, INFEASIBLE_TRIAL_DESIGN).",
+        "id": "assumption.infeasible_months",
+        "path": "model.constants.infeasible_months",
+        "synthetic": false,
+        "unit": "months",
+        "value": 48
+      },
+      {
+        "basis": "Real trials over-enrol against dropout and non-evaluable patients; the powering formula inflates N by this factor.",
+        "id": "assumption.dropout_inflation",
+        "path": "model.constants.dropout_inflation",
+        "synthetic": false,
+        "unit": "ratio",
+        "value": 1.3
+      },
+      {
+        "basis": "Textbook two-arm approximation n per arm ≈ 16/d² at 80% power, alpha 0.05 two-sided.",
+        "id": "assumption.powering_constant",
+        "path": "model.constants.powering_constant",
+        "synthetic": false,
+        "unit": "dimensionless",
+        "value": 16
+      },
+      {
+        "basis": "Required-N fallback when the thesis has no effect size and precedents carry no enrolment counts.",
+        "id": "assumption.default_required_n",
+        "path": "model.constants.default_required_n",
+        "synthetic": false,
+        "unit": "patients",
+        "value": 200
+      },
+      {
+        "basis": "Programme-minimum site count: used when precedent is too thin, and as the lower clamp on the precedent-derived estimate — precedent can raise the site count, never talk a sponsor below the minimum.",
+        "id": "assumption.default_sites",
+        "path": "model.constants.default_sites",
+        "synthetic": false,
+        "unit": "sites",
+        "value": 40
+      },
+      {
+        "basis": "Upper clamp on the precedent-derived site count.",
+        "id": "assumption.max_sites",
+        "path": "model.constants.max_sites",
+        "synthetic": false,
+        "unit": "sites",
+        "value": 250
+      },
+      {
+        "basis": "Enrolment velocity assumed when no precedent velocity is computable. Not applied in this run (precedent velocity was available).",
+        "id": "assumption.fallback_velocity",
+        "path": "model.constants.fallback_velocity",
+        "synthetic": false,
+        "unit": "patients/site-month",
+        "value": 0.5
+      },
+      {
+        "basis": "Language-model reads per eligibility assessment; the median multiplier is used to pin sampling drift.",
+        "id": "assumption.eligibility_samples",
+        "path": "model.constants.eligibility_samples",
+        "synthetic": false,
+        "unit": "samples",
+        "value": 3
+      },
+      {
+        "basis": "Registry page size for recruiting/stopped searches; counts are page-scaled by total/page so crowded indications are not undercounted.",
+        "id": "assumption.search_page_size",
+        "path": "model.constants.search_page_size",
+        "synthetic": false,
+        "unit": "trials",
+        "value": 100
+      },
+      {
+        "basis": "Registry page size for the completed-precedent pool (a single page of 50 produced measurably unstable velocities).",
+        "id": "assumption.precedent_page_size",
+        "path": "model.constants.precedent_page_size",
+        "synthetic": false,
+        "unit": "trials",
+        "value": 300
+      },
+      {
+        "basis": "waterfall_delta = round((score − 0.5) × 24): up to ±12 points around a neutral 0.5 score.",
+        "id": "assumption.waterfall_scale",
+        "path": "model.constants.waterfall_scale",
+        "synthetic": false,
+        "unit": "points",
+        "value": 24
+      }
+    ],
+    "counterfactuals": [
+      {
+        "change": "No biomarker relaxation works: even all-comers (100%) predicts 247 months at 85 sites. The binding constraints are elsewhere — N=340 against 189 competing trials; feasibility would need ~447 sites even without the biomarker.",
+        "meaning": "No biomarker relaxation reaches the threshold; the stated binding constraint (N, competition, or sites) is what must change to alter the verdict.",
+        "result": "Simulated enrolment becomes 247 months (achieves: none)."
+      }
+    ],
+    "evidence": [
+      {
+        "claim": "220 completed interventional precedent trials in rheumatoid arthritis (page sampled from 2268 registered) back the velocity, N, and site anchors.",
+        "grade": "MODERATE",
+        "id": "evidence.registry.completed_search",
+        "locator": null,
+        "quote": null,
+        "source_id": "clinicaltrials.gov/api/v2 query.cond=\"rheumatoid arthritis\" status=COMPLETED pageSize=300",
+        "source_type": "registry",
+        "source_url": null,
+        "synthetic": false
+      },
+      {
+        "claim": "~189 interventional trials actively recruiting rheumatoid arthritis (page-scaled registry count) compete for the same patients.",
+        "grade": "MODERATE",
+        "id": "evidence.registry.competing_search",
+        "locator": null,
+        "quote": null,
+        "source_id": "clinicaltrials.gov/api/v2 query.cond=\"rheumatoid arthritis\" status=RECRUITING pageSize=100, interventional only",
+        "source_type": "registry",
+        "source_url": null,
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT01061736",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT01061736",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01061736",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT00810836",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT00810836",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT00810836",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT01416493",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT01416493",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01416493",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT01194414",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT01194414",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01194414",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT00563849",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT00563849",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT00563849",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT03008590",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT03008590",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT03008590",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT00750880",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT00750880",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT00750880",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT00815906",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT00815906",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT00815906",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT01534884",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT01534884",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01534884",
+        "synthetic": false
+      },
+      {
+        "claim": "Completed interventional precedent trial in rheumatoid arthritis; part of the pool anchoring observed enrollment velocity, precedent N, and site counts.",
+        "grade": "MODERATE",
+        "id": "evidence.precedent.NCT02760316",
+        "locator": "registry fields: enrollment, locations, start/primary-completion dates",
+        "quote": null,
+        "source_id": "NCT02760316",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT02760316",
+        "synthetic": false
+      },
+      {
+        "claim": "Published inclusion/exclusion criteria for a real rheumatoid arthritis trial; the eligibility pass-rate estimate rests on this prose.",
+        "grade": "MODERATE",
+        "id": "evidence.criteria.NCT01061736",
+        "locator": "registry field: eligibilityCriteria",
+        "quote": null,
+        "source_id": "NCT01061736",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01061736",
+        "synthetic": false
+      },
+      {
+        "claim": "Published inclusion/exclusion criteria for a real rheumatoid arthritis trial; the eligibility pass-rate estimate rests on this prose.",
+        "grade": "MODERATE",
+        "id": "evidence.criteria.NCT01194414",
+        "locator": "registry field: eligibilityCriteria",
+        "quote": null,
+        "source_id": "NCT01194414",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01194414",
+        "synthetic": false
+      },
+      {
+        "claim": "Published inclusion/exclusion criteria for a real rheumatoid arthritis trial; the eligibility pass-rate estimate rests on this prose.",
+        "grade": "MODERATE",
+        "id": "evidence.criteria.NCT00810836",
+        "locator": "registry field: eligibilityCriteria",
+        "quote": null,
+        "source_id": "NCT00810836",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT00810836",
+        "synthetic": false
+      },
+      {
+        "claim": "Published inclusion/exclusion criteria for a real rheumatoid arthritis trial; the eligibility pass-rate estimate rests on this prose.",
+        "grade": "MODERATE",
+        "id": "evidence.criteria.NCT00563849",
+        "locator": "registry field: eligibilityCriteria",
+        "quote": null,
+        "source_id": "NCT00563849",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT00563849",
+        "synthetic": false
+      },
+      {
+        "claim": "Terminated/withdrawn trial in rheumatoid arthritis; the registry states why it stopped.",
+        "grade": "HIGH",
+        "id": "evidence.failed.NCT01955733",
+        "locator": "registry field: whyStopped",
+        "quote": "Substance discontinued",
+        "source_id": "NCT01955733",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01955733",
+        "synthetic": false
+      },
+      {
+        "claim": "Terminated/withdrawn trial in rheumatoid arthritis; the registry states why it stopped.",
+        "grade": "HIGH",
+        "id": "evidence.failed.NCT02390700",
+        "locator": "registry field: whyStopped",
+        "quote": "Business decision based on lack of enrollment",
+        "source_id": "NCT02390700",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT02390700",
+        "synthetic": false
+      },
+      {
+        "claim": "Terminated/withdrawn trial in rheumatoid arthritis; the registry states why it stopped.",
+        "grade": "HIGH",
+        "id": "evidence.failed.NCT01525654",
+        "locator": "registry field: whyStopped",
+        "quote": "Ran out of funding",
+        "source_id": "NCT01525654",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT01525654",
+        "synthetic": false
+      },
+      {
+        "claim": "Terminated/withdrawn trial in rheumatoid arthritis; the registry states why it stopped.",
+        "grade": "HIGH",
+        "id": "evidence.failed.NCT00083759",
+        "locator": "registry field: whyStopped",
+        "quote": "The biological effect seen with natalizumab was not sufficient to warrant further development in RA.",
+        "source_id": "NCT00083759",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT00083759",
+        "synthetic": false
+      },
+      {
+        "claim": "Terminated/withdrawn trial in rheumatoid arthritis; the registry states why it stopped.",
+        "grade": "HIGH",
+        "id": "evidence.failed.NCT04143841",
+        "locator": "registry field: whyStopped",
+        "quote": "Financial constraints",
+        "source_id": "NCT04143841",
+        "source_type": "trial",
+        "source_url": "https://clinicaltrials.gov/study/NCT04143841",
+        "synthetic": false
+      },
+      {
+        "claim": "Seropositive fraction of incident RA is 62% (37% dual RF+/anti-CCP+, 13% anti-CCP only, 12% RF only) in a population-based US cohort, 2003-2019, n=1373 -- the enrollable-population denominator for a seropositive-required trial.",
+        "grade": "HIGH",
+        "id": "evidence.thesis.doi_10_1002_acr_80009",
+        "locator": null,
+        "quote": null,
+        "source_id": "doi:10.1002/acr.80009",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1002/acr.80009",
+        "synthetic": false
+      }
+    ],
+    "extensions": {
+      "as_of_date": null,
+      "data_source": {
+        "mode": "live",
+        "registry": "clinicaltrials.gov API v2"
+      },
+      "eligibility_drivers": [
+        "active disease thresholds (tender/swollen joint counts, elevated hs-CRP/ESR)",
+        "stable background DMARD/MTX dose requirements for several weeks prior to screening",
+        "exclusion of prior biologic/TNF failures or biologic use within recent months",
+        "restrictions on oral/parenteral corticosteroid dose and timing",
+        "exclusion of other autoimmune or active infectious disease"
+      ],
+      "eligibility_llm": {
+        "aggregation": "median",
+        "model": "claude-sonnet-5",
+        "samples": 3,
+        "seed": null
+      },
+      "engine": {
+        "name": "clinical-simulation",
+        "version": "1.0.0"
+      },
+      "feasibility_thresholds": {
+        "good_months": 18,
+        "infeasible_months": 48
+      }
+    },
+    "headline": {
+      "basis": ["OBSERVED", "INFERRED", "MODELED"],
+      "plain_language": "Enrolling 340 patients at 85 sites is simulated to take 398 months — at or beyond the 48-month bar, so the trial is infeasible as designed and no biomarker relaxation rescues it.",
+      "result": "INFEASIBLE_TRIAL_DESIGN",
+      "status": "SUPPORTED",
+      "title": "Trial recruitability — IRAK4 inhibitor (small molecule) in rheumatoid arthritis"
+    },
+    "limitations": [
+      {
+        "code": "SIMULATED_NOT_OBSERVED",
+        "field_path": "output.simulated_months_to_enroll",
+        "message": "Every number in this result is SIMULATED — a model output, never an observed enrolment. The field names say so on purpose; keep the label in any UI.",
+        "severity": "INFO"
+      },
+      {
+        "code": "ENROLLMENT_DURATION_NOT_LAUNCH_DELAY",
+        "field_path": "output.simulated_months_to_enroll",
+        "message": "Enrollment duration is not automatically equivalent to launch delay. Consumers pricing programs must derive delay (months beyond their own plan) from their baseline; these months are a recruitment forecast, not a program schedule.",
+        "severity": "INFO"
+      },
+      {
+        "code": "SCORE_IS_HEURISTIC",
+        "field_path": "output.score",
+        "message": "score is a heuristic operational-recruitability index (linear between the 18- and 48-month thresholds). It is NOT a probability, and mapping it — or waterfall_delta — to probability of approval is a category error.",
+        "severity": "INFO"
+      },
+      {
+        "code": "ELIGIBILITY_IS_LLM_JUDGMENT",
+        "field_path": "output.eligibility.multiplier",
+        "message": "The eligibility multiplier is a language-model judgement over real precedent I/E prose (median of 3 reads) — treat it as ASSUMED-grade, not measured. The cited NCT ids are checkable on clinicaltrials.gov.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "COMPETITION_PENALTY_UNCALIBRATED",
+        "field_path": "output.evidence.competing_trials",
+        "message": "The linear competition penalty is uncalibrated for extremely crowded indications (~189 concurrent trials here): treat the month count as a design-failure signal, not a schedule.",
+        "severity": "WARNING"
+      }
+    ],
+    "lineage": [
+      {
+        "input_paths": [
+          "input.disease.name",
+          "input.biomarker_population.prevalence_in_disease",
+          "input.endpoint.expected_effect_size",
+          "input.as_of_date"
+        ],
+        "output_path": "output.simulated_months_to_enroll",
+        "transformation": "required_n / (sites × base_velocity × max(prevalence × eligibility_multiplier, 0.1) × 1/(1 + 0.08 × competing_trials)), rounded up — every factor derived from registry searches on the disease name (horizon-filtered when as_of_date is set)"
+      },
+      {
+        "input_paths": [
+          "input.endpoint.expected_effect_size",
+          "input.disease.name"
+        ],
+        "output_path": "output.required_n",
+        "transformation": "effect size d=0.35 (see step.sample_size and step.powering)"
+      },
+      {
+        "input_paths": [
+          "input.disease.name",
+          "input.biomarker_population.marker",
+          "input.endpoint.name"
+        ],
+        "output_path": "output.eligibility.multiplier",
+        "transformation": "language-model read of precedent inclusion/exclusion prose (median of 3 samples)"
+      },
+      {
+        "input_paths": ["input.disease.name", "input.as_of_date"],
+        "output_path": "output.evidence.competing_trials",
+        "transformation": "page-scaled registry count of interventional trials actively recruiting the condition"
+      },
+      {
+        "input_paths": ["input.disease.name"],
+        "output_path": "output.sites",
+        "transformation": "site count with basis \"precedent\" (see step.site_count)"
+      },
+      {
+        "input_paths": ["input.biomarker_population.prevalence_in_disease"],
+        "output_path": "output.screens_per_enrollee",
+        "transformation": "round(1 / max(prevalence × eligibility_multiplier, 0.0001))"
+      },
+      {
+        "input_paths": [
+          "input.disease.name",
+          "input.biomarker_population.prevalence_in_disease",
+          "input.endpoint.expected_effect_size",
+          "input.as_of_date"
+        ],
+        "output_path": "output.score",
+        "transformation": "linear ramp on simulated_months_to_enroll: 1 at ≤18 months to 0 at ≥48"
+      },
+      {
+        "input_paths": [
+          "input.disease.name",
+          "input.biomarker_population.prevalence_in_disease",
+          "input.endpoint.expected_effect_size",
+          "input.as_of_date"
+        ],
+        "output_path": "output.waterfall_delta",
+        "transformation": "round((score − 0.5) × 24)"
+      },
+      {
+        "input_paths": [
+          "input.disease.name",
+          "input.biomarker_population.prevalence_in_disease",
+          "input.endpoint.expected_effect_size",
+          "input.as_of_date"
+        ],
+        "output_path": "output.interpretability.headline.result",
+        "transformation": "threshold bucketing of simulated_months_to_enroll (≤18 FEASIBLE; <48 FEASIBLE_WITH_RISK; ≥48 INFEASIBLE_TRIAL_DESIGN)"
+      }
+    ],
+    "metrics": [
+      {
+        "assumption_ids": [
+          "assumption.prevalence_in_disease",
+          "assumption.eligibility_multiplier",
+          "assumption.competition_share",
+          "assumption.narrowing_floor"
+        ],
+        "direction": "negative",
+        "display": "398 months (simulated)",
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.registry.competing_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "id": "metric.simulated_months_to_enroll",
+        "label": "Simulated months to enroll",
+        "meaning": "Modeled months to enroll 340 patients at 85 sites. SIMULATED — a model output, never an observed enrolment; and enrollment duration is not automatically equivalent to launch delay.",
+        "unit": "months",
+        "value": 398
+      },
+      {
+        "assumption_ids": [
+          "assumption.good_months",
+          "assumption.infeasible_months"
+        ],
+        "direction": "positive",
+        "display": "0.00 of 1 (heuristic)",
+        "evidence_ids": [],
+        "id": "metric.recruitability_score",
+        "label": "Recruitability score (heuristic)",
+        "meaning": "Heuristic operational-recruitability index: 1 at ≤18 simulated months, 0 at ≥48, linear between. It is not a probability of any event — reading it as probability of approval is a category error.",
+        "unit": "score",
+        "value": 0
+      },
+      {
+        "assumption_ids": [
+          "assumption.effect_size",
+          "assumption.powering_constant",
+          "assumption.dropout_inflation"
+        ],
+        "direction": "negative",
+        "display": "340 patients",
+        "evidence_ids": [],
+        "id": "metric.required_n",
+        "label": "Required N",
+        "meaning": "Patients to enroll. Derivation: effect size d=0.35.",
+        "unit": "patients",
+        "value": 340
+      },
+      {
+        "assumption_ids": ["assumption.default_sites", "assumption.max_sites"],
+        "direction": "neutral",
+        "display": "85 sites",
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "id": "metric.sites",
+        "label": "Sites",
+        "meaning": "Site count used by the simulation (basis: precedent).",
+        "unit": "sites",
+        "value": 85
+      },
+      {
+        "assumption_ids": [
+          "assumption.prevalence_in_disease",
+          "assumption.eligibility_multiplier"
+        ],
+        "direction": "negative",
+        "display": "~4 screened per enrollee",
+        "evidence_ids": [
+          "evidence.criteria.NCT01061736",
+          "evidence.criteria.NCT01194414",
+          "evidence.criteria.NCT00810836",
+          "evidence.criteria.NCT00563849"
+        ],
+        "id": "metric.screens_per_enrollee",
+        "label": "Screening burden",
+        "meaning": "Disease patients screened per enrolled patient, 1/(prevalence × eligibility). The active-screening floor keeps months finite at low prevalence; this is where that cost actually lands.",
+        "unit": "patients/enrollee",
+        "value": 4
+      },
+      {
+        "assumption_ids": [],
+        "direction": "positive",
+        "display": "0.65 patients/site/enrolling-month",
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "id": "metric.precedent_velocity",
+        "label": "Precedent enrollment velocity",
+        "meaning": "Median observed enrolment velocity across 196 completed precedent trials, with each registry window corrected for the trial's own endpoint follow-up.",
+        "unit": "patients/site-month",
+        "value": 0.6533333333333333
+      },
+      {
+        "assumption_ids": [
+          "assumption.search_page_size",
+          "assumption.competition_share"
+        ],
+        "direction": "negative",
+        "display": "~189 competing trials",
+        "evidence_ids": ["evidence.registry.competing_search"],
+        "id": "metric.competing_trials",
+        "label": "Competing recruiting trials",
+        "meaning": "Interventional trials actively consenting the same population; each takes an equal share of enrolment velocity in the model.",
+        "unit": "trials",
+        "value": 189
+      },
+      {
+        "assumption_ids": [],
+        "direction": "neutral",
+        "display": "98.50 patients",
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "id": "metric.precedent_median_n",
+        "label": "Precedent median N",
+        "meaning": "Median enrolment of comparable completed trials — the reality check printed beside required_n. Null when no precedent carries counts.",
+        "unit": "patients",
+        "value": 98.5
+      },
+      {
+        "assumption_ids": [],
+        "direction": "neutral",
+        "display": "269 patients",
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "id": "metric.phase3_median_n",
+        "label": "Phase-3 precedent median N",
+        "meaning": "Median N of phase-3 precedents — the registrational-reality anchor that can floor required_n. Null when none exist.",
+        "unit": "patients",
+        "value": 269
+      },
+      {
+        "assumption_ids": [
+          "assumption.waterfall_scale",
+          "assumption.good_months",
+          "assumption.infeasible_months"
+        ],
+        "direction": "positive",
+        "display": "-12 points",
+        "evidence_ids": [],
+        "id": "metric.waterfall_delta",
+        "label": "Waterfall contribution",
+        "meaning": "Signed contribution to the thesis's evidence waterfall, derived from the heuristic score. Not a probability and not an approval-odds adjustment.",
+        "unit": "points",
+        "value": -12
+      }
+    ],
+    "schema_version": "1.0.0",
+    "steps": [
+      {
+        "assumption_ids": ["assumption.precedent_page_size"],
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "formula": null,
+        "id": "step.precedent_pool",
+        "inputs": [
+          {
+            "path": "input.disease.name",
+            "unit": null,
+            "value": "rheumatoid arthritis"
+          },
+          {
+            "path": "input.as_of_date",
+            "unit": null,
+            "value": null
+          }
+        ],
+        "label": "Gather completed precedent trials",
+        "method": "ClinicalTrials.gov API v2 search: completed interventional trials in the condition, horizon-filtered when as_of_date is set",
+        "result": {
+          "unit": "trials",
+          "value": 220
+        }
+      },
+      {
+        "assumption_ids": [],
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "formula": "median(enrollment / sites / enrolling_months) over usable precedents",
+        "id": "step.velocity",
+        "inputs": [
+          {
+            "path": "model.velocity_sample_count",
+            "unit": "trials",
+            "value": 196
+          }
+        ],
+        "label": "Observed enrollment velocity",
+        "method": "median patients/site/enrolling-month across usable precedents, each registry window corrected for its own endpoint follow-up",
+        "result": {
+          "unit": "patients/site-month",
+          "value": 0.6533333333333333
+        }
+      },
+      {
+        "assumption_ids": ["assumption.eligibility_samples"],
+        "evidence_ids": [
+          "evidence.criteria.NCT01061736",
+          "evidence.criteria.NCT01194414",
+          "evidence.criteria.NCT00810836",
+          "evidence.criteria.NCT00563849"
+        ],
+        "formula": null,
+        "id": "step.eligibility",
+        "inputs": [
+          {
+            "path": "input.biomarker_population.marker",
+            "unit": null,
+            "value": "seropositive RA (RF and/or anti-CCP positive)"
+          },
+          {
+            "path": "output.eligibility.cited_trials",
+            "unit": "trials",
+            "value": 4
+          }
+        ],
+        "label": "Eligibility pass rate",
+        "method": "median of 3 claude-sonnet-5 reads of real precedent inclusion/exclusion prose — the one judgement step; drivers and reasoning are preserved verbatim in output.eligibility",
+        "result": {
+          "unit": "fraction",
+          "value": 0.4
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.prevalence_in_disease",
+          "assumption.eligibility_multiplier",
+          "assumption.narrowing_floor"
+        ],
+        "evidence_ids": ["evidence.thesis.doi_10_1002_acr_80009"],
+        "formula": "max(prevalence × eligibility_multiplier, 0.1)",
+        "id": "step.narrowing",
+        "inputs": [
+          {
+            "path": "input.biomarker_population.prevalence_in_disease",
+            "unit": "fraction",
+            "value": 0.62
+          },
+          {
+            "path": "output.eligibility.multiplier",
+            "unit": "fraction",
+            "value": 0.4
+          }
+        ],
+        "label": "Biomarker + eligibility narrowing",
+        "method": "floored product: below the floor, sites pre-screen for the marker rather than wait on clinic flow",
+        "result": {
+          "unit": "fraction",
+          "value": 0.248
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.prevalence_in_disease",
+          "assumption.eligibility_multiplier"
+        ],
+        "evidence_ids": [
+          "evidence.criteria.NCT01061736",
+          "evidence.criteria.NCT01194414",
+          "evidence.criteria.NCT00810836",
+          "evidence.criteria.NCT00563849"
+        ],
+        "formula": "round(1 / max(prevalence × eligibility_multiplier, 0.0001))",
+        "id": "step.screening_burden",
+        "inputs": [
+          {
+            "path": "input.biomarker_population.prevalence_in_disease",
+            "unit": "fraction",
+            "value": 0.62
+          },
+          {
+            "path": "output.eligibility.multiplier",
+            "unit": "fraction",
+            "value": 0.4
+          }
+        ],
+        "label": "Screening burden",
+        "method": "unfloored inverse of the narrowing product — where the low-prevalence cost lands when the velocity floor applies",
+        "result": {
+          "unit": "patients/enrollee",
+          "value": 4
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.competition_share",
+          "assumption.search_page_size"
+        ],
+        "evidence_ids": ["evidence.registry.competing_search"],
+        "formula": "1 / (1 + 0.08 × competing_trials)",
+        "id": "step.competition",
+        "inputs": [
+          {
+            "path": "output.evidence.competing_trials",
+            "unit": "trials",
+            "value": 189
+          }
+        ],
+        "label": "Competition penalty",
+        "method": "each concurrently recruiting interventional trial takes an equal share of the patient pool",
+        "result": {
+          "unit": "fraction",
+          "value": 0.06203473945409429
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.effect_size",
+          "assumption.powering_constant",
+          "assumption.dropout_inflation"
+        ],
+        "evidence_ids": [],
+        "formula": "ceil((16 / d²) × 2 × 1.3)",
+        "id": "step.sample_size",
+        "inputs": [
+          {
+            "path": "input.endpoint.expected_effect_size",
+            "unit": "Cohen's d",
+            "value": 0.35
+          }
+        ],
+        "label": "Base sample size",
+        "method": "textbook two-arm powering from the predicted effect size (80% power, alpha 0.05 two-sided), inflated for dropout",
+        "result": {
+          "unit": "patients",
+          "value": 340
+        }
+      },
+      {
+        "assumption_ids": [],
+        "evidence_ids": [],
+        "formula": "max(base_n, ceil(phase3_median_n)) when ≥3 phase-3 precedents",
+        "id": "step.powering",
+        "inputs": [
+          {
+            "path": "model.required_n_base",
+            "unit": "patients",
+            "value": 340
+          },
+          {
+            "path": "output.phase3_median_n",
+            "unit": "patients",
+            "value": 269
+          },
+          {
+            "path": "model.phase3_precedent_count",
+            "unit": "trials",
+            "value": 57
+          }
+        ],
+        "label": "Required N (registrational floor)",
+        "method": "phase-3 precedent floor checked and not binding; the base estimate stands",
+        "result": {
+          "unit": "patients",
+          "value": 340
+        }
+      },
+      {
+        "id": "step.site_count",
+        "label": "Site count",
+        "result": {
+          "unit": "sites",
+          "value": 85
+        },
+        "assumption_ids": ["assumption.default_sites", "assumption.max_sites"],
+        "evidence_ids": [
+          "evidence.registry.completed_search",
+          "evidence.precedent.NCT01061736",
+          "evidence.precedent.NCT00810836",
+          "evidence.precedent.NCT01416493",
+          "evidence.precedent.NCT01194414",
+          "evidence.precedent.NCT00563849",
+          "evidence.precedent.NCT03008590",
+          "evidence.precedent.NCT00750880",
+          "evidence.precedent.NCT00815906",
+          "evidence.precedent.NCT01534884",
+          "evidence.precedent.NCT02760316"
+        ],
+        "formula": "clamp(round(p75(at-scale precedent site counts)), 40, 250)",
+        "inputs": [
+          {
+            "path": "output.required_n",
+            "unit": "patients",
+            "value": 340
+          }
+        ],
+        "method": "75th percentile of site counts among precedents that enrolled ≥ required_n/2 (a sponsor sizes like the upper quartile of at-scale trials), clamped to the programme range"
+      },
+      {
+        "assumption_ids": [],
+        "evidence_ids": [],
+        "formula": "base_velocity × narrowing × competition_penalty",
+        "id": "step.effective_velocity",
+        "inputs": [
+          {
+            "path": "model.base_velocity",
+            "unit": "patients/site-month",
+            "value": 0.6533333333333333
+          },
+          {
+            "path": "model.narrowing",
+            "unit": "fraction",
+            "value": 0.248
+          },
+          {
+            "path": "model.competition_penalty",
+            "unit": "fraction",
+            "value": 0.06203473945409429
+          }
+        ],
+        "label": "Effective per-site velocity",
+        "method": "product of the velocity, narrowing, and competition terms",
+        "result": {
+          "unit": "patients/site-month",
+          "value": 0.01005128205128205
+        }
+      },
+      {
+        "assumption_ids": [],
+        "evidence_ids": [],
+        "formula": "ceil(required_n / (sites × effective_velocity))",
+        "id": "step.enrollment_duration",
+        "inputs": [
+          {
+            "path": "output.required_n",
+            "unit": "patients",
+            "value": 340
+          },
+          {
+            "path": "output.sites",
+            "unit": "sites",
+            "value": 85
+          },
+          {
+            "path": "model.effective_velocity",
+            "unit": "patients/site-month",
+            "value": 0.01005128205128205
+          }
+        ],
+        "label": "Simulated enrolment duration",
+        "method": "closed-form flow model",
+        "result": {
+          "unit": "months",
+          "value": 398
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.good_months",
+          "assumption.infeasible_months"
+        ],
+        "evidence_ids": [],
+        "formula": "1 − (months − 18) / (48 − 18), clamped to [0, 1]",
+        "id": "step.score",
+        "inputs": [
+          {
+            "path": "output.simulated_months_to_enroll",
+            "unit": "months",
+            "value": 398
+          }
+        ],
+        "label": "Recruitability score (heuristic)",
+        "method": "linear ramp between the comfort and infeasibility thresholds",
+        "result": {
+          "unit": "score",
+          "value": 0
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.good_months",
+          "assumption.infeasible_months"
+        ],
+        "evidence_ids": [
+          "evidence.failed.NCT01955733",
+          "evidence.failed.NCT02390700",
+          "evidence.failed.NCT01525654",
+          "evidence.failed.NCT00083759",
+          "evidence.failed.NCT04143841"
+        ],
+        "formula": "months ≤ 18 → FEASIBLE; 18 < months < 48 → FEASIBLE_WITH_RISK; months ≥ 48 → INFEASIBLE_TRIAL_DESIGN",
+        "id": "step.feasibility",
+        "inputs": [
+          {
+            "path": "output.simulated_months_to_enroll",
+            "unit": "months",
+            "value": 398
+          }
+        ],
+        "label": "Feasibility verdict",
+        "method": "threshold bucketing of the simulated months (the same thresholds that define the score); registry-stated trial failures in the indication are attached as context evidence",
+        "result": {
+          "unit": null,
+          "value": "INFEASIBLE_TRIAL_DESIGN"
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.prevalence_in_disease",
+          "assumption.good_months",
+          "assumption.infeasible_months"
+        ],
+        "evidence_ids": [],
+        "formula": null,
+        "id": "step.counterfactual",
+        "inputs": [
+          {
+            "path": "input.biomarker_population.prevalence_in_disease",
+            "unit": "fraction",
+            "value": 0.62
+          },
+          {
+            "path": "output.simulated_months_to_enroll",
+            "unit": "months",
+            "value": 398
+          }
+        ],
+        "label": "Counterfactual rescue search",
+        "method": "bisection over the months-vs-prevalence curve for the smallest biomarker relaxation reaching the good/feasible thresholds — the only lever the thesis itself controls",
+        "result": {
+          "unit": "months",
+          "value": 247
+        }
+      },
+      {
+        "assumption_ids": ["assumption.waterfall_scale"],
+        "evidence_ids": [],
+        "formula": "round((score − 0.5) × 24)",
+        "id": "step.waterfall_delta",
+        "inputs": [
+          {
+            "path": "output.score",
+            "unit": "score",
+            "value": 0
+          }
+        ],
+        "label": "Waterfall contribution",
+        "method": "linear recentering of the heuristic score",
+        "result": {
+          "unit": "points",
+          "value": -12
+        }
+      }
+    ],
+    "uncertainty": {
+      "draws": null,
+      "intervals": [
+        {
+          "central": 398,
+          "confidence_level": null,
+          "high": 1026,
+          "low": 81,
+          "metric_id": "metric.simulated_months_to_enroll",
+          "unit": "months"
+        }
+      ],
+      "limitations": [
+        "The bounds vary ONLY the precedent velocity (fast = its 75th percentile, slow = its 25th). They are velocity scenarios — not percentiles of a predictive months distribution and not a confidence interval.",
+        "Eligibility-multiplier sampling variance, site-count choice, and competition-count error are not propagated into the range.",
+        "The eligibility multiplier is the median of 3 unseeded language-model reads; repeat runs can differ slightly."
+      ],
+      "method": "Scenario range over observed precedent-velocity percentiles: the low bound is months at the 75th-percentile (fast) velocity, the high bound at the 25th (slow). Scenario bounds, not a confidence interval.",
+      "seed": null
+    }
+  },
   "phase3_median_n": 269,
   "powering_basis": "effect size d=0.35",
   "precedent_median_n": 98.5,
   "required_n": 340,
   "score": 0,
-  "screens_per_enrollee": 5,
-  "simulated_months_range": [93, 1172],
-  "simulated_months_to_enroll": 455,
+  "screens_per_enrollee": 4,
+  "simulated_months_range": [81, 1026],
+  "simulated_months_to_enroll": 398,
   "sites": 85,
   "sites_basis": "precedent",
   "waterfall_delta": -12,
-  "why": "340 patients (effect size d=0.35) at 85 sites (p75 of at-scale precedents); precedent velocity 0.65 pt/site/mo across 196 completed trials (sampled from 2268 registered), narrowed by 62% biomarker prevalence and 35% eligibility pass rate, with ~189 interventional trials competing for the same patients."
+  "why": "340 patients (effect size d=0.35) at 85 sites (p75 of at-scale precedents); precedent velocity 0.65 pt/site/mo across 196 completed trials (sampled from 2268 registered), narrowed by 62% biomarker prevalence and 40% eligibility pass rate, with ~189 interventional trials competing for the same patients."
 }

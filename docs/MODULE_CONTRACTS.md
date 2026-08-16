@@ -27,11 +27,11 @@ operational use is profile-bound and truth-labeled; they still do not define the
 
 | Order | UI stage | Repository and commit | Current mode | Operator meaning |
 | --- | --- | --- | --- | --- |
-| 1 | Biomarker / evidence | `REagent-LABrador/research-evidence-mapper` at `60ae23a4275282422416b45ea5bc5041ff3e9195` | **Cached** | The golden profile may use `fixtures/golden/fallbacks/evidence.json`. No live file-in/file-out command is configured. |
-| 2 | Hypothesis | `REagent-LABrador/Hypothesis_Generator` at `80cf2524372003b96b39106dc5487b1f98330fd3` | **Auto; profile-only fallback** | Runs a deterministic no-model dry run from the validated evidence graph. |
-| 3 | Recruitability | `REagent-LABrador/clinical_simulation` at `494479bee1250d0b27ba939bbb063c6901ae3bad` | **Auto; profile-only fallback** | Runs the native clinical thesis when Bun is available. Its `score` is recruitability, not probability of technical success or approval. |
+| 1 | Biomarker / evidence | `REagent-LABrador/research-evidence-mapper` at `551a5a8c4c7ff4143c21dab2e37519ac9f482c04` | **Replay** | Executes the pinned module assembler over the recorded IRAK4 graph. Execution completes, but scientific origin remains `CACHED`; no new literature search is claimed. |
+| 2 | Hypothesis | `REagent-LABrador/Hypothesis_Generator` at `80cf2524372003b96b39106dc5487b1f98330fd3` | **Auto; profile-only fallback** | Runs one deterministic no-model selection and emits up to three candidates through the official cards adapter. |
+| 3 | Recruitability | `REagent-LABrador/clinical_simulation` at `1d417b43ee8cb3b20a0769eedfc8e97474d65e30` | **Replay** | Identity-checks the exact RA thesis/result pair. Execution completes with `CACHED` scientific origin; `score` is recruitability, not probability of approval. |
 | 4 | ROI | `REagent-LABrador/rnpv-roi-calculator` at `0a0abd5b6372969bf186d7d2cb496e898cf9703b` | **Auto; profile-only fallback** | Runs locally from its locked Python environment. Transport `status: "ok"` can coexist with `NOT_DECISION_GRADE`. |
-| 5 | Simulation / tractability | `REagent-LABrador/simulation` at `15869b2c8e4ff68d13be357f72ef5d320a3920e6` | **Cached** | The golden profile may use `fixtures/golden/fallbacks/simulation.json`. This is a tractability dossier, not atomistic simulation. |
+| 5 | Simulation / tractability | `REagent-LABrador/simulation` at `63ed6e560e7c0e66e51085e9140fdcc28c7ca64d` | **Replay** | Runs the module's dependency-light local cache resolver. The exact golden request resolves to its bundled IRAK4 dossier; origin remains `CACHED` and this is not atomistic simulation. |
 
 `auto` means attempt the pinned command and validate the output. It does **not** mean every request
 may use the configured fallback. All current cached/fallback artifacts belong to the golden
@@ -43,8 +43,8 @@ Paths are relative to the orchestrator root. Paths under `.modules/` exist after
 
 | Stage | Input schema | Output schema |
 | --- | --- | --- |
-| Evidence | `schemas/evidence-input.schema.json` (`urn:reagent-labrador:orchestrator:evidence-request:1`) | `.modules/Hypothesis_Generator/schemas/knowledge-graph.schema.json` (`https://labrador.dev/schemas/knowledge-graph.schema.json`) |
-| Hypothesis | `.modules/Hypothesis_Generator/schemas/knowledge-graph.schema.json` | `.modules/Hypothesis_Generator/schemas/hypothesis.schema.json` (`https://labrador.dev/schemas/hypothesis.schema.json`) |
+| Evidence | `schemas/evidence-input.schema.json` (`urn:reagent-labrador:orchestrator:evidence-request:1`) | `.modules/research-evidence-mapper/schema/graph.schema.json` |
+| Hypothesis | `.modules/Hypothesis_Generator/schemas/knowledge-graph.schema.json` | `.modules/Hypothesis_Generator/schemas/cards.schema.json` (`https://labrador.dev/schemas/cards.schema.json`) |
 | Recruitability | `.modules/clinical_simulation/schemas/input.schema.json` (`https://github.com/REagent-LABrador/clinical_simulation/schemas/input.schema.json`) | `.modules/clinical_simulation/schemas/output.schema.json` (`https://github.com/REagent-LABrador/clinical_simulation/schemas/output.schema.json`) |
 | ROI | `.modules/rnpv-roi-calculator/schemas/input.schema.json` (`urn:reagent-labrador:rnpv_roi_calculator:input:1.0.0`) | `.modules/rnpv-roi-calculator/schemas/output.schema.json` (`urn:reagent-labrador:rnpv_roi_calculator:output:1.0.0`) |
 | Tractability | `.modules/simulation/schemas/input.schema.json` (`https://github.com/REagent-LABrador/simulation/schema/input.schema.json`) | `.modules/simulation/schemas/output.schema.json` (`https://github.com/REagent-LABrador/simulation/schema/output.schema.json`) |
@@ -53,9 +53,9 @@ All five boundaries use JSON Schema Draft 2020-12.
 
 Interpretability is projection data, not a sequencing dependency. The orchestrator preserves a
 module's native result and transports an optional top-level `interpretability` object unchanged
-inside the functional frontend's `station_payloads`. At this snapshot ROI and tractability emit
-that shared object. Hypothesis interpretability is a separate generated cards artifact and is not
-yet part of the sequential runner; evidence and recruitability may omit it.
+inside the functional frontend's station payloads. At this snapshot evidence, recruitability,
+ROI, and tractability emit shared contract version `1.0.0`. Hypothesis interpretability is a
+separate generated cards artifact and is not yet part of the sequential runner.
 
 ## Versioned setup contracts
 
@@ -178,13 +178,13 @@ An inline analyst frame resolves with `profileRef: null` and `fallbackPolicy: "D
 Therefore:
 
 - a failed live command cannot load an RA/IRAK4 fallback;
-- a stage configured as `cached` cannot return an RA/IRAK4 cache;
+- a replay command cannot promote an RA/IRAK4 artifact whose native input identity differs;
 - the stage is marked `FAILED / NO_MATCHING_CACHED_ARTIFACT`, with `output_origin: "NOT_RUN"`;
 - an absent optional native input is instead an explicit `SKIPPED` stage with its own reason code.
 
-With the current lockfile, evidence and tractability are configured as cached. They will therefore
-refuse every custom frame until a live adapter or an artifact explicitly bound to that frame is
-added. This is intentional abstention, not a generalized end-to-end success claim.
+The three replay artifacts are bound to `golden.ra-irak4.v1`. They refuse every custom frame until
+a live adapter or an artifact explicitly bound to that frame is added. This is intentional
+abstention, not a generalized end-to-end success claim.
 
 ## Module commands
 
@@ -200,10 +200,10 @@ Setup and execution argument arrays are also recorded verbatim in `module-lock.j
 
 ### Evidence mapper
 
-No live command is configured. The standalone repository publishes a prose contract in
-`SCHEMA.md`, but it does not provide the promised machine input/output schema pair and a stable
-file-in/file-out CLI at the pinned commit. The orchestrator validates its own evidence request
-schema and the cached graph against the Hypothesis Generator knowledge-graph schema.
+The golden command runs `scripts/run_evidence_replay.py`, which verifies the exact recorded request and
+executes the pinned repository's `skills/graph-assembly/assemble.py --rebuild`. The resulting
+graph is schema-validated and semantically identical to the recorded search. This executes local
+module code but does not perform a new Paperclip/Anthropic literature search.
 
 ### Hypothesis generator
 
@@ -217,21 +217,21 @@ python3 scripts/run_hypothesis.py \
   --output runs/manual-hypothesis.json
 ```
 
-The wrapper invokes `hypgen --dry-run` and normalizes its directory output to one JSON file. The
-UI's 1–10 boldness interval maps its midpoint to generator craziness with
+The wrapper runs the deterministic generator once, retains the first three selected structural
+candidates, and emits the module's official `cards.json` WebPayload with shared interpretability.
+For the 3×3 judging view, the orchestrator contextualizes those three unchanged source cards under
+each of the three graph-grounded readout candidates. The resulting nine branch IDs are UI/program
+contexts, not nine HypGen executions or nine independently generated hypotheses.
+The UI's 1–10 boldness interval maps its midpoint to generator craziness with
 `(midpoint - 1) / 9`; this changes search posture, not evidence quality.
 
 ### Recruitability
 
-```bash
-cd .modules/clinical_simulation
-bun install --frozen-lockfile
-bun run simulate ../../fixtures/golden/clinical-input.json \
-  --out ../../runs/manual-recruitability.json
-```
-
-The orchestrator consumes the `--out` artifact. `score` is operational recruitability from
-simulated enrollment time. It is not probability of technical success or approval.
+The judging command runs `scripts/run_clinical_replay.py`. It normalizes only the two optional
+null fields, requires the native input to equal the recorded output echo, and promotes the exact
+schema-valid RA result. `score` is operational recruitability from modeled enrollment time. It
+is not probability of technical success or approval. A fresh native run additionally requires
+the producer's Anthropic/registry access.
 
 ### ROI calculator
 
@@ -249,7 +249,7 @@ process failure.
 
 ### Simulation / tractability
 
-The published interface is:
+The module's published native interface is:
 
 ```bash
 cd .modules/simulation
@@ -259,10 +259,12 @@ python3 -m simulation run \
   --output ../../runs/manual-simulation.json
 ```
 
-Do not use it live at the pinned commit. The runner searches for a repository-level
-`package.json` and `managed/druggability-dossier/`, neither of which exists in the standalone
-repository. Retrieved precedent and computed tractability are separate axes and must not be
-averaged into one score.
+The orchestrator runs that capability through `scripts/run_simulation_replay.py`, which first
+requires the exact recorded request and then rebuilds interpretability with the pinned module
+code. It runs locally without Bun, cloud credentials, or the former monorepo support tree. For
+the golden request it records an exact hit against the module's bundled dossier cache, so
+execution is `COMPLETE` while scientific origin remains `CACHED`. Retrieved precedent and
+computed tractability are separate axes and must not be averaged into one score.
 
 ## Observed rehearsal snapshot
 
@@ -271,24 +273,26 @@ The golden run recorded on this Mac on 2026-08-16 ended
 
 | Module | Stage status | Execution | Origin | Reason |
 | --- | --- | --- | --- | --- |
-| Evidence | `COMPLETE_WITH_WARNINGS` | `SKIPPED` | `CACHED` | Module is configured cached |
-| Hypothesis | `COMPLETE` | `COMPLETE` | `LIVE` | Validated local dry-run output |
-| Clinical | `COMPLETE_WITH_WARNINGS` | `FAILED` | `DEMO_FALLBACK` | Bun was unavailable, so live execution did not start |
+| Evidence | `COMPLETE_WITH_WARNINGS` | `COMPLETE` | `CACHED` | Pinned mapper graph rebuilt and revalidated; no new search |
+| Hypothesis | `COMPLETE` | `COMPLETE` | `LIVE` | Three validated deterministic cards |
+| Clinical | `COMPLETE_WITH_WARNINGS` | `COMPLETE` | `CACHED` | Exact recorded RA thesis/result replayed |
 | ROI | `COMPLETE` | `COMPLETE` | `LIVE` | Validated local output; still `NOT_DECISION_GRADE` |
-| Tractability | `COMPLETE_WITH_WARNINGS` | `SKIPPED` | `CACHED` | Module is configured cached |
+| Tractability | `COMPLETE_WITH_WARNINGS` | `COMPLETE` | `CACHED` | Exact dossier revalidated and interpretability rebuilt |
 
 This is evidence about that rehearsal, not a guarantee about another machine or future checkout.
 Always inspect the new run's `manifest.json`.
 
 ## Repair blockers and demo cut line
 
-- Custom v2 programs cannot complete live evidence or tractability with the current registry:
-  those stages are cached and golden-profile artifacts are correctly refused.
-- Bun was absent in the observed rehearsal, so clinical live execution was not exercised there.
-- The evidence mapper still needs a machine schema pair and stable file-in/file-out command before
-  it can replace the profile cache.
-- The simulation repository still needs the support tree expected by its runner before it can
-  replace the profile cache.
+- Custom v2 programs cannot complete evidence, recruitment, or tractability with the current
+  replay registry: the golden-profile artifacts are correctly refused on identity mismatch.
+- Bun 1.3.14 is installed and the pinned Bun dependencies pass setup. Fresh managed-agent calls
+  remain unavailable without the producer-owned Anthropic credentials.
+- The evidence mapper now publishes its graph schema, but still needs a stable local
+  file-in/file-out command and orchestrator request boundary before it can replace the profile
+  cache.
+- The simulation repository now resolves bundled dossiers locally. A request without a matching
+  dossier still needs a separate live-science path; the golden cache must not be generalized.
 - The browser currently creates the legacy golden request. Custom v2 requests are available via
   the API or `uv run python app.py run --setup path/to/run-setup.v2.json`.
 - The Highlander repository has landed, but this narrow functional slice does not invoke its

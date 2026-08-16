@@ -163,6 +163,7 @@ class SequentialRunner:
             load_json(module.output_schema),
             fallback,
             label=f"{module.module_id} fallback",
+            schema_path=module.output_schema,
         )
         validate_semantics(
             module.module_id, fallback, module_input=module_input, setup=setup
@@ -267,12 +268,37 @@ class SequentialRunner:
                 )
             output = load_json(live_output_path)
             validate_json(
-                load_json(module.output_schema), output, label=f"{module.module_id} live output"
+                load_json(module.output_schema),
+                output,
+                label=f"{module.module_id} live output",
+                schema_path=module.output_schema,
             )
             validate_semantics(
                 module.module_id, output, module_input=module_input, setup=setup
             )
             live_output_path.replace(output_path)
+            if module.mode == "replay":
+                return output, {
+                    "stage_status": "COMPLETE_WITH_WARNINGS",
+                    "execution_status": "COMPLETE",
+                    "output_origin": "CACHED",
+                    "reason_code": "PINNED_ARTIFACT_REVALIDATED",
+                    "note": (
+                        "module replay command revalidated a pinned scientific artifact; "
+                        "no fresh external search or scientific computation was claimed"
+                    ),
+                    "warnings": [
+                        "A module-owned replay/revalidation command ran successfully over "
+                        "recorded scientific evidence; the scientific result remains CACHED."
+                    ],
+                    "attempt": {
+                        "status": "COMPLETE",
+                        "exit_code": result.returncode,
+                        "duration_ms": duration_ms,
+                        "stdout": _bounded(result.stdout),
+                        "stderr": _bounded(result.stderr),
+                    },
+                }
             return output, {
                 "stage_status": "COMPLETE",
                 "execution_status": "COMPLETE",
@@ -371,6 +397,7 @@ class SequentialRunner:
                     load_json(module.input_schema),
                     module_input,
                     label=f"{module.module_id} adapted input",
+                    schema_path=module.input_schema,
                 )
                 dump_json_atomic(input_path, module_input)
             except StageAbstention as exc:
@@ -431,8 +458,15 @@ class SequentialRunner:
             )
 
         hypothesis_output = outputs.get("hypothesis_generator")
-        has_candidate = isinstance(hypothesis_output, dict) and isinstance(
-            hypothesis_output.get("hypothesis"), dict
+        has_candidate = isinstance(hypothesis_output, dict) and (
+            isinstance(hypothesis_output.get("hypothesis"), dict)
+            or (
+                isinstance(hypothesis_output.get("hypotheses"), list)
+                and any(
+                    isinstance(candidate, dict)
+                    for candidate in hypothesis_output["hypotheses"]
+                )
+            )
         )
         return self._finish_run(run_id, fatal_error, has_candidate=has_candidate)
 

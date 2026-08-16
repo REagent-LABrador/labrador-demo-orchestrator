@@ -1,516 +1,1018 @@
 {
-  "schema_version": "2.0",
-  "provenance": {
-    "graph_id": "g_1a4f",
-    "round": 2,
-    "question": "can a small-molecule IRAK4 inhibitor suppress synovial fibroblast-driven inflammation in rheumatoid arthritis, or is its effect confined to the myeloid compartment?",
-    "generated_at": "2026-08-15T17:30:00Z",
-    "params": {
-      "stance": {
-        "profile": "default",
-        "craziness": null
-      },
-      "framing": {
-        "mode": "open",
-        "anchors": [],
-        "targets": [],
-        "exclude": []
-      },
-      "traversal": {
-        "max_hops": 3,
-        "min_link_confidence": 0.2,
-        "allow_no_effect_edges": false,
-        "allow_negative_edges": false,
-        "allow_edge_reversal": true,
-        "reversal_penalty": 0.7,
-        "max_paths_per_pair": 2,
-        "max_branch_per_node": 12,
-        "seed_kinds": [],
-        "target_kinds": [],
-        "intermediate_kinds": [],
-        "metapaths": [],
-        "predicates_allow": [],
-        "predicates_deny": [
-          "correlates_with",
-          "co_occurs_with"
-        ],
-        "hub_damping": 0.4,
-        "max_node_degree": 0,
-        "min_mentions": 0,
-        "min_dwpc": 0.0,
-        "max_candidates": 400
-      },
-      "motifs": {
-        "enabled": [
-          "gap_closure",
-          "transitive_chain",
-          "analogical_transfer",
-          "condition_split"
-        ],
-        "weights": {
-          "gap_closure": 1.0,
-          "transitive_chain": 0.9,
-          "analogical_transfer": 0.7,
-          "condition_split": 0.85
+  "coverage": {
+    "depth": "deep",
+    "figures_read": null,
+    "figures_skipped_reason": "text was decisive; Figure 2B would only confirm the stimulus split already stated in the Results text",
+    "found": 49,
+    "limits": {
+      "hit_limit": null,
+      "max_papers": 50,
+      "max_queries": 6
+    },
+    "no_quote_discarded": 0,
+    "queries": [],
+    "queries_run": 6,
+    "quotes_unverified": 12,
+    "read": 6,
+    "stop_reason": "queries_exhausted",
+    "truncated": true,
+    "used": 2
+  },
+  "generated_at": "2026-08-15T17:30:00Z",
+  "graph_id": "g_1a4f",
+  "hypotheses": [
+    {
+      "headline": "myeloid inflammatory signalling → TLR/MyD88/NF-kB signalling axis",
+      "highlights": [
+        {
+          "kind": "caution",
+          "refs": [],
+          "text": "independence gate: all primary evidence here is from Yoon; nothing replicates it"
         },
-        "analogy_min_shared": 2,
-        "analogy_min_jaccard": 0.15,
-        "analogy_same_kind_only": true,
-        "condition_split_requires_where": true,
-        "require_unstated": true
+        {
+          "kind": "caution",
+          "refs": [
+            "L2"
+          ],
+          "text": "L2 recomputes to 0.51, 0.09 below the graph's stated 0.60."
+        },
+        {
+          "kind": "caution",
+          "refs": [
+            "L1"
+          ],
+          "text": "L1 recomputes to 0.51, 0.11 above the graph's stated 0.40."
+        },
+        {
+          "kind": "novelty",
+          "refs": [
+            "g2"
+          ],
+          "text": "Unstated in the graph (g2): both connect to t1; no direct link reported."
+        },
+        {
+          "kind": "support",
+          "refs": [
+            "L2",
+            "f1",
+            "f2"
+          ],
+          "text": "The graph agrees: myeloid inflammatory signalling suppresses IRAK4 inhibition (f1, f2)."
+        },
+        {
+          "kind": "support",
+          "refs": [
+            "L1",
+            "f5"
+          ],
+          "text": "One source only for 'IRAK4 inhibition blocks TLR/MyD88/NF-kB signalling axis': f5."
+        }
+      ],
+      "hops": 2,
+      "id": "H-g2",
+      "metrics": {
+        "novelty": 0.245,
+        "rank": 0.4704,
+        "support": 0.512,
+        "testability": 0.7
       },
-      "evidence": {
-        "study_weights": {
-          "meta_analysis": 1.0,
-          "clinical_trial": 0.95,
-          "human_cohort": 0.8,
-          "animal": 0.6,
-          "test_tube": 0.45,
-          "computational": 0.3,
-          "review": 0.25
-        },
-        "hedged_penalty": 0.75,
-        "secondhand_penalty": 0.6,
-        "preprint_penalty": 0.85,
-        "basis_penalty": {
-          "primary": 1.0,
-          "mixed": 0.9,
-          "hedged_only": 0.7,
-          "background_only": 0.5
-        },
-        "recency_half_life": 0.0,
-        "min_independent_groups": 1,
-        "single_group_cap": 0.6,
-        "support_weights": {
-          "evidence_quality": 0.4,
-          "agreement": 0.35,
-          "independence": 0.25
-        },
-        "chain_aggregation": "weakest",
-        "contradiction_weight": 1.0
+      "motif": "gap_closure",
+      "statement": null,
+      "status": {
+        "critics": null,
+        "flags": [],
+        "verification": "qualified"
       },
-      "novelty": {
-        "hop_novelty": 0.22,
-        "gap_novelty_bonus": 0.25,
-        "searched_gap_bonus": 0.2,
-        "gap_confidence_cap": 0.6,
-        "popularity_penalty": 0.15,
-        "respect_absence_reliability": true
-      },
-      "selection": {
-        "top_k": 8,
-        "diversity_lambda": 0.7,
-        "similarity": "jaccard_nodes",
-        "max_per_subject": 2,
-        "max_per_object": 2,
-        "max_per_motif": 0,
-        "min_support": 0.0,
-        "min_novelty": 0.0,
-        "max_contradiction_risk": 1.0,
-        "require_pareto": false,
-        "rank_weights": {
-          "support": 0.35,
-          "novelty": 0.35,
-          "testability": 0.2,
-          "contradiction_risk": -0.1
+      "trace": "myeloid inflammatory signalling <--suppresses-- IRAK4 inhibition --blocks--> TLR/MyD88/NF-kB signalling axis"
+    },
+    {
+      "headline": "IRAK4 inhibition → MyD88 dimerization inhibition",
+      "highlights": [
+        {
+          "kind": "contradiction",
+          "refs": [
+            "L3",
+            "n_f3"
+          ],
+          "text": "n_f3 pushes back on 'IRAK4 inhibition suppresses synovial fibroblast driven inflammation': \"However, it did not inhibit IL‐1–induced cytokines in RA FLS.\""
         },
-        "testable_kinds": [
+        {
+          "kind": "caution",
+          "refs": [
+            "L3"
+          ],
+          "text": "L3 recomputes to 0.42, 0.08 below the graph's stated 0.50."
+        },
+        {
+          "kind": "caution",
+          "refs": [
+            "L5"
+          ],
+          "text": "L5 recomputes to 0.50, 0.10 below the graph's stated 0.60."
+        },
+        {
+          "kind": "novelty",
+          "refs": [
+            "g1"
+          ],
+          "text": "Unstated in the graph (g1): both connect to t3; no direct link reported."
+        },
+        {
+          "kind": "support",
+          "refs": [
+            "L3",
+            "n_f1",
+            "n_f2",
+            "n_f4"
+          ],
+          "text": "'IRAK4 inhibition suppresses synovial fibroblast driven inflammation' is backed by n_f1, n_f2, n_f4 [disagreed]."
+        },
+        {
+          "kind": "support",
+          "refs": [
+            "L5",
+            "f3",
+            "f4"
+          ],
+          "text": "The graph agrees: synovial fibroblast driven inflammation suppresses MyD88 dimerization inhibition (f3, f4)."
+        }
+      ],
+      "hops": 2,
+      "id": "H-g1",
+      "metrics": {
+        "novelty": 0.228,
+        "rank": 0.3674,
+        "support": 0.423,
+        "testability": 0.7
+      },
+      "motif": "gap_closure",
+      "statement": null,
+      "status": {
+        "critics": null,
+        "flags": [],
+        "verification": "qualified"
+      },
+      "trace": "IRAK4 inhibition --suppresses--> synovial fibroblast driven inflammation <--suppresses-- MyD88 dimerization inhibition"
+    },
+    {
+      "headline": "myeloid inflammatory signalling → synovial fibroblast driven inflammation",
+      "highlights": [
+        {
+          "kind": "contradiction",
+          "refs": [
+            "L3",
+            "n_f3"
+          ],
+          "text": "n_f3 pushes back on 'IRAK4 inhibition suppresses synovial fibroblast driven inflammation': \"However, it did not inhibit IL‐1–induced cytokines in RA FLS.\""
+        },
+        {
+          "kind": "caution",
+          "refs": [
+            "L2"
+          ],
+          "text": "L2 recomputes to 0.51, 0.09 below the graph's stated 0.60."
+        },
+        {
+          "kind": "caution",
+          "refs": [
+            "L3"
+          ],
+          "text": "L3 recomputes to 0.42, 0.08 below the graph's stated 0.50."
+        },
+        {
+          "kind": "novelty",
+          "refs": [
+            "g4"
+          ],
+          "text": "Unstated in the graph (g4): both connect to t1; no direct link reported."
+        },
+        {
+          "kind": "support",
+          "refs": [
+            "L2",
+            "f1",
+            "f2"
+          ],
+          "text": "The graph agrees: myeloid inflammatory signalling suppresses IRAK4 inhibition (f1, f2)."
+        },
+        {
+          "kind": "support",
+          "refs": [
+            "L3",
+            "n_f1",
+            "n_f2",
+            "n_f4"
+          ],
+          "text": "'IRAK4 inhibition suppresses synovial fibroblast driven inflammation' is backed by n_f1, n_f2, n_f4 [disagreed]."
+        }
+      ],
+      "hops": 2,
+      "id": "H-g4",
+      "metrics": {
+        "novelty": 0.245,
+        "rank": 0.3892,
+        "support": 0.423,
+        "testability": 0.7
+      },
+      "motif": "gap_closure",
+      "statement": null,
+      "status": {
+        "critics": null,
+        "flags": [],
+        "verification": "qualified"
+      },
+      "trace": "myeloid inflammatory signalling <--suppresses-- IRAK4 inhibition --suppresses--> synovial fibroblast driven inflammation"
+    }
+  ],
+  "interpretability": {
+    "assumptions": [
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.rank_weight.support",
+        "path": "provenance.params.selection.rank_weights.support",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.35
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.rank_weight.novelty",
+        "path": "provenance.params.selection.rank_weights.novelty",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.35
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.rank_weight.testability",
+        "path": "provenance.params.selection.rank_weights.testability",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.2
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.rank_weight.contradiction_risk",
+        "path": "provenance.params.selection.rank_weights.contradiction_risk",
+        "synthetic": false,
+        "unit": "weight",
+        "value": -0.1
+      },
+      {
+        "basis": "Default structure weight the scorer applies when selection.rank_weights omits it (generate/scoring.py).",
+        "id": "assumption.rank_weight.structure",
+        "path": "provenance.params.selection.rank_weights.structure",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.15
+      },
+      {
+        "basis": "Motif prior for gap_closure: multiplies the weighted axis sum. Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.motif_prior",
+        "path": "provenance.params.motifs.weights.gap_closure",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 1.0
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.support_weight.evidence_quality",
+        "path": "provenance.params.evidence.support_weights.evidence_quality",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.4
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.support_weight.agreement",
+        "path": "provenance.params.evidence.support_weights.agreement",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.35
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.support_weight.independence",
+        "path": "provenance.params.evidence.support_weights.independence",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.25
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.chain_aggregation",
+        "path": "provenance.params.evidence.chain_aggregation",
+        "synthetic": false,
+        "unit": null,
+        "value": "weakest"
+      },
+      {
+        "basis": "Cap on any link's support while it rests on one research group. Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.single_group_cap",
+        "path": "provenance.params.evidence.single_group_cap",
+        "synthetic": false,
+        "unit": "score",
+        "value": 0.6
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.min_independent_groups",
+        "path": "provenance.params.evidence.min_independent_groups",
+        "synthetic": false,
+        "unit": "groups",
+        "value": 1
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.novelty.hop_novelty",
+        "path": "provenance.params.novelty.hop_novelty",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.22
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.novelty.gap_novelty_bonus",
+        "path": "provenance.params.novelty.gap_novelty_bonus",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.25
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.novelty.searched_gap_bonus",
+        "path": "provenance.params.novelty.searched_gap_bonus",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.2
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.novelty.gap_confidence_cap",
+        "path": "provenance.params.novelty.gap_confidence_cap",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.6
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.novelty.popularity_penalty",
+        "path": "provenance.params.novelty.popularity_penalty",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 0.15
+      },
+      {
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.testable_kinds",
+        "path": "provenance.params.selection.testable_kinds",
+        "synthetic": false,
+        "unit": null,
+        "value": [
           "method",
           "small_molecule",
           "gene",
           "protein"
         ]
       },
-      "ranking": {
-        "articulate": true,
-        "critique": true,
-        "max_claims_per_hypothesis": 6,
-        "critic_lenses": [
-          "mechanism",
-          "evidence",
-          "testability"
-        ],
-        "critics_per_hypothesis": 2,
-        "refute_threshold": 0.5,
-        "tournament": false,
-        "elo_initial": 1200.0,
-        "elo_k": 32.0,
-        "tournament_matches_per_hypothesis": 4,
-        "debate_turns": 2,
-        "evolution_rounds": 0,
-        "evolve_top_n": 3,
-        "evolve_operators": [
-          "specialise",
-          "combine",
-          "invert_condition"
-        ],
-        "effort_articulate": "high",
-        "effort_critique": "high"
-      },
-      "verification": {
-        "enabled": true,
-        "gates": [
-          "structure",
-          "citations",
-          "consistency",
-          "independence",
-          "falsifiability",
-          "adversarial"
-        ],
-        "halt_on": [
-          "structure",
-          "citations",
-          "independence"
-        ],
-        "require_primary_evidence": true,
-        "max_claim_overlap": 0.9,
-        "min_falsifier_chars": 25
-      },
-      "loop": {
-        "enabled": false,
-        "max_requests": 3,
-        "depth": "standard",
-        "test_gap_when_ranked_above": 3,
-        "resolve_link_below_confidence": 0.35,
-        "expand_node_min_mentions": 8,
-        "expand_node_max_degree": 2,
-        "stop_when_no_score_change": 0.02
-      },
-      "budget": {
-        "max_model_calls": 40,
-        "max_enumeration_seconds": 30.0,
-        "max_output_hypotheses": 12
-      }
-    },
-    "coverage": {
-      "depth": "deep",
-      "found": 49,
-      "read": 6,
-      "used": 2,
-      "truncated": true,
-      "no_quote_discarded": 0,
-      "limits": {
-        "max_papers": 50,
-        "max_queries": 6,
-        "hit_limit": null
-      },
-      "figures_read": false,
-      "figures_skipped_reason": "text was decisive; Figure 2B would only confirm the stimulus split already stated in the Results text",
-      "queries_run": 6,
-      "stop_reason": "queries_exhausted"
-    },
-    "counts": {
-      "things": 5,
-      "links": 6,
-      "findings": 12,
-      "gaps": 3,
-      "shortlisted": 5,
-      "blocked": 0,
-      "model_calls": 0,
-      "verification_verified": 0,
-      "verification_qualified": 5,
-      "verification_unverified": 0,
-      "verification_rejected": 0
-    },
-    "considered": 5
-  },
-  "hypothesis": {
-    "id": "H-g2",
-    "motif": "gap_closure",
-    "subject": "t2",
-    "object": "t5",
-    "subject_name": "myeloid inflammatory signalling",
-    "object_name": "TLR/MyD88/NF-kB signalling axis",
-    "hops": 2,
-    "tags": [
-      "unsearched"
-    ],
-    "path": [
       {
-        "link": "L2",
-        "from": "t2",
-        "from_name": "myeloid inflammatory signalling",
-        "how": "suppresses",
-        "to": "t1",
-        "to_name": "IRAK4 inhibition",
-        "reversed": true,
-        "state": "agreed",
-        "support": 0.512
-      },
-      {
-        "link": "L1",
-        "from": "t1",
-        "from_name": "IRAK4 inhibition",
-        "how": "blocks",
-        "to": "t5",
-        "to_name": "TLR/MyD88/NF-kB signalling axis",
-        "reversed": false,
-        "state": "single_source",
-        "support": 0.512
+        "basis": "Resolved run parameter (profile 'default'); configured, not measured.",
+        "id": "assumption.contradiction_weight",
+        "path": "provenance.params.evidence.contradiction_weight",
+        "synthetic": false,
+        "unit": "weight",
+        "value": 1.0
       }
     ],
-    "scores": {
-      "support": 0.512,
-      "novelty": 0.245,
-      "testability": 0.7,
-      "contradiction_risk": 0.0,
-      "structure": 0.436,
-      "absence_reliability": 0.48
-    },
-    "rank_score": 0.4704,
-    "evidence": {
-      "links": {
-        "L2": {
-          "from": "t1",
-          "to": "t2",
-          "from_name": "IRAK4 inhibition",
-          "to_name": "myeloid inflammatory signalling",
+    "counterfactuals": [],
+    "evidence": [
+      {
+        "claim": "IRAK4 inhibition suppresses myeloid inflammatory signalling",
+        "grade": "LOW",
+        "id": "evidence.f1",
+        "locator": null,
+        "quote": "NF- κ B promoter activity was analyzed using the THP1-Lucia NF- κ B cell line (InvivoGen, CA, USA) and luciferase assay.",
+        "source_id": "doi:10.1016/j.apsb.2022.11.023",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1016/j.apsb.2022.11.023",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition suppresses myeloid inflammatory signalling",
+        "grade": "LOW",
+        "id": "evidence.f2",
+        "locator": null,
+        "quote": "(B, C) Effects of KIC-compounds on LPS-induced IL-6 secretion in THP1 cells and TNF α  secretion in PBMCs.",
+        "source_id": "doi:10.1016/j.apsb.2022.11.023",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1016/j.apsb.2022.11.023",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition blocks TLR/MyD88/NF-kB signalling axis",
+        "grade": "LOW",
+        "id": "evidence.f5",
+        "locator": null,
+        "quote": "We confirmed that KIC-compounds suppressed luciferase expression in a dose-dependent manner in reporter cells",
+        "source_id": "doi:10.1016/j.apsb.2022.11.023",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1016/j.apsb.2022.11.023",
+        "synthetic": false
+      }
+    ],
+    "extensions": {
+      "candidates": [
+        {
+          "id": "H-g4",
+          "motif": "gap_closure",
+          "rank_score": 0.3892,
+          "reason_not_selected": "ranked below the winner (0.3892 < 0.4704)",
+          "scores": {
+            "absence_reliability": 0.48,
+            "contradiction_risk": 0.5,
+            "novelty": 0.245,
+            "structure": 0.436,
+            "support": 0.423,
+            "testability": 0.7
+          }
+        },
+        {
+          "id": "H-g1",
+          "motif": "gap_closure",
+          "rank_score": 0.3674,
+          "reason_not_selected": "ranked below the winner (0.3674 < 0.4704)",
+          "scores": {
+            "absence_reliability": 0.48,
+            "contradiction_risk": 0.5,
+            "novelty": 0.228,
+            "structure": 0.33,
+            "support": 0.423,
+            "testability": 0.7
+          }
+        }
+      ],
+      "graph_path": [
+        {
+          "from": "t2",
+          "from_name": "myeloid inflammatory signalling",
           "how": "suppresses",
+          "link": "L2",
+          "reversed": true,
           "state": "agreed",
-          "basis": "primary",
-          "why": null,
-          "yes": [
-            "f1",
-            "f2"
-          ],
-          "no": [],
-          "no_effect": [],
-          "stated_confidence": 0.6,
-          "recomputed_support": 0.512,
-          "conditions": [
-            "THP1-Lucia NF-kB reporter cells, LPS 100 ng/mL, 24 h",
-            "THP1 cells and human PBMCs, LPS-induced IL-6 and TNF-alpha"
-          ]
+          "support": 0.512,
+          "to": "t1",
+          "to_name": "IRAK4 inhibition"
         },
-        "L1": {
+        {
           "from": "t1",
-          "to": "t5",
           "from_name": "IRAK4 inhibition",
-          "to_name": "TLR/MyD88/NF-kB signalling axis",
           "how": "blocks",
+          "link": "L1",
+          "reversed": false,
           "state": "single_source",
-          "basis": "primary",
-          "why": null,
-          "yes": [
-            "f5"
-          ],
-          "no": [],
-          "no_effect": [],
-          "stated_confidence": 0.4,
-          "recomputed_support": 0.512,
-          "conditions": [
-            "THP1-Lucia NF-kB reporter cells, dose-response"
-          ]
-        }
-      },
-      "findings": {
-        "f1": {
-          "from": "t1",
-          "to": "t2",
-          "how": "suppresses",
-          "says": "yes",
-          "quote": "NF- κ B promoter activity was analyzed using the THP1-Lucia NF- κ B cell line (InvivoGen, CA, USA) and luciferase assay.",
-          "paper": "p1",
-          "where": "THP1-Lucia NF-kB reporter cells, LPS 100 ng/mL, 24 h",
-          "is_own_result": true,
-          "hedged": false,
-          "confidence": 0.9
-        },
-        "f2": {
-          "from": "t1",
-          "to": "t2",
-          "how": "suppresses",
-          "says": "yes",
-          "quote": "(B, C) Effects of KIC-compounds on LPS-induced IL-6 secretion in THP1 cells and TNF α  secretion in PBMCs.",
-          "paper": "p1",
-          "where": "THP1 cells and human PBMCs, LPS-induced IL-6 and TNF-alpha",
-          "is_own_result": true,
-          "hedged": false,
-          "confidence": 0.9
-        },
-        "f5": {
-          "from": "t1",
+          "support": 0.512,
           "to": "t5",
-          "how": "blocks",
-          "says": "yes",
-          "quote": "We confirmed that KIC-compounds suppressed luciferase expression in a dose-dependent manner in reporter cells",
-          "paper": "p1",
-          "where": "THP1-Lucia NF-kB reporter cells, dose-response",
-          "is_own_result": true,
-          "hedged": false,
-          "confidence": 0.9
-        }
-      },
-      "papers": {
-        "p1": {
-          "title": "A novel IRAK4/PIM1 inhibitor ameliorates rheumatoid arthritis and lymphoid malignancy by blocking the TLR/MYD88-mediated NF-kB pathway",
-          "year": 2022,
-          "journal": "Acta Pharmaceutica Sinica B",
-          "doi": "10.1016/j.apsb.2022.11.023",
-          "first_author": "Yoon",
-          "study_type": "test_tube",
-          "is_preprint": false
-        }
-      },
-      "things": {
-        "t2": {
-          "name": "myeloid inflammatory signalling",
-          "kind": "process",
-          "aliases": [
-            "THP1 NF-kB",
-            "monocyte cytokine release"
-          ],
-          "mentions": 1
-        },
-        "t1": {
-          "name": "IRAK4 inhibition",
-          "kind": "small_molecule",
-          "aliases": [
-            "IRAK4 inhibitor",
-            "KIC-0101",
-            "PF-06650833"
-          ],
-          "mentions": 1
-        },
-        "t5": {
-          "name": "TLR/MyD88/NF-kB signalling axis",
-          "kind": "process",
-          "aliases": [
-            "TLR MYD88 mediated NF-kB pathway",
-            "myddosome"
-          ],
-          "mentions": 1
-        }
-      },
-      "gap": {
-        "id": "g2",
-        "missing": [
-          "t2",
-          "t5"
-        ],
-        "implied_by": [
-          "L1",
-          "L2"
-        ],
-        "note": "both connect to t1; no direct link reported",
-        "confidence": 0.4,
-        "searched_in_round": null
-      },
-      "per_link_support": [
-        {
-          "link_id": "L2",
-          "evidence_quality": 0.405,
-          "agreement": 1.0,
-          "independence": 0.0,
-          "support": 0.512,
-          "stated_overall": 0.6,
-          "yes_count": 2,
-          "no_count": 0,
-          "groups": 1,
-          "capped": false,
-          "paper_ids": [
-            "p1"
-          ],
-          "conditions": [
-            "THP1-Lucia NF-kB reporter cells, LPS 100 ng/mL, 24 h",
-            "THP1 cells and human PBMCs, LPS-induced IL-6 and TNF-alpha"
-          ]
-        },
-        {
-          "link_id": "L1",
-          "evidence_quality": 0.405,
-          "agreement": 1.0,
-          "independence": 0.0,
-          "support": 0.512,
-          "stated_overall": 0.4,
-          "yes_count": 1,
-          "no_count": 0,
-          "groups": 1,
-          "capped": false,
-          "paper_ids": [
-            "p1"
-          ],
-          "conditions": [
-            "THP1-Lucia NF-kB reporter cells, dose-response"
-          ]
+          "to_name": "TLR/MyD88/NF-kB signalling axis"
         }
       ],
-      "scoring_notes": []
+      "heuristic_scores": true,
+      "motif": "gap_closure",
+      "run_mode": "DRY_RUN",
+      "verification": {
+        "gates": [
+          {
+            "halting": true,
+            "issues": [],
+            "name": "structure",
+            "status": "pass",
+            "summary": "2 hop(s), path intact, not already stated"
+          },
+          {
+            "halting": true,
+            "issues": [],
+            "name": "citations",
+            "status": "skip",
+            "summary": "not articulated"
+          },
+          {
+            "halting": false,
+            "issues": [],
+            "name": "consistency",
+            "status": "skip",
+            "summary": "not articulated"
+          },
+          {
+            "halting": false,
+            "issues": [
+              {
+                "code": "single_group",
+                "detail": "all primary evidence here is from Yoon; nothing replicates it",
+                "severity": "warning"
+              }
+            ],
+            "name": "independence",
+            "status": "warn",
+            "summary": "all primary evidence here is from Yoon; nothing replicates it"
+          },
+          {
+            "halting": false,
+            "issues": [],
+            "name": "falsifiability",
+            "status": "skip",
+            "summary": "not articulated"
+          },
+          {
+            "halting": false,
+            "issues": [],
+            "name": "adversarial",
+            "status": "skip",
+            "summary": "not articulated"
+          }
+        ],
+        "halted_at": null,
+        "verdict": "qualified"
+      }
     },
-    "caveats": [
-      "The search is a sample, not the literature: 6 of 49 results were read. Absence of a link is weak evidence of absence.",
-      "This chain traverses at least one link against its stated direction. Do not assert the reverse relation as established.",
-      "Novelty here rests on a gap, but this graph is not entitled to strong absence claims. Treat 'nobody has shown X' as 'this search did not surface X'."
-    ],
-    "articulation": null,
-    "critiques": [],
-    "verdict": null,
-    "verification": {
-      "verdict": "qualified",
-      "gates": [
-        {
-          "name": "structure",
-          "status": "pass",
-          "summary": "2 hop(s), path intact, not already stated",
-          "issues": [],
-          "halting": true
-        },
-        {
-          "name": "citations",
-          "status": "skip",
-          "summary": "not articulated",
-          "issues": [],
-          "halting": true
-        },
-        {
-          "name": "consistency",
-          "status": "skip",
-          "summary": "not articulated",
-          "issues": [],
-          "halting": false
-        },
-        {
-          "name": "independence",
-          "status": "warn",
-          "summary": "all primary evidence here is from Yoon; nothing replicates it",
-          "issues": [
-            {
-              "code": "single_group",
-              "detail": "all primary evidence here is from Yoon; nothing replicates it",
-              "severity": "warning"
-            }
-          ],
-          "halting": true
-        },
-        {
-          "name": "falsifiability",
-          "status": "skip",
-          "summary": "not articulated",
-          "issues": [],
-          "halting": false
-        },
-        {
-          "name": "adversarial",
-          "status": "skip",
-          "summary": "not articulated",
-          "issues": [],
-          "halting": false
-        }
+    "headline": {
+      "basis": [
+        "OBSERVED",
+        "INFERRED"
       ],
-      "halted_at": null
+      "plain_language": "Structural candidate (gap_closure): the graph pattern proposes an unstated relation between myeloid inflammatory signalling and TLR/MyD88/NF-kB signalling axis; no model has articulated it yet.",
+      "result": "H-g2",
+      "status": "QUALIFIED",
+      "title": "myeloid inflammatory signalling → TLR/MyD88/NF-kB signalling axis"
     },
-    "elo": null,
-    "evolved_from": null,
-    "evolution_operator": null,
-    "issues": [
+    "limitations": [
       {
-        "code": "single_group",
-        "detail": "all primary evidence here is from Yoon; nothing replicates it",
-        "severity": "warning"
+        "code": "NO_SOURCE_LOCATORS",
+        "field_path": "interpretability.evidence",
+        "message": "The knowledge graph records verbatim sentences but no page, figure or section locators, so every locator is null.",
+        "severity": "INFO"
+      },
+      {
+        "code": "EVIDENCE_GRADES_DERIVED",
+        "field_path": "interpretability.evidence",
+        "message": "Grades are derived deterministically from the recorded study type, hedging, firsthand status and independent-group count — they are a display mapping, not a new appraisal.",
+        "severity": "INFO"
+      },
+      {
+        "code": "UNTAGGED_VALUE",
+        "field_path": "interpretability.metrics",
+        "message": "metric.structure, metric.absence_reliability derive from graph topology and coverage recorded in provenance, not from citable evidence or a configured assumption.",
+        "severity": "INFO"
+      },
+      {
+        "code": "STRUCTURAL_CANDIDATE_NOT_ARTICULATED",
+        "field_path": "hypothesis.articulation",
+        "message": "Dry run: the candidate is a graph structure that was never articulated into a testable statement by a model; there is no falsifier or decisive experiment on record.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "SINGLE_GROUP",
+        "field_path": "hypothesis.issues",
+        "message": "all primary evidence here is from Yoon; nothing replicates it",
+        "severity": "WARNING"
+      },
+      {
+        "code": "DOCUMENT_CAVEAT",
+        "field_path": "hypothesis.caveats",
+        "message": "The search is a sample, not the literature: 6 of 49 results were read. Absence of a link is weak evidence of absence.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "DOCUMENT_CAVEAT",
+        "field_path": "hypothesis.caveats",
+        "message": "This chain traverses at least one link against its stated direction. Do not assert the reverse relation as established.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "DOCUMENT_CAVEAT",
+        "field_path": "hypothesis.caveats",
+        "message": "Novelty here rests on a gap, but this graph is not entitled to strong absence claims. Treat 'nobody has shown X' as 'this search did not surface X'.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "COVERAGE_TRUNCATED",
+        "field_path": "provenance.coverage",
+        "message": "The search read 6 of 49 results; absence of a link is weak evidence of absence, and novelty is discounted for it.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "HEURISTIC_SCORES",
+        "field_path": "interpretability.metrics",
+        "message": "support, novelty, testability, contradiction_risk, structure and rank_score are deterministic heuristics on 0..1, not probabilities.",
+        "severity": "INFO"
+      },
+      {
+        "code": "NO_COUNTERFACTUALS_RECORDED",
+        "field_path": "interpretability.counterfactuals",
+        "message": "No falsifier, decisive experiment or graph-builder ask is on record for this run, so no counterfactual can be stated without inventing one.",
+        "severity": "INFO"
+      },
+      {
+        "code": "NOVELTY_NOT_RECONSTRUCTIBLE",
+        "field_path": "hypothesis.scores.novelty",
+        "message": "Novelty depends on node degrees recorded only in the input graph; the document carries the resulting score and its parameters, not those inputs.",
+        "severity": "INFO"
       }
     ],
-    "asks": [],
-    "provenance": "gap_closure over g_1a4f@round2 via L2, L1"
+    "lineage": [
+      {
+        "input_paths": [
+          "hypothesis.scores",
+          "provenance.params.selection.rank_weights",
+          "provenance.params.motifs.weights.gap_closure"
+        ],
+        "output_path": "hypothesis.rank_score",
+        "transformation": "Weighted sum of the axis scores, times the motif prior (step.rank_score)."
+      },
+      {
+        "input_paths": [
+          "hypothesis.evidence.findings",
+          "hypothesis.evidence.papers",
+          "provenance.params.evidence"
+        ],
+        "output_path": "hypothesis.scores.support",
+        "transformation": "Per-link support recomputed from findings and papers (study type, hedging, firsthand status, independent groups), then aggregated over the chain by 'weakest'."
+      },
+      {
+        "input_paths": [
+          "hypothesis.evidence.gap",
+          "provenance.coverage",
+          "provenance.params.novelty"
+        ],
+        "output_path": "hypothesis.scores.novelty",
+        "transformation": "Hop distance and gap bonuses, scaled by the graph's absence reliability and damped by node popularity. Node degrees live only in the graph, so this value cannot be re-derived from the document alone."
+      },
+      {
+        "input_paths": [
+          "hypothesis.evidence.links"
+        ],
+        "output_path": "hypothesis.path",
+        "transformation": "Typed, degree-weighted traversal of the input graph; a reversed hop is marked and rendered against the stated arrow."
+      }
+    ],
+    "metrics": [
+      {
+        "assumption_ids": [
+          "assumption.support_weight.evidence_quality",
+          "assumption.support_weight.agreement",
+          "assumption.support_weight.independence",
+          "assumption.chain_aggregation",
+          "assumption.single_group_cap",
+          "assumption.min_independent_groups"
+        ],
+        "direction": "positive",
+        "display": "0.512",
+        "evidence_ids": [
+          "evidence.f1",
+          "evidence.f2",
+          "evidence.f5"
+        ],
+        "id": "metric.support",
+        "label": "Evidence support",
+        "meaning": "How well the recorded findings back every link of the chain, recomputed from study type, hedging and independent groups. Heuristic score on 0..1, not a probability.",
+        "unit": "score",
+        "value": 0.512
+      },
+      {
+        "assumption_ids": [
+          "assumption.novelty.hop_novelty",
+          "assumption.novelty.gap_novelty_bonus",
+          "assumption.novelty.searched_gap_bonus",
+          "assumption.novelty.gap_confidence_cap",
+          "assumption.novelty.popularity_penalty"
+        ],
+        "direction": "positive",
+        "display": "0.245",
+        "evidence_ids": [],
+        "id": "metric.novelty",
+        "label": "Novelty",
+        "meaning": "Distance from what the graph already states, discounted by how entitled this search is to claim absence. Heuristic score on 0..1, not a probability.",
+        "unit": "score",
+        "value": 0.245
+      },
+      {
+        "assumption_ids": [
+          "assumption.testable_kinds"
+        ],
+        "direction": "positive",
+        "display": "0.700",
+        "evidence_ids": [],
+        "id": "metric.testability",
+        "label": "Testability",
+        "meaning": "Whether the chain touches kinds an experiment can manipulate. Heuristic score on 0..1, not a probability.",
+        "unit": "score",
+        "value": 0.7
+      },
+      {
+        "assumption_ids": [
+          "assumption.contradiction_weight"
+        ],
+        "direction": "negative",
+        "display": "0.000",
+        "evidence_ids": [],
+        "id": "metric.contradiction_risk",
+        "label": "Contradiction risk",
+        "meaning": "Share of links with counter-findings or weak bases. Heuristic score on 0..1, not a probability.",
+        "unit": "score",
+        "value": 0.0
+      },
+      {
+        "assumption_ids": [],
+        "direction": "positive",
+        "display": "0.436",
+        "evidence_ids": [],
+        "id": "metric.structure",
+        "label": "Structural strength",
+        "meaning": "Degree-weighted path strength relative to the run's strongest candidate. Heuristic score on 0..1, not a probability.",
+        "unit": "score",
+        "value": 0.436
+      },
+      {
+        "assumption_ids": [],
+        "direction": "neutral",
+        "display": "0.480",
+        "evidence_ids": [],
+        "id": "metric.absence_reliability",
+        "label": "Absence reliability",
+        "meaning": "How entitled this graph is to claim a link is absent, from coverage depth and truncation. Heuristic score on 0..1, not a probability.",
+        "unit": "score",
+        "value": 0.48
+      },
+      {
+        "assumption_ids": [
+          "assumption.rank_weight.support",
+          "assumption.rank_weight.novelty",
+          "assumption.rank_weight.testability",
+          "assumption.rank_weight.contradiction_risk",
+          "assumption.rank_weight.structure",
+          "assumption.motif_prior"
+        ],
+        "direction": "neutral",
+        "display": "0.4704",
+        "evidence_ids": [],
+        "id": "metric.rank_score",
+        "label": "Rank score",
+        "meaning": "Orders candidates on a page; it does not grade the science. Weighted sum of the axis scores times the motif prior. Heuristic score on 0..1, not a probability.",
+        "unit": "score",
+        "value": 0.4704
+      }
+    ],
+    "schema_version": "1.0.0",
+    "steps": [
+      {
+        "assumption_ids": [
+          "assumption.support_weight.evidence_quality",
+          "assumption.support_weight.agreement",
+          "assumption.support_weight.independence",
+          "assumption.chain_aggregation",
+          "assumption.single_group_cap",
+          "assumption.min_independent_groups"
+        ],
+        "evidence_ids": [
+          "evidence.f1",
+          "evidence.f2"
+        ],
+        "formula": "support = w_evidence_quality*evidence_quality + w_agreement*agreement + w_independence*independence; capped at single_group_cap while groups < min_independent_groups. Components are recorded rounded to 3 decimals.",
+        "id": "step.link_support.L2",
+        "inputs": [
+          {
+            "path": "per_link_support.L2.evidence_quality",
+            "unit": "score",
+            "value": 0.405
+          },
+          {
+            "path": "per_link_support.L2.agreement",
+            "unit": "score",
+            "value": 1.0
+          },
+          {
+            "path": "per_link_support.L2.independence",
+            "unit": "score",
+            "value": 0.0
+          },
+          {
+            "path": "provenance.params.evidence.support_weights.evidence_quality",
+            "unit": "weight",
+            "value": 0.4
+          },
+          {
+            "path": "provenance.params.evidence.support_weights.agreement",
+            "unit": "weight",
+            "value": 0.35
+          },
+          {
+            "path": "provenance.params.evidence.support_weights.independence",
+            "unit": "weight",
+            "value": 0.25
+          },
+          {
+            "path": "per_link_support.L2.groups",
+            "unit": "groups",
+            "value": 1
+          },
+          {
+            "path": "provenance.params.evidence.single_group_cap",
+            "unit": "score",
+            "value": 0.6
+          }
+        ],
+        "label": "Recompute support for link L2",
+        "method": "weighted evidence recomputation",
+        "result": {
+          "unit": "score",
+          "value": 0.512
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.support_weight.evidence_quality",
+          "assumption.support_weight.agreement",
+          "assumption.support_weight.independence",
+          "assumption.chain_aggregation",
+          "assumption.single_group_cap",
+          "assumption.min_independent_groups"
+        ],
+        "evidence_ids": [
+          "evidence.f5"
+        ],
+        "formula": "support = w_evidence_quality*evidence_quality + w_agreement*agreement + w_independence*independence; capped at single_group_cap while groups < min_independent_groups. Components are recorded rounded to 3 decimals.",
+        "id": "step.link_support.L1",
+        "inputs": [
+          {
+            "path": "per_link_support.L1.evidence_quality",
+            "unit": "score",
+            "value": 0.405
+          },
+          {
+            "path": "per_link_support.L1.agreement",
+            "unit": "score",
+            "value": 1.0
+          },
+          {
+            "path": "per_link_support.L1.independence",
+            "unit": "score",
+            "value": 0.0
+          },
+          {
+            "path": "provenance.params.evidence.support_weights.evidence_quality",
+            "unit": "weight",
+            "value": 0.4
+          },
+          {
+            "path": "provenance.params.evidence.support_weights.agreement",
+            "unit": "weight",
+            "value": 0.35
+          },
+          {
+            "path": "provenance.params.evidence.support_weights.independence",
+            "unit": "weight",
+            "value": 0.25
+          },
+          {
+            "path": "per_link_support.L1.groups",
+            "unit": "groups",
+            "value": 1
+          },
+          {
+            "path": "provenance.params.evidence.single_group_cap",
+            "unit": "score",
+            "value": 0.6
+          }
+        ],
+        "label": "Recompute support for link L1",
+        "method": "weighted evidence recomputation",
+        "result": {
+          "unit": "score",
+          "value": 0.512
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.chain_aggregation"
+        ],
+        "evidence_ids": [
+          "evidence.f1",
+          "evidence.f2",
+          "evidence.f5"
+        ],
+        "formula": "support = min(per-link support)",
+        "id": "step.chain_support",
+        "inputs": [
+          {
+            "path": "per_link_support.L2.support",
+            "unit": "score",
+            "value": 0.512
+          },
+          {
+            "path": "per_link_support.L1.support",
+            "unit": "score",
+            "value": 0.512
+          }
+        ],
+        "label": "Aggregate per-link support over the chain",
+        "method": "chain aggregation (weakest)",
+        "result": {
+          "unit": "score",
+          "value": 0.512
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.rank_weight.support",
+          "assumption.rank_weight.novelty",
+          "assumption.rank_weight.testability",
+          "assumption.rank_weight.contradiction_risk",
+          "assumption.rank_weight.structure",
+          "assumption.motif_prior"
+        ],
+        "evidence_ids": [],
+        "formula": "rank_score = round((w_support*support + w_novelty*novelty + w_testability*testability + w_contradiction_risk*contradiction_risk + w_structure*structure) * motif_prior, 4)",
+        "id": "step.rank_score",
+        "inputs": [
+          {
+            "path": "hypothesis.scores.support",
+            "unit": "score",
+            "value": 0.512
+          },
+          {
+            "path": "hypothesis.scores.novelty",
+            "unit": "score",
+            "value": 0.245
+          },
+          {
+            "path": "hypothesis.scores.testability",
+            "unit": "score",
+            "value": 0.7
+          },
+          {
+            "path": "hypothesis.scores.contradiction_risk",
+            "unit": "score",
+            "value": 0.0
+          },
+          {
+            "path": "hypothesis.scores.structure",
+            "unit": "score",
+            "value": 0.436
+          },
+          {
+            "path": "provenance.params.selection.rank_weights.support",
+            "unit": "weight",
+            "value": 0.35
+          },
+          {
+            "path": "provenance.params.selection.rank_weights.novelty",
+            "unit": "weight",
+            "value": 0.35
+          },
+          {
+            "path": "provenance.params.selection.rank_weights.testability",
+            "unit": "weight",
+            "value": 0.2
+          },
+          {
+            "path": "provenance.params.selection.rank_weights.contradiction_risk",
+            "unit": "weight",
+            "value": -0.1
+          },
+          {
+            "path": "provenance.params.selection.rank_weights.structure",
+            "unit": "weight",
+            "value": 0.15
+          },
+          {
+            "path": "provenance.params.motifs.weights.gap_closure",
+            "unit": "weight",
+            "value": 1.0
+          }
+        ],
+        "label": "Combine the axes into the display rank",
+        "method": "weighted sum with motif prior",
+        "result": {
+          "unit": "score",
+          "value": 0.4704
+        }
+      }
+    ],
+    "uncertainty": {
+      "draws": null,
+      "intervals": [],
+      "limitations": [
+        "Scores are deterministic heuristics computed once from the document; no interval, distribution or confidence level exists for them, and none is invented here."
+      ],
+      "method": "none",
+      "seed": null
+    }
   },
-  "asks": []
+  "question": "can a small-molecule IRAK4 inhibitor suppress synovial fibroblast-driven inflammation in rheumatoid arthritis, or is its effect confined to the myeloid compartment?",
+  "round": 2,
+  "schema_version": "1.0",
+  "warnings": [
+    "Absence of a link is not evidence of absence: this search read 6 of 49 results. Novelty is discounted for that.",
+    "The search is a sample, not the literature: 6 of 49 results were read. Absence of a link is weak evidence of absence.",
+    "This chain traverses at least one link against its stated direction. Do not assert the reverse relation as established.",
+    "Novelty here rests on a gap, but this graph is not entitled to strong absence claims. Treat 'nobody has shown X' as 'this search did not surface X'."
+  ]
 }

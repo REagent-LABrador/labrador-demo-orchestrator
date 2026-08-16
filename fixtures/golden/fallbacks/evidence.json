@@ -1,7 +1,7 @@
 {
   "coverage": {
     "depth": "deep",
-    "figures_read": false,
+    "figures_read": null,
     "figures_skipped_reason": "text was decisive; Figure 2B would only confirm the stimulus split already stated in the Results text",
     "found": 49,
     "limits": {
@@ -9,7 +9,9 @@
       "max_queries": 6
     },
     "no_quote_discarded": 0,
+    "queries": [],
     "queries_run": 6,
+    "quotes_unverified": 12,
     "read": 6,
     "stop_reason": "queries_exhausted",
     "truncated": true,
@@ -27,6 +29,8 @@
       "is_own_result": true,
       "paper": "p1",
       "quote": "(B, C) Effects of KIC-compounds on LPS-induced IL-6 secretion in THP1 cells and TNF α  secretion in PBMCs.",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "results",
       "to": "t2",
@@ -42,6 +46,8 @@
       "is_own_result": true,
       "paper": "p1",
       "quote": "NF- κ B promoter activity was analyzed using the THP1-Lucia NF- κ B cell line (InvivoGen, CA, USA) and luciferase assay.",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "methods",
       "to": "t2",
@@ -57,6 +63,8 @@
       "is_own_result": true,
       "paper": "p3",
       "quote": "As depicted in Figure  2B , PF‐06650833 substantially reduced cytokine and matrix metalloproteinase (MMP) release in response to all ligands profiled.",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "results",
       "to": "t3",
@@ -72,6 +80,8 @@
       "is_own_result": true,
       "paper": "p3",
       "quote": "However, it did not inhibit IL‐1–induced cytokines in RA FLS.",
+      "quote_verified": null,
+      "round": 1,
       "says": "no",
       "section": "results",
       "to": "t3",
@@ -87,6 +97,8 @@
       "is_own_result": true,
       "paper": "p3",
       "quote": "Human RA fibroblast‐like synoviocytes (FLS) were incubated with inhibitors, and stimulatory ligands added. Supernatants were analyzed with a Meso Scale Discovery assay kit.",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "methods",
       "to": "t3",
@@ -102,6 +114,8 @@
       "is_own_result": true,
       "paper": "p3",
       "quote": "Intriguingly, PF‐06650833 was able to block MMP induction by IL‐1β: the first response to IL‐1β in nonhematopoietic cells we have found to be IRAK4 kinase dependent.",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "results",
       "to": "t3",
@@ -117,6 +131,8 @@
       "is_own_result": true,
       "paper": "p1",
       "quote": "We confirmed that KIC-compounds suppressed luciferase expression in a dose-dependent manner in reporter cells",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "results",
       "to": "t5",
@@ -132,6 +148,8 @@
       "is_own_result": true,
       "paper": "p2",
       "quote": "The invasiveness of RA SFs in Matrigel matrices was measured in organoid cultures.",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "methods",
       "to": "t3",
@@ -147,6 +165,8 @@
       "is_own_result": true,
       "paper": "p2",
       "quote": "we elucidated the effect of disrupting MyD88 dimerization by ST2825 on the pathological properties of synovial fibroblasts from RA patients (RA SFs).",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "abstract",
       "to": "t3",
@@ -162,6 +182,8 @@
       "is_own_result": true,
       "paper": "p2",
       "quote": "Dimerization of the myeloid differentiation primary response 88 protein (MyD88) plays a pivotal role in the exacerbated response to innate immunity-dependent signaling in rheumatoid arthritis (RA).",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "abstract",
       "to": "t5",
@@ -177,6 +199,8 @@
       "is_own_result": false,
       "paper": "p1",
       "quote": "Moreover, aberrant NF- κ B signaling in fibroblast-like synoviocytes causes chronic inflammation and destruction of extracellular matrix, leading to articular damage",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "introduction",
       "to": "t3",
@@ -192,6 +216,8 @@
       "is_own_result": true,
       "paper": "p4",
       "quote": "IRAK1KD synovial fibroblasts showed reduced secretion of neutrophil chemoattractant chemokines following stimulation with IL-1β or human synovial fluids from patients with rheumatoid arthritis (RA) and gout.",
+      "quote_verified": null,
+      "round": 1,
       "says": "yes",
       "section": "results",
       "to": "t3",
@@ -244,6 +270,1088 @@
   ],
   "generated_at": "2026-08-15T17:30:00Z",
   "graph_id": "g_1a4f",
+  "interpretability": {
+    "assumptions": [
+      {
+        "basis": "Depth tier requested by the caller; it sets the paper budget for the round. null means the caller did not state one.",
+        "id": "assumption.depth",
+        "path": "input.depth",
+        "synthetic": false,
+        "unit": "tier",
+        "value": "deep"
+      },
+      {
+        "basis": "Hard ceiling on papers read this round. Every coverage count is bounded by it, so an absent relationship may be a budget artefact.",
+        "id": "assumption.limits.max_papers",
+        "path": "input.coverage.limits.max_papers",
+        "synthetic": false,
+        "unit": "papers",
+        "value": 50
+      },
+      {
+        "basis": "Hard ceiling on distinct corpus queries issued this round.",
+        "id": "assumption.limits.max_queries",
+        "path": "input.coverage.limits.max_queries",
+        "synthetic": false,
+        "unit": "queries",
+        "value": 6
+      },
+      {
+        "basis": "Publication window the search was restricted to. null means no window was requested, NOT that the corpus is complete.",
+        "id": "assumption.years",
+        "path": "input.years",
+        "synthetic": false,
+        "unit": "year range",
+        "value": null
+      },
+      {
+        "basis": "Fixed weights in score_link. Chosen, not fitted: no labelled corpus exists to fit them against.",
+        "id": "assumption.confidence_weights",
+        "path": "code.score_link",
+        "synthetic": false,
+        "unit": "weight",
+        "value": {
+          "agreement": 0.4,
+          "evidence_quality": 0.4,
+          "independence": 0.2
+        }
+      },
+      {
+        "basis": "Study-design quality prior. An out-of-vocabulary study_type scores as `unknown` (0.4) rather than silently matching something close.",
+        "id": "assumption.study_quality_table",
+        "path": "code._STUDY_QUALITY",
+        "synthetic": false,
+        "unit": "score",
+        "value": {
+          "animal": 0.6,
+          "clinical_trial": 0.9,
+          "computational": 0.4,
+          "human_cohort": 0.8,
+          "meta_analysis": 1.0,
+          "review": 0.3,
+          "test_tube": 0.5,
+          "unknown": 0.4
+        }
+      },
+      {
+        "basis": "Multiplier applied to a preprint's design score, for absence of peer review.",
+        "id": "assumption.preprint_penalty",
+        "path": "code.evidence_quality",
+        "synthetic": false,
+        "unit": "factor",
+        "value": 0.8
+      },
+      {
+        "basis": "Only a paper's own results count toward a link's STATE, its agreement term and its independence term -- a review restating forty studies is one paper, and is not independent evidence for any of them. Note the exception: `evidence_quality` averages over every finding on the link, cited background included.",
+        "id": "assumption.own_result_only",
+        "path": "code._own",
+        "synthetic": false,
+        "unit": "flag",
+        "value": true
+      },
+      {
+        "basis": "Constants in the open-triangle gap ranking, including the 0.6 ceiling that keeps a gap a proposal rather than a finding.",
+        "id": "assumption.gap_ranking",
+        "path": "code.find_gaps",
+        "synthetic": false,
+        "unit": "constants",
+        "value": {
+          "cap": 50,
+          "confidence_ceiling": 0.6,
+          "degree_cap": 24,
+          "route_bonus_coefficient": 0.12,
+          "shared_paper_penalty": 0.65
+        }
+      }
+    ],
+    "counterfactuals": [
+      {
+        "change": "One further test_tube study by a different group reports the opposite direction for L2 (IRAK4 inhibition --suppresses--> myeloid inflammatory signalling).",
+        "meaning": "The strongest relationship in the graph is not robust to a single contradicting primary result; it is a claim about the literature, not about the biology.",
+        "result": "state agreed -> disagreed, heuristic confidence 0.6 -> 0.6667"
+      },
+      {
+        "change": "One independent replication of L6 (TLR/MyD88/NF-kB signalling axis --drives--> synovial fibroblast driven inflammation) by a different first author.",
+        "meaning": "Shows how much of this relationship's score is the independence term rather than the evidence itself.",
+        "result": "state single_source -> agreed, heuristic confidence 0.42 -> 0.84"
+      },
+      {
+        "change": "The literature search is re-run without the corpus limits in `coverage.limits`.",
+        "meaning": "Absence of a relationship in this graph is evidence about what was read, not about what exists. Only `stop_reason: complete` means the literature was exhausted rather than the budget.",
+        "result": "unknown -- 6 of 49 papers found were read this round"
+      }
+    ],
+    "evidence": [
+      {
+        "claim": "IRAK4 inhibition suppresses myeloid inflammatory signalling (THP1-Lucia NF-kB reporter cells, LPS 100 ng/mL, 24 h)",
+        "grade": "LOW",
+        "id": "evidence.f1",
+        "locator": "methods",
+        "quote": "NF- κ B promoter activity was analyzed using the THP1-Lucia NF- κ B cell line (InvivoGen, CA, USA) and luciferase assay.",
+        "source_id": "doi:10.1016/j.apsb.2022.11.023",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1016/j.apsb.2022.11.023",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition suppresses myeloid inflammatory signalling (THP1 cells and human PBMCs, LPS-induced IL-6 and TNF-alpha)",
+        "grade": "LOW",
+        "id": "evidence.f2",
+        "locator": "results",
+        "quote": "(B, C) Effects of KIC-compounds on LPS-induced IL-6 secretion in THP1 cells and TNF α  secretion in PBMCs.",
+        "source_id": "doi:10.1016/j.apsb.2022.11.023",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1016/j.apsb.2022.11.023",
+        "synthetic": false
+      },
+      {
+        "claim": "MyD88 dimerization inhibition suppresses synovial fibroblast driven inflammation (synovial fibroblasts from RA patients, LPS-activated TLR signalling)",
+        "grade": "LOW",
+        "id": "evidence.f3",
+        "locator": "abstract",
+        "quote": "we elucidated the effect of disrupting MyD88 dimerization by ST2825 on the pathological properties of synovial fibroblasts from RA patients (RA SFs).",
+        "source_id": "doi:10.1186/s13075-023-03145-0",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1186/s13075-023-03145-0",
+        "synthetic": false
+      },
+      {
+        "claim": "MyD88 dimerization inhibition suppresses synovial fibroblast driven inflammation (RA SF, Matrigel organoid invasion, OA SF and dermal fibroblast controls)",
+        "grade": "LOW",
+        "id": "evidence.f4",
+        "locator": "methods",
+        "quote": "The invasiveness of RA SFs in Matrigel matrices was measured in organoid cultures.",
+        "source_id": "doi:10.1186/s13075-023-03145-0",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1186/s13075-023-03145-0",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition blocks TLR/MyD88/NF-kB signalling axis (THP1-Lucia NF-kB reporter cells, dose-response)",
+        "grade": "LOW",
+        "id": "evidence.f5",
+        "locator": "results",
+        "quote": "We confirmed that KIC-compounds suppressed luciferase expression in a dose-dependent manner in reporter cells",
+        "source_id": "doi:10.1016/j.apsb.2022.11.023",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1016/j.apsb.2022.11.023",
+        "synthetic": false
+      },
+      {
+        "claim": "TLR/MyD88/NF-kB signalling axis drives synovial fibroblast driven inflammation (cited background, not measured in this paper)",
+        "grade": "LOW",
+        "id": "evidence.f6",
+        "locator": "introduction",
+        "quote": "Moreover, aberrant NF- κ B signaling in fibroblast-like synoviocytes causes chronic inflammation and destruction of extracellular matrix, leading to articular damage",
+        "source_id": "doi:10.1016/j.apsb.2022.11.023",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1016/j.apsb.2022.11.023",
+        "synthetic": false
+      },
+      {
+        "claim": "MyD88 dimerization inhibition blocks TLR/MyD88/NF-kB signalling axis (RA synovial fibroblasts, LPS-activated TLR signalling)",
+        "grade": "LOW",
+        "id": "evidence.f7",
+        "locator": "abstract",
+        "quote": "Dimerization of the myeloid differentiation primary response 88 protein (MyD88) plays a pivotal role in the exacerbated response to innate immunity-dependent signaling in rheumatoid arthritis (RA).",
+        "source_id": "doi:10.1186/s13075-023-03145-0",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1186/s13075-023-03145-0",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition suppresses synovial fibroblast driven inflammation (RA FLS, inhibitor plus stimulatory ligands, Meso Scale readout)",
+        "grade": "LOW",
+        "id": "evidence.n_f1",
+        "locator": "methods",
+        "quote": "Human RA fibroblast‐like synoviocytes (FLS) were incubated with inhibitors, and stimulatory ligands added. Supernatants were analyzed with a Meso Scale Discovery assay kit.",
+        "source_id": "doi:10.1002/art.41953",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1002/art.41953",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition suppresses synovial fibroblast driven inflammation (RA FLS, TLR ligands Pam3Cys TLR1/2, LPS TLR4, flagellin TLR5, 100 nM)",
+        "grade": "LOW",
+        "id": "evidence.n_f2",
+        "locator": "results",
+        "quote": "As depicted in Figure  2B , PF‐06650833 substantially reduced cytokine and matrix metalloproteinase (MMP) release in response to all ligands profiled.",
+        "source_id": "doi:10.1002/art.41953",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1002/art.41953",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition does not suppresses synovial fibroblast driven inflammation (RA FLS, IL-1beta stimulation, cytokine readout)",
+        "grade": "LOW",
+        "id": "evidence.n_f3",
+        "locator": "results",
+        "quote": "However, it did not inhibit IL‐1–induced cytokines in RA FLS.",
+        "source_id": "doi:10.1002/art.41953",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1002/art.41953",
+        "synthetic": false
+      },
+      {
+        "claim": "IRAK4 inhibition suppresses synovial fibroblast driven inflammation (RA FLS, IL-1beta stimulation, MMP readout)",
+        "grade": "LOW",
+        "id": "evidence.n_f4",
+        "locator": "results",
+        "quote": "Intriguingly, PF‐06650833 was able to block MMP induction by IL‐1β: the first response to IL‐1β in nonhematopoietic cells we have found to be IRAK4 kinase dependent.",
+        "source_id": "doi:10.1002/art.41953",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1002/art.41953",
+        "synthetic": false
+      },
+      {
+        "claim": "TLR/MyD88/NF-kB signalling axis drives synovial fibroblast driven inflammation (mouse IRAK1-kinase-deficient synovial fibroblasts, IL-1beta, chemokine secretion)",
+        "grade": "LOW",
+        "id": "evidence.n_f5",
+        "locator": "results",
+        "quote": "IRAK1KD synovial fibroblasts showed reduced secretion of neutrophil chemoattractant chemokines following stimulation with IL-1β or human synovial fluids from patients with rheumatoid arthritis (RA) and gout.",
+        "source_id": "doi:10.1172/jci.insight.149825",
+        "source_type": "publication",
+        "source_url": "https://doi.org/10.1172/jci.insight.149825",
+        "synthetic": false
+      }
+    ],
+    "extensions": {
+      "confidence_decomposition": {
+        "heuristic": true,
+        "is_probability": false,
+        "labels": {
+          "high": ">= 0.7",
+          "low": "< 0.4",
+          "medium": ">= 0.4"
+        },
+        "terms": [
+          "agreement",
+          "evidence_quality",
+          "independence"
+        ],
+        "weights": {
+          "agreement": 0.4,
+          "evidence_quality": 0.4,
+          "independence": 0.2
+        }
+      },
+      "gaps": [
+        {
+          "id": "g1",
+          "missing_labels": [
+            "IRAK4 inhibition",
+            "MyD88 dimerization inhibition"
+          ]
+        },
+        {
+          "id": "g2",
+          "missing_labels": [
+            "myeloid inflammatory signalling",
+            "TLR/MyD88/NF-kB signalling axis"
+          ]
+        },
+        {
+          "id": "g4",
+          "missing_labels": [
+            "myeloid inflammatory signalling",
+            "synovial fibroblast driven inflammation"
+          ]
+        }
+      ],
+      "graph": {
+        "graph_id": "g_1a4f",
+        "round": 2,
+        "rounds": [
+          {
+            "ask": "new_question",
+            "depth": "standard",
+            "n": 1,
+            "outcome": "new_evidence",
+            "papers_added": 2,
+            "target": null
+          },
+          {
+            "ask": "test_gap",
+            "depth": "deep",
+            "n": 2,
+            "outcome": "contradicted",
+            "papers_added": 2,
+            "target": "g3"
+          }
+        ],
+        "schema_version": "1.1"
+      },
+      "id_conventions": {
+        "evidence": "evidence.<finding id, any character outside [A-Za-z0-9_.:-] replaced by _>",
+        "gaps": "the gap id in output.gaps[]",
+        "note": "Every id here resolves into the graph beside it. The block annotates the graph; it does not restate it.",
+        "relationships": "the link id in output.links[]"
+      },
+      "module": "research-evidence-mapper",
+      "quote_verification": {
+        "by_evidence": {
+          "evidence.f1": null,
+          "evidence.f2": null,
+          "evidence.f3": null,
+          "evidence.f4": null,
+          "evidence.f5": null,
+          "evidence.f6": null,
+          "evidence.f7": null,
+          "evidence.n_f1": null,
+          "evidence.n_f2": null,
+          "evidence.n_f3": null,
+          "evidence.n_f4": null,
+          "evidence.n_f5": null
+        },
+        "discarded": 0,
+        "fails_closed": true,
+        "method": "verbatim substring match after NFKC and typographic folding; mechanical, not a model judgement",
+        "mismatched": 0,
+        "unchecked": 12,
+        "verified": 0
+      },
+      "quote_verified": false,
+      "relationships": [
+        {
+          "contradicting": [],
+          "id": "L1",
+          "label": "IRAK4 inhibition --blocks--> TLR/MyD88/NF-kB signalling axis",
+          "no_effect": [],
+          "supporting": [
+            "evidence.f5"
+          ]
+        },
+        {
+          "contradicting": [],
+          "id": "L2",
+          "label": "IRAK4 inhibition --suppresses--> myeloid inflammatory signalling",
+          "no_effect": [],
+          "supporting": [
+            "evidence.f1",
+            "evidence.f2"
+          ]
+        },
+        {
+          "contradicting": [
+            "evidence.n_f3"
+          ],
+          "id": "L3",
+          "label": "IRAK4 inhibition --suppresses--> synovial fibroblast driven inflammation",
+          "no_effect": [],
+          "supporting": [
+            "evidence.n_f1",
+            "evidence.n_f2",
+            "evidence.n_f4"
+          ]
+        },
+        {
+          "contradicting": [],
+          "id": "L4",
+          "label": "MyD88 dimerization inhibition --blocks--> TLR/MyD88/NF-kB signalling axis",
+          "no_effect": [],
+          "supporting": [
+            "evidence.f7"
+          ]
+        },
+        {
+          "contradicting": [],
+          "id": "L5",
+          "label": "MyD88 dimerization inhibition --suppresses--> synovial fibroblast driven inflammation",
+          "no_effect": [],
+          "supporting": [
+            "evidence.f3",
+            "evidence.f4"
+          ]
+        },
+        {
+          "contradicting": [],
+          "id": "L6",
+          "label": "TLR/MyD88/NF-kB signalling axis --drives--> synovial fibroblast driven inflammation",
+          "no_effect": [],
+          "supporting": [
+            "evidence.n_f5"
+          ]
+        }
+      ],
+      "search": {
+        "depth": "deep",
+        "figures_read": null,
+        "found": 49,
+        "limits": {
+          "max_papers": 50,
+          "max_queries": 6
+        },
+        "queries": [],
+        "read": 6,
+        "stop_reason": "queries_exhausted",
+        "truncated": true,
+        "used": 2,
+        "years": null
+      }
+    },
+    "headline": {
+      "basis": [
+        "OBSERVED",
+        "INFERRED",
+        "MODELED"
+      ],
+      "plain_language": "Read 2 papers and mapped 6 relationships from 12 quote-backed findings; 2 are corroborated by more than one paper, 3 rest on a single paper, and 1 are disputed.",
+      "result": "EVIDENCE_MAPPED_DISPUTED",
+      "status": "QUALIFIED",
+      "title": "Evidence graph: 6 relationships from 4 papers"
+    },
+    "limitations": [
+      {
+        "code": "UNVERIFIED_QUOTE",
+        "field_path": "output.findings[].quote_verified",
+        "message": "12 of 12 retained findings carry a quote that was never checked against source text, because no source text was supplied for their paper. Their quotes are shown but must not be treated as verified, and their evidence grade is capped at LOW.",
+        "severity": "ERROR"
+      },
+      {
+        "code": "COVERAGE_INCOMPLETE",
+        "field_path": "output.coverage.stop_reason",
+        "message": "stop_reason=queries_exhausted. Only `complete` means the literature was exhausted rather than the budget.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "QUERIES_NOT_RECORDED",
+        "field_path": "output.coverage.queries",
+        "message": "The round did not record the search queries it issued, so the search cannot be reproduced or audited from this output.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "SINGLE_SOURCE_LINKS",
+        "field_path": "output.links[].state",
+        "message": "3 of 6 relationships rest on exactly one paper.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "TRUNCATED_SEARCH",
+        "field_path": "output.coverage.truncated",
+        "message": "The search was truncated (stop_reason=queries_exhausted). Absence of a relationship is evidence about what was read, not about what exists.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "UNTAGGED_VALUE",
+        "field_path": "interpretability.metrics",
+        "message": "These metrics are structural counts of the graph itself and reference neither evidence nor an assumption: metric.findings_verified, metric.findings_quote_mismatch, metric.entities.",
+        "severity": "WARNING"
+      },
+      {
+        "code": "DISPUTED_LINKS",
+        "field_path": "output.links[].why",
+        "message": "1 relationships have primary papers reporting opposite directions; `why` names the differing conditions where they could be identified.",
+        "severity": "INFO"
+      },
+      {
+        "code": "HEURISTIC_CONFIDENCE",
+        "field_path": "output.links[].confidence.overall",
+        "message": "link.confidence.overall is a heuristic score (0.4*agreement + 0.4*evidence_quality + 0.2*independence), not a probability. Do not threshold it as one.",
+        "severity": "INFO"
+      },
+      {
+        "code": "INTERPRETABILITY_PARTIAL",
+        "field_path": "output.papers[].source_sha256",
+        "message": "No source-text hash for 4 of 4 papers, and no Paperclip document id or page/figure locator is recorded for any paper -- the corpus does not expose stable document ids through the search interface used here. Evidence locators fall back to the finding's section label.",
+        "severity": "INFO"
+      },
+      {
+        "code": "UNKNOWN_VALUE",
+        "field_path": "interpretability",
+        "message": "1 values in this block are null because they were never recorded or could not be computed. Null is not zero and not false. Full list: assumption.years.",
+        "severity": "INFO"
+      },
+      {
+        "code": "YEARS_NOT_SPECIFIED",
+        "field_path": "input.years",
+        "message": "No publication window was requested, so a windowed absence cannot be distinguished from a real one.",
+        "severity": "INFO"
+      }
+    ],
+    "lineage": [
+      {
+        "input_paths": [
+          "input.findings[]",
+          "input.papers[].source_text"
+        ],
+        "output_path": "output.findings[]",
+        "transformation": "Kept only when the quote matches the paper's source text verbatim after NFKC and whitespace folding; deduplicated by (paper, relationship, folded quote) so a retried round cannot double-count."
+      },
+      {
+        "input_paths": [
+          "input.papers[].source_text"
+        ],
+        "output_path": "output.papers[].source_sha256",
+        "transformation": "SHA-256 of the exact source text the quotes were checked against. null when none was supplied."
+      },
+      {
+        "input_paths": [
+          "input.things[]"
+        ],
+        "output_path": "output.things[]",
+        "transformation": "Merged on UniProt accession first, then on normalized name; a conflicting accession blocks a name merge."
+      },
+      {
+        "input_paths": [
+          "output.links[].from",
+          "output.links[].how",
+          "output.links[].to",
+          "prior.links[].id"
+        ],
+        "output_path": "output.links[].id",
+        "transformation": "Bound to the (from, how, to) triple the round it first appears and carried forward through entity merges, so delta and changed_in_round keep naming the same relationship across rounds."
+      },
+      {
+        "input_paths": [
+          "output.findings[].says",
+          "output.findings[].is_own_result"
+        ],
+        "output_path": "output.links[].state",
+        "transformation": "Counts of yes/no/no_effect over own-result findings only."
+      },
+      {
+        "input_paths": [
+          "output.findings[].says",
+          "output.papers[].study_type",
+          "output.papers[].is_preprint",
+          "output.papers[].first_author"
+        ],
+        "output_path": "output.links[].confidence.overall",
+        "transformation": "0.4*agreement + 0.4*evidence_quality + 0.2*independence."
+      },
+      {
+        "input_paths": [
+          "output.findings[].where"
+        ],
+        "output_path": "output.links[].why",
+        "transformation": "Emitted only for a disagreed link whose supporting and contradicting findings report non-overlapping conditions."
+      },
+      {
+        "input_paths": [
+          "output.links[]",
+          "output.things[]"
+        ],
+        "output_path": "output.gaps[]",
+        "transformation": "Open triangles ranked multiplicatively; ids keyed on the missing pair so test_gap can target one by id across rounds."
+      },
+      {
+        "input_paths": [
+          "prior graph",
+          "output.links[].changed_in_round"
+        ],
+        "output_path": "output.delta",
+        "transformation": "Diff against the stored prior round. Derived, never stored."
+      }
+    ],
+    "metrics": [
+      {
+        "assumption_ids": [
+          "assumption.depth",
+          "assumption.limits.max_queries"
+        ],
+        "direction": "neutral",
+        "display": "49 found",
+        "evidence_ids": [],
+        "id": "metric.papers_found",
+        "label": "Papers matched by search",
+        "meaning": "How many papers the corpus returned before any reading. Bounded by the query budget, not by what exists.",
+        "unit": "papers",
+        "value": 49
+      },
+      {
+        "assumption_ids": [
+          "assumption.depth",
+          "assumption.limits.max_papers"
+        ],
+        "direction": "neutral",
+        "display": "6 read",
+        "evidence_ids": [],
+        "id": "metric.papers_read",
+        "label": "Papers read",
+        "meaning": "How many matched papers were actually opened this round.",
+        "unit": "papers",
+        "value": 6
+      },
+      {
+        "assumption_ids": [
+          "assumption.limits.max_papers",
+          "assumption.own_result_only"
+        ],
+        "direction": "neutral",
+        "display": "2 used",
+        "evidence_ids": [],
+        "id": "metric.papers_used",
+        "label": "Papers contributing evidence",
+        "meaning": "Papers that produced at least one quote-backed finding. The gap between read and used is the screening loss.",
+        "unit": "papers",
+        "value": 2
+      },
+      {
+        "assumption_ids": [],
+        "direction": "positive",
+        "display": "0 verified",
+        "evidence_ids": [],
+        "id": "metric.findings_verified",
+        "label": "Quote-verified findings",
+        "meaning": "Findings whose quote was matched verbatim against the paper's source text. This is a string match, not a judgement.",
+        "unit": "findings",
+        "value": 0
+      },
+      {
+        "assumption_ids": [],
+        "direction": "negative",
+        "display": "12 unchecked",
+        "evidence_ids": [
+          "evidence.f1",
+          "evidence.f2",
+          "evidence.f3",
+          "evidence.f4",
+          "evidence.f5",
+          "evidence.f6",
+          "evidence.f7",
+          "evidence.n_f1",
+          "evidence.n_f2",
+          "evidence.n_f3",
+          "evidence.n_f4",
+          "evidence.n_f5"
+        ],
+        "id": "metric.findings_unverified",
+        "label": "Findings with unchecked quotes",
+        "meaning": "Findings kept without source text to check their quote against. Never counted as verified.",
+        "unit": "findings",
+        "value": 12
+      },
+      {
+        "assumption_ids": [],
+        "direction": "negative",
+        "display": "0 mismatched",
+        "evidence_ids": [],
+        "id": "metric.findings_quote_mismatch",
+        "label": "Findings whose quote did not match",
+        "meaning": "Findings whose quote was checked against source text and was not found in it. Treat as unsourced.",
+        "unit": "findings",
+        "value": 0
+      },
+      {
+        "assumption_ids": [
+          "assumption.own_result_only"
+        ],
+        "direction": "neutral",
+        "display": "6 relationships",
+        "evidence_ids": [],
+        "id": "metric.relationships",
+        "label": "Relationships",
+        "meaning": "Distinct (subject, predicate, object) triples supported by at least one paper's own result.",
+        "unit": "relationships",
+        "value": 6
+      },
+      {
+        "assumption_ids": [
+          "assumption.own_result_only"
+        ],
+        "direction": "mixed",
+        "display": "1 disputed",
+        "evidence_ids": [
+          "evidence.n_f1",
+          "evidence.n_f2",
+          "evidence.n_f3",
+          "evidence.n_f4"
+        ],
+        "id": "metric.relationships_disputed",
+        "label": "Disputed relationships",
+        "meaning": "Relationships where primary papers report opposite directions. These are the ones worth reading by hand.",
+        "unit": "relationships",
+        "value": 1
+      },
+      {
+        "assumption_ids": [
+          "assumption.own_result_only"
+        ],
+        "direction": "positive",
+        "display": "2 corroborated",
+        "evidence_ids": [
+          "evidence.f1",
+          "evidence.f2",
+          "evidence.f3",
+          "evidence.f4"
+        ],
+        "id": "metric.relationships_agreed",
+        "label": "Corroborated relationships",
+        "meaning": "Relationships where two or more papers agree on direction.",
+        "unit": "relationships",
+        "value": 2
+      },
+      {
+        "assumption_ids": [
+          "assumption.own_result_only"
+        ],
+        "direction": "negative",
+        "display": "3 single-source",
+        "evidence_ids": [
+          "evidence.f5",
+          "evidence.f7",
+          "evidence.n_f5"
+        ],
+        "id": "metric.relationships_single_source",
+        "label": "Single-source relationships",
+        "meaning": "Relationships resting on exactly one paper. Uncorroborated, not wrong.",
+        "unit": "relationships",
+        "value": 3
+      },
+      {
+        "assumption_ids": [
+          "assumption.own_result_only"
+        ],
+        "direction": "neutral",
+        "display": "0 null results",
+        "evidence_ids": [],
+        "id": "metric.relationships_no_effect",
+        "label": "Reported-null relationships",
+        "meaning": "Relationships where the only primary evidence is an explicit no-effect result. Kept separately so a null is never read as an absence of evidence.",
+        "unit": "relationships",
+        "value": 0
+      },
+      {
+        "assumption_ids": [
+          "assumption.gap_ranking"
+        ],
+        "direction": "neutral",
+        "display": "3 open gaps",
+        "evidence_ids": [],
+        "id": "metric.gaps_open",
+        "label": "Untested relationships proposed",
+        "meaning": "Pairs connected through an intermediate but with no direct link reported. Proposals for the next round, not findings.",
+        "unit": "gaps",
+        "value": 3
+      },
+      {
+        "assumption_ids": [
+          "assumption.confidence_weights",
+          "assumption.preprint_penalty",
+          "assumption.study_quality_table"
+        ],
+        "direction": "unknown",
+        "display": "0.4867 mean",
+        "evidence_ids": [],
+        "id": "metric.mean_link_confidence",
+        "label": "Mean heuristic confidence",
+        "meaning": "Mean of the per-relationship heuristic score. A ranking aid, NOT a probability that any relationship is true.",
+        "unit": "score",
+        "value": 0.4867
+      },
+      {
+        "assumption_ids": [],
+        "direction": "neutral",
+        "display": "5 entities",
+        "evidence_ids": [],
+        "id": "metric.entities",
+        "label": "Distinct entities",
+        "meaning": "Nodes after accession-first merging of synonyms.",
+        "unit": "entities",
+        "value": 5
+      }
+    ],
+    "schema_version": "1.0.0",
+    "steps": [
+      {
+        "assumption_ids": [
+          "assumption.limits.max_queries",
+          "assumption.depth",
+          "assumption.years"
+        ],
+        "evidence_ids": [],
+        "formula": null,
+        "id": "step.search",
+        "inputs": [
+          {
+            "path": "input.coverage.queries",
+            "unit": null,
+            "value": []
+          },
+          {
+            "path": "input.coverage.limits.max_queries",
+            "unit": "queries",
+            "value": 6
+          },
+          {
+            "path": "input.depth",
+            "unit": "tier",
+            "value": "deep"
+          }
+        ],
+        "label": "Search the corpus",
+        "method": "Paperclip full-text search over the biomedical corpus",
+        "result": {
+          "unit": "papers",
+          "value": 49
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.limits.max_papers"
+        ],
+        "evidence_ids": [],
+        "formula": "papers_found -> papers_read -> papers_used",
+        "id": "step.screen",
+        "inputs": [
+          {
+            "path": "output.coverage.found",
+            "unit": "papers",
+            "value": 49
+          },
+          {
+            "path": "output.coverage.limits.max_papers",
+            "unit": "papers",
+            "value": 50
+          }
+        ],
+        "label": "Read and screen",
+        "method": "Full-text read, then keep papers that yield a quote-backed finding",
+        "result": {
+          "unit": "papers",
+          "value": 2
+        }
+      },
+      {
+        "assumption_ids": [],
+        "evidence_ids": [],
+        "formula": "fold(NFKC(quote)) is a substring of fold(NFKC(source_text)); non-matching findings are discarded, findings with no source text are retained and marked quote_verified=null",
+        "id": "step.quote_verification",
+        "inputs": [
+          {
+            "path": "input.findings[].quote",
+            "unit": "findings",
+            "value": 12
+          },
+          {
+            "path": "input.papers[].source_text",
+            "unit": "papers",
+            "value": 0
+          }
+        ],
+        "label": "Verify every quote against source text",
+        "method": "Mechanical substring match, not a model judgement",
+        "result": {
+          "unit": "findings",
+          "value": 0
+        }
+      },
+      {
+        "assumption_ids": [],
+        "evidence_ids": [],
+        "formula": "a conflicting accession BLOCKS a name merge, so human Q9NWZ3 and mouse Q8R4K2 stay distinct",
+        "id": "step.entity_resolution",
+        "inputs": [
+          {
+            "path": "input.things",
+            "unit": "entities",
+            "value": 5
+          }
+        ],
+        "label": "Merge synonymous entities",
+        "method": "UniProt accession first, then separator-insensitive normalized name",
+        "result": {
+          "unit": "entities",
+          "value": 5
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.own_result_only"
+        ],
+        "evidence_ids": [],
+        "formula": "state = disagreed if yes and no; agreed if >=2 one way; single_source if exactly one; no_effect if only explicit nulls",
+        "id": "step.link_assembly",
+        "inputs": [
+          {
+            "path": "output.findings",
+            "unit": "findings",
+            "value": 12
+          }
+        ],
+        "label": "Group findings into relationships",
+        "method": "Group by (from, how, to) over own-result findings only",
+        "result": {
+          "unit": "relationships",
+          "value": 6
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.own_result_only"
+        ],
+        "evidence_ids": [],
+        "formula": "0.5 + (yes - no) / (2 * (yes + no)); a lone source is 0.5, never 1.0",
+        "id": "step.confidence.agreement",
+        "inputs": [
+          {
+            "path": "output.links[].yes|no",
+            "unit": "relationships",
+            "value": 6
+          }
+        ],
+        "label": "Agreement term",
+        "method": "Direction balance across a relationship's own results",
+        "result": {
+          "unit": "score",
+          "value": 0.7083
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.study_quality_table",
+          "assumption.preprint_penalty"
+        ],
+        "evidence_ids": [],
+        "formula": "mean(_STUDY_QUALITY[study_type]), x0.8 per preprint",
+        "id": "step.confidence.evidence_quality",
+        "inputs": [
+          {
+            "path": "output.papers[].study_type",
+            "unit": "papers",
+            "value": 4
+          }
+        ],
+        "label": "Evidence-quality term",
+        "method": "Study-design prior, averaged over the relationship's findings",
+        "result": {
+          "unit": "score",
+          "value": 0.5083
+        }
+      },
+      {
+        "assumption_ids": [],
+        "evidence_ids": [],
+        "formula": "(distinct first authors - 1) / (papers - 1); one group is not a consensus, so a single group scores 0.0",
+        "id": "step.confidence.independence",
+        "inputs": [
+          {
+            "path": "output.papers[].first_author",
+            "unit": "authors",
+            "value": 4
+          }
+        ],
+        "label": "Independence term",
+        "method": "Distinct first authors behind a relationship",
+        "result": {
+          "unit": "score",
+          "value": 0.0
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.confidence_weights"
+        ],
+        "evidence_ids": [],
+        "formula": "0.4*agreement + 0.4*evidence_quality + 0.2*independence; label high >=0.7, medium >=0.4, else low",
+        "id": "step.confidence.overall",
+        "inputs": [
+          {
+            "path": "code.CONFIDENCE_WEIGHTS.agreement",
+            "unit": "weight",
+            "value": 0.4
+          },
+          {
+            "path": "code.CONFIDENCE_WEIGHTS.evidence_quality",
+            "unit": "weight",
+            "value": 0.4
+          },
+          {
+            "path": "code.CONFIDENCE_WEIGHTS.independence",
+            "unit": "weight",
+            "value": 0.2
+          }
+        ],
+        "label": "Combine into a heuristic confidence score",
+        "method": "Fixed-weight linear combination. HEURISTIC -- not a probability, not calibrated against any outcome",
+        "result": {
+          "unit": "score",
+          "value": 0.4867
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.gap_ranking"
+        ],
+        "evidence_ids": [],
+        "formula": "min(conf_AB, conf_BC) * basis_AB * basis_BC * independence * (1/sqrt(gaps spawned by the hub)) * (1 + 0.12*log2(routes)), capped at 0.6",
+        "id": "step.gap_ranking",
+        "inputs": [
+          {
+            "path": "output.links",
+            "unit": "relationships",
+            "value": 6
+          },
+          {
+            "path": "code.GAP_RANKING_CONSTANTS",
+            "unit": null,
+            "value": {
+              "cap": 50,
+              "confidence_ceiling": 0.6,
+              "degree_cap": 24,
+              "route_bonus_coefficient": 0.12,
+              "shared_paper_penalty": 0.65
+            }
+          }
+        ],
+        "label": "Rank untested relationships",
+        "method": "Open triangles (A-B and B-C exist, A-C does not), ranked multiplicatively to break the ties a min() score produces",
+        "result": {
+          "unit": "gaps",
+          "value": 3
+        }
+      },
+      {
+        "assumption_ids": [
+          "assumption.limits.max_papers",
+          "assumption.limits.max_queries"
+        ],
+        "evidence_ids": [],
+        "formula": null,
+        "id": "step.stop",
+        "inputs": [
+          {
+            "path": "output.coverage.stop_reason",
+            "unit": null,
+            "value": "queries_exhausted"
+          },
+          {
+            "path": "output.coverage.truncated",
+            "unit": null,
+            "value": true
+          }
+        ],
+        "label": "Stop the round",
+        "method": "Stopping rule: queries_exhausted",
+        "result": {
+          "unit": "papers",
+          "value": 2
+        }
+      }
+    ],
+    "uncertainty": {
+      "draws": null,
+      "intervals": [
+        {
+          "central": 0.4867,
+          "confidence_level": null,
+          "high": 0.6,
+          "interval_type": "observed_range",
+          "low": 0.4,
+          "metric_id": "metric.mean_link_confidence",
+          "unit": "score"
+        }
+      ],
+      "limitations": [
+        "low/central/high are the observed minimum, mean and maximum of the per-relationship heuristic score across the 6 relationships in this graph. They are an observed range -- NOT percentiles, NOT a confidence interval, and NOT a sampling distribution.",
+        "The score is a ranking aid over what was read. It is not a probability that a relationship is true, and it is not calibrated against any outcome.",
+        "seed and draws are null because assembly is deterministic: the same round bundle produces byte-identical output.",
+        "The dominant uncertainty is not in the score, it is in coverage: 6 of 49 matched papers were read this round."
+      ],
+      "method": "Heuristic confidence decomposition (agreement, evidence quality, independence). No sampling, no model fitting and no statistical inference is performed.",
+      "seed": null
+    }
+  },
   "links": [
     {
       "basis": "primary",

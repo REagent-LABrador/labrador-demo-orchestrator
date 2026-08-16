@@ -188,6 +188,8 @@ def build_module_input(
             _overlay_recruitment_delay(result, recruitability, planned)
         return result
     if module_id == "simulation":
+        if profile_ref:
+            return copy.deepcopy(load_json(root / "fixtures/golden/simulation-input.json"))
         identity = frame.get("identity") if isinstance(frame.get("identity"), dict) else {}
         accession = identity.get("uniprotAccession")
         if not isinstance(accession, str) or not accession.strip():
@@ -239,8 +241,15 @@ def validate_semantics(
 
     if not isinstance(output, dict):
         raise ContractError(f"{module_id} output must be a JSON object")
-    if module_id == "evidence_mapper" and output.get("status") not in {"ok", "partial", "empty"}:
-        raise ContractError(f"evidence mapper payload status is {output.get('status')!r}")
+    if module_id == "evidence_mapper":
+        if output.get("status") not in {"ok", "partial", "empty"}:
+            raise ContractError(f"evidence mapper payload status is {output.get('status')!r}")
+        if isinstance(module_input, dict) and not _matches(
+            output.get("question"), module_input.get("target")
+        ):
+            raise ContractError(
+                "OUTPUT_IDENTITY_MISMATCH: evidence question does not match request target"
+            )
     if module_id == "roi_calculator" and output.get("status") != "ok":
         raise ContractError(f"ROI transport status is {output.get('status')!r}")
     frame = setup.get("programFrame") if isinstance(setup, dict) else None
@@ -249,11 +258,22 @@ def validate_semantics(
         return
     if module_id == "hypothesis_generator":
         provenance = output.get("provenance")
-        graph_id = provenance.get("graph_id") if isinstance(provenance, dict) else None
+        graph_id = (
+            output.get("graph_id")
+            if isinstance(output.get("graph_id"), str)
+            else provenance.get("graph_id") if isinstance(provenance, dict) else None
+        )
         if graph_id is not None and not _matches(graph_id, module_input.get("graph_id")):
             raise ContractError(
                 "OUTPUT_IDENTITY_MISMATCH: hypothesis graph_id does not match input"
             )
+        cards = output.get("hypotheses")
+        if isinstance(cards, list):
+            identifiers = [card.get("id") for card in cards if isinstance(card, dict)]
+            if not 2 <= len(identifiers) <= 3 or len(set(identifiers)) != len(identifiers):
+                raise ContractError(
+                    "hypothesis cards output must contain two or three unique candidates"
+                )
     elif module_id == "clinical_simulation":
         echoed = output.get("input")
         if isinstance(echoed, dict):

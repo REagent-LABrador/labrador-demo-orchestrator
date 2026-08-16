@@ -45,8 +45,10 @@ class StaticUIContractTests(unittest.TestCase):
         )
         self.assertEqual(
             self.values("section", "data-highlander-section"),
-            ["comparison", "detail", "chat", "actions"],
+            ["comparison", "detail", "chat"],
         )
+        self.assertNotIn("Human review actions", self.html)
+        self.assertNotIn("Hard constraints are separate.", self.html)
 
     def test_setup_hooks_and_both_ten_point_ranges_remain_visible(self) -> None:
         self.assertEqual(

@@ -1,4 +1,5 @@
 .DS_Store
+.frontend/
 .modules/
 .venv/
 __pycache__/

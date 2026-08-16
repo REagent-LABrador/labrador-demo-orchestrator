@@ -318,6 +318,7 @@ def _v2(raw: dict[str, Any], registry: ModuleRegistry | None) -> dict[str, Any]:
             load_json(registry.by_id("evidence_mapper").input_schema),
             exploration["evidenceRequest"],
             label="evidence_mapper profile request",
+            schema_path=registry.by_id("evidence_mapper").input_schema,
         )
         if canonical_json(exploration["evidenceRequest"]) != canonical_json(
             frame["evidenceRequest"]
@@ -391,18 +392,21 @@ def _v2(raw: dict[str, Any], registry: ModuleRegistry | None) -> dict[str, Any]:
             load_json(registry.by_id("evidence_mapper").input_schema),
             frame["evidenceRequest"],
             label="evidence_mapper analyst input",
+            schema_path=registry.by_id("evidence_mapper").input_schema,
         )
         if frame["clinicalThesis"] is not None:
             validate_json(
                 load_json(registry.by_id("clinical_simulation").input_schema),
                 frame["clinicalThesis"],
                 label="clinical_simulation analyst input",
+                schema_path=registry.by_id("clinical_simulation").input_schema,
             )
         if frame["roiRequest"] is not None:
             validate_json(
                 load_json(registry.by_id("roi_calculator").input_schema),
                 frame["roiRequest"],
                 label="roi_calculator analyst input",
+                schema_path=registry.by_id("roi_calculator").input_schema,
             )
         _identity_check(frame)
         profile_ref = None

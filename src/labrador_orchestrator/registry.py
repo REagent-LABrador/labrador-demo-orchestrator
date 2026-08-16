@@ -59,7 +59,7 @@ class ModuleSpec:
         missing = sorted(required - raw.keys())
         if missing:
             raise ContractError(f"registry module missing fields: {', '.join(missing)}")
-        if raw["mode"] not in {"auto", "cached"}:
+        if raw["mode"] not in {"auto", "cached", "replay"}:
             raise ContractError(f"{raw['id']}: unsupported mode {raw['mode']!r}")
         if not isinstance(raw["command"], list) or not all(
             isinstance(item, str) for item in raw["command"]
@@ -161,9 +161,24 @@ class ModuleRegistry:
             example_input = load_json(module.example_input)
             example_output = load_json(module.example_output)
             fallback_output = load_json(module.fallback_output)
-            validate_json(input_schema, example_input, label=f"{module.module_id} example input")
-            validate_json(output_schema, example_output, label=f"{module.module_id} example output")
-            validate_json(output_schema, fallback_output, label=f"{module.module_id} fallback")
+            validate_json(
+                input_schema,
+                example_input,
+                label=f"{module.module_id} example input",
+                schema_path=module.input_schema,
+            )
+            validate_json(
+                output_schema,
+                example_output,
+                label=f"{module.module_id} example output",
+                schema_path=module.output_schema,
+            )
+            validate_json(
+                output_schema,
+                fallback_output,
+                label=f"{module.module_id} fallback",
+                schema_path=module.output_schema,
+            )
             from .adapters import validate_semantics
 
             validate_semantics(module.module_id, fallback_output)
@@ -189,7 +204,7 @@ class ModuleRegistry:
                 git_state = actual
             report["git_commit"] = git_state
 
-            if module.mode == "auto" and module.command:
+            if module.mode in {"auto", "replay"} and module.command:
                 first = module.expand_command(
                     root=self.root,
                     input_path=module.example_input,

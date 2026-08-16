@@ -38,7 +38,7 @@ def _parser() -> argparse.ArgumentParser:
 
     serve = subparsers.add_parser("serve", help="serve the UI and local API")
     serve.add_argument("--host", default="127.0.0.1")
-    serve.add_argument("--port", type=int, default=8765)
+    serve.add_argument("--port", type=int, default=8787)
     serve.add_argument("--no-open", action="store_true", help="do not open the browser")
 
     preflight = subparsers.add_parser("preflight", help="validate pinned module contracts")

@@ -89,11 +89,14 @@ def _runtime(stage: dict[str, Any]) -> str:
 def _evidence_metric(evidence: dict[str, Any] | None) -> float | None:
     if not evidence:
         return None
-    values = [
-        _number(link.get("confidence"))
-        for link in evidence.get("links", [])
-        if isinstance(link, dict)
-    ]
+    values = []
+    for link in evidence.get("links", []):
+        if not isinstance(link, dict):
+            continue
+        confidence = link.get("confidence")
+        if isinstance(confidence, dict):
+            confidence = confidence.get("overall")
+        values.append(_number(confidence))
     finite = [float(value) for value in values if value is not None]
     if not finite:
         return None
@@ -113,16 +116,75 @@ def _paper_citations(evidence: dict[str, Any] | None) -> list[str]:
     return citations[:6]
 
 
-def _actual_program(
+def _hypothesis_cards(output: Any) -> list[dict[str, Any]]:
+    """Normalize the official cards payload and the hermetic legacy fixture."""
+
+    if not isinstance(output, dict):
+        return []
+    cards = output.get("hypotheses")
+    if isinstance(cards, list):
+        return [card for card in cards if isinstance(card, dict)][:3]
+    record = output.get("hypothesis")
+    if not isinstance(record, dict):
+        return []
+    scores = record.get("scores") if isinstance(record.get("scores"), dict) else {}
+    return [
+        {
+            "id": record.get("id") or "program-1",
+            "headline": (
+                f"{record.get('subject_name', 'Candidate')} → "
+                f"{record.get('object_name', 'mechanism')}"
+            ),
+            "statement": None,
+            "trace": record.get("provenance") or "Graph-derived structural candidate",
+            "motif": record.get("motif") or "legacy_fixture",
+            "metrics": {
+                "support": scores.get("support"),
+                "novelty": scores.get("novelty"),
+                "testability": scores.get("testability"),
+                "rank": record.get("rank_score"),
+            },
+            "highlights": [],
+        }
+    ]
+
+
+def _biomarker_signals(evidence: Any, count: int) -> list[dict[str, Any]]:
+    """Select graph-grounded RA readout signals; these are not clinical biomarkers."""
+
+    if not isinstance(evidence, dict):
+        return []
+    things = {
+        str(thing.get("id")): thing
+        for thing in evidence.get("things", [])
+        if isinstance(thing, dict) and thing.get("id")
+    }
+    preferred = ["t2", "t3", "t5"]
+    selected = [things[thing_id] for thing_id in preferred if thing_id in things]
+    if not selected:
+        selected = [
+            thing
+            for thing in things.values()
+            if str(thing.get("kind", "")).casefold() in {"process", "biomarker"}
+        ]
+    if not selected:
+        selected = [
+            {"id": f"signal-{index + 1}", "name": "Target evidence signal"}
+            for index in range(count)
+        ]
+    return selected[:count]
+
+
+def _program_from_card(
     setup: dict[str, Any],
     stages: dict[str, dict[str, Any]],
     outputs: dict[str, Any],
+    card: dict[str, Any],
+    signal: dict[str, Any],
+    biomarker_slot: int,
+    hypothesis_slot: int,
 ) -> dict[str, Any] | None:
-    hypothesis = outputs.get("hypothesis_generator")
-    if not isinstance(hypothesis, dict) or not isinstance(hypothesis.get("hypothesis"), dict):
-        return None
-    record = hypothesis["hypothesis"]
-    scores = record.get("scores") if isinstance(record.get("scores"), dict) else {}
+    card_metrics = card.get("metrics") if isinstance(card.get("metrics"), dict) else {}
     roi = outputs.get("roi_calculator") if isinstance(outputs.get("roi_calculator"), dict) else {}
     roi_payload = roi.get("payload") if isinstance(roi.get("payload"), dict) else {}
     summary = roi_payload.get("summary") if isinstance(roi_payload.get("summary"), dict) else {}
@@ -138,9 +200,16 @@ def _actual_program(
     target = str(identity.get("targetSymbol") or "Target not reported")
     indication = str(identity.get("indication") or setup.get("validatedIndication") or "Indication")
     display_name = str(identity.get("displayName") or f"{target} in {indication}")
-    hypothesis_label = (
-        f"{record.get('subject_name', target)} → "
-        f"{record.get('object_name', indication + ' mechanism')}"
+    hypothesis_label = str(card.get("headline") or card.get("trace") or f"{target} mechanism")
+    signal_name = str(signal.get("name") or f"Signal {biomarker_slot + 1}")
+    trace = str(card.get("trace") or "")
+    association_basis = (
+        "SOURCE_PATH" if signal_name.casefold() in trace.casefold() else "CONTEXT_ONLY"
+    )
+    association_qualifier = (
+        "PARENT_SIGNAL_ON_SOURCE_PATH"
+        if association_basis == "SOURCE_PATH"
+        else "PARENT_SIGNAL_CONTEXT_ONLY"
     )
     p10 = _number(summary.get("p10_rnpv"))
     p90 = _number(summary.get("p90_rnpv"))
@@ -150,8 +219,8 @@ def _actual_program(
     citations = _paper_citations(outputs.get("evidence_mapper"))
     metrics = {
         "boldness": round((low + high) / 2, 1),
-        "evidence": _percent(scores.get("support")),
-        "plausibility": _percent(record.get("rank_score")),
+        "evidence": _percent(card_metrics.get("support")),
+        "plausibility": _percent(card_metrics.get("rank")),
         "rnpv": (
             round(float(summary["p50_rnpv"]) / 1_000_000, 1)
             if _number(summary.get("p50_rnpv")) is not None
@@ -172,17 +241,27 @@ def _actual_program(
         "occupancy": None,
         "convergence": None,
     }
+    lane = (
+        biomarker_slot * int(setup["maxHypothesesPerBiomarker"])
+        + hypothesis_slot
+    )
+    source_candidate_id = str(card.get("id") or f"candidate-{hypothesis_slot + 1}")
+    signal_id = str(signal.get("id") or f"signal-{biomarker_slot + 1}")
+    candidate_id = f"ctx-{signal_id}--{source_candidate_id}"
     return {
-        "id": str(identity.get("programId") or "program-1"),
-        "lane": 0,
-        "biomarkerSlot": 0,
-        "hypothesisSlot": 0,
-        "hypothesisNodeId": "hyp-slot-0",
-        "roiNodeId": "roi-slot-0",
-        "recruitNodeId": "recruitability-slot-0",
-        "simulationNodeId": "simulation-slot-0",
-        "label": hypothesis_label,
-        "short": f"{target} · {indication}",
+        "id": candidate_id,
+        "sourceHypothesisId": source_candidate_id,
+        "biomarkerGraphThingId": signal_id,
+        "associationBasis": association_basis,
+        "lane": lane,
+        "biomarkerSlot": biomarker_slot,
+        "hypothesisSlot": hypothesis_slot,
+        "hypothesisNodeId": f"hyp-slot-{lane}",
+        "roiNodeId": f"roi-slot-{lane}",
+        "recruitNodeId": f"recruitability-slot-{lane}",
+        "simulationNodeId": f"simulation-slot-{lane}",
+        "label": f"{source_candidate_id} · {hypothesis_label}",
+        "short": f"{signal_id} · {source_candidate_id} · {target}/{indication}",
         "metrics": metrics,
         "uncertainty": (
             f"rNPV P10–P90: ${float(p10) / 1_000_000:.1f}M to "
@@ -191,8 +270,15 @@ def _actual_program(
             else f"Economics unavailable · {qualifier}"
         ),
         "publicWhy": (
-            f"Integrated candidate for {display_name}. Each stage retains its own execution, "
-            "origin, evidence basis, and decision-grade qualifiers."
+            "SHARED_HYPOTHESIS_SLATE_ACROSS_BIOMARKERS / "
+            "NOT_INDEPENDENT_GENERATIONS: "
+            f"HypGen candidate {source_candidate_id} is contextualized beneath evidence-graph "
+            f"signal {signal_id}. This pairing is {association_basis.replace('_', ' ').lower()}; "
+            "the same native slate is shown beneath each requested signal. "
+            "SHARED_RA_ANALYST_FRAME / NOT_CANDIDATE_SPECIFIC: "
+            f"structural candidate {source_candidate_id} for {display_name}. Recruitment, ROI, and "
+            "tractability are the same explicit RA analyst-frame records on every candidate; "
+            "only the hypothesis metrics differ."
         ),
         "roiFailed": "roi_calculator" not in outputs,
         "recruitFailed": "clinical_simulation" not in outputs,
@@ -201,7 +287,7 @@ def _actual_program(
         "revision": "packet-r1",
         "hash": stages["roi"].get("output_hash") or stages["hypothesis"].get("output_hash"),
         "paretoStatus": "non-dominated" if metrics["rnpv"] is not None else "incomparable",
-        "sourceType": "INTEGRATED_RUN",
+        "sourceType": "HYPGEN_CARD_CONTEXT_BRANCH_WITH_SHARED_DOWNSTREAM",
         "qualifiers": sorted(
             set(
                 stages["biomarker"]["qualifiers"]
@@ -209,6 +295,13 @@ def _actual_program(
                 + stages["roi"]["qualifiers"]
                 + stages["recruitability"]["qualifiers"]
                 + stages["simulation"]["qualifiers"]
+                + [
+                    "SHARED_HYPOTHESIS_SLATE_ACROSS_BIOMARKERS",
+                    "NOT_INDEPENDENT_GENERATIONS",
+                    association_qualifier,
+                    "SHARED_RA_ANALYST_FRAME",
+                    "NOT_CANDIDATE_SPECIFIC",
+                ]
             )
         ),
         "citations": citations,
@@ -218,6 +311,11 @@ def _actual_program(
             "NOT ATOMISTIC"
         ),
         "gaps": [
+            (
+                "The native HypGen slate is contextualized across graph signals; the lane "
+                "records are not independent generations."
+            ),
+            "Downstream records are shared RA analyst-frame records, not candidate-specific.",
             (
                 "Recruitability uses an explicit analyst clinical thesis, "
                 "not inferred hypothesis prose."
@@ -237,85 +335,73 @@ def _actual_program(
     }
 
 
-def _proxy_programs() -> list[dict[str, Any]]:
-    """Two explicit comparators retained for a flashy comparison without fake module claims."""
-
-    return [
-        {
-            "id": "proxy-jak1",
-            "label": "JAK1 inhibition comparator",
-            "short": "JAK1 · illustrative proxy",
-            "sourceType": "ILLUSTRATIVE_PROXY",
-            "paretoStatus": "incomparable",
-            "metrics": {
-                "boldness": 3,
-                "evidence": None,
-                "plausibility": None,
-                "rnpv": None,
-                "positive": None,
-                "impact": None,
-                "recruit": None,
-                "duration": None,
-                "screens": None,
-                "risk": None,
-                "support": None,
-                "occupancy": None,
-                "convergence": None,
-            },
-            "publicWhy": "Comparison shell only; no module packet was produced for this program.",
-            "uncertainty": "All objectives missing",
-            "qualifiers": ["ILLUSTRATIVE_PROXY", "NO_MODULE_PACKET"],
-            "citations": [],
-            "gaps": ["No integrated module packet."],
-            "economicsBasis": "MISSING",
-            "simulationBasis": "MISSING",
-        },
-        {
-            "id": "proxy-tnf",
-            "label": "TNF inhibition comparator",
-            "short": "TNF · illustrative proxy",
-            "sourceType": "ILLUSTRATIVE_PROXY",
-            "paretoStatus": "incomparable",
-            "metrics": {
-                "boldness": 1,
-                "evidence": None,
-                "plausibility": None,
-                "rnpv": None,
-                "positive": None,
-                "impact": None,
-                "recruit": None,
-                "duration": None,
-                "screens": None,
-                "risk": None,
-                "support": None,
-                "occupancy": None,
-                "convergence": None,
-            },
-            "publicWhy": "Comparison shell only; no module packet was produced for this program.",
-            "uncertainty": "All objectives missing",
-            "qualifiers": ["ILLUSTRATIVE_PROXY", "NO_MODULE_PACKET"],
-            "citations": [],
-            "gaps": ["No integrated module packet."],
-            "economicsBasis": "MISSING",
-            "simulationBasis": "MISSING",
-        },
-    ]
-
-
-def _nodes(
+def _actual_programs(
     setup: dict[str, Any],
     stages: dict[str, dict[str, Any]],
     outputs: dict[str, Any],
-    program: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
-    if program is None:
-        return []
+    hypothesis_output = outputs.get("hypothesis_generator")
+    cards = _hypothesis_cards(hypothesis_output)
+    signals = _biomarker_signals(
+        outputs.get("evidence_mapper"), int(setup["maxBiomarkers"])
+    )
+    biomarker_limit = min(len(signals), int(setup["maxBiomarkers"]))
+    hypothesis_limit = min(len(cards), int(setup["maxHypothesesPerBiomarker"]))
+    official_slate = isinstance(hypothesis_output, dict) and isinstance(
+        hypothesis_output.get("hypotheses"), list
+    )
+    if not official_slate:
+        # Preserve the legacy single-document behavior used by custom and hermetic flows.
+        limit = min(biomarker_limit, hypothesis_limit)
+        return [
+            program
+            for index in range(limit)
+            if (
+                program := _program_from_card(
+                    setup,
+                    stages,
+                    outputs,
+                    cards[index],
+                    signals[index],
+                    index,
+                    0,
+                )
+            )
+            is not None
+        ]
+    return [
+        program
+        for biomarker_slot, signal in enumerate(signals[:biomarker_limit])
+        for hypothesis_slot, card in enumerate(cards[:hypothesis_limit])
+        if (
+            program := _program_from_card(
+                setup,
+                stages,
+                outputs,
+                card,
+                signal,
+                biomarker_slot,
+                hypothesis_slot,
+            )
+        )
+        is not None
+    ]
+
+
+def _nodes_for_program(
+    setup: dict[str, Any],
+    stages: dict[str, dict[str, Any]],
+    outputs: dict[str, Any],
+    program: dict[str, Any],
+) -> list[dict[str, Any]]:
     evidence_value = outputs.get("evidence_mapper")
     evidence = evidence_value if isinstance(evidence_value, dict) else {}
     hypothesis_value = outputs.get("hypothesis_generator")
-    hypothesis = hypothesis_value if isinstance(hypothesis_value, dict) else {}
-    hypothesis_record = (
-        hypothesis.get("hypothesis") if isinstance(hypothesis.get("hypothesis"), dict) else {}
+    cards = _hypothesis_cards(hypothesis_value)
+    source_hypothesis_id = str(program.get("sourceHypothesisId") or program["id"])
+    hypothesis_record = next(
+        (card for card in cards if str(card.get("id")) == source_hypothesis_id),
+        {},
     )
     roi = outputs.get("roi_calculator") if isinstance(outputs.get("roi_calculator"), dict) else {}
     roi_payload = roi.get("payload") if isinstance(roi.get("payload"), dict) else {}
@@ -328,10 +414,17 @@ def _nodes(
     indication = str(identity.get("indication") or setup.get("validatedIndication") or "Indication")
     display_name = str(identity.get("displayName") or f"{target} in {indication}")
     low, high = setup["biomarkerRange"]
-    common = {
-        "lane": 0,
-        "kind": "real",
-    }
+    lane = int(program["lane"])
+    biomarker_slot = int(program["biomarkerSlot"])
+    signals = _biomarker_signals(evidence, int(setup["maxBiomarkers"]))
+    signal = signals[biomarker_slot] if biomarker_slot < len(signals) else {}
+    signal_id = str(signal.get("id") or f"signal-{biomarker_slot + 1}")
+    signal_name = str(signal.get("name") or target)
+    bio_node_id = f"bio-slot-{biomarker_slot}"
+    hypothesis_node_id = f"hyp-slot-{lane}"
+    roi_node_id = f"roi-slot-{lane}"
+    recruit_node_id = f"recruitability-slot-{lane}"
+    common = {"lane": lane, "kind": "real"}
 
     def node(
         stage_id: str,
@@ -396,9 +489,9 @@ def _nodes(
     nodes = [
         node(
             "biomarker",
-            "bio-slot-0",
+            bio_node_id,
             "indication-root",
-            target,
+            signal_name,
             {
                 "exploration": round((low + high) / 2, 1),
                 "evidence": _evidence_metric(evidence),
@@ -406,8 +499,12 @@ def _nodes(
             },
             evidence_uncertainty,
             {
-                "slot": 0,
-                "summary": f"Evidence request for {target} in {indication}",
+                "slot": biomarker_slot,
+                "graphThingId": signal_id,
+                "summary": (
+                    f"Candidate mechanistic/PD readout for {target} in {indication}; "
+                    "not a validated clinical biomarker"
+                ),
                 "evidenceSummary": f"{len(evidence.get('findings', []))} quoted findings",
                 "counterevidenceSummary": (
                     "Condition-dependent or no-effect findings remain available for inspection."
@@ -420,8 +517,8 @@ def _nodes(
         ),
         node(
             "hypothesis",
-            "hyp-slot-0",
-            "bio-slot-0",
+            hypothesis_node_id,
+            bio_node_id,
             program["label"],
             {
                 "boldness": program["metrics"]["boldness"],
@@ -430,21 +527,33 @@ def _nodes(
             },
             hypothesis_uncertainty,
             {
-                "slot": 0,
-                "biomarkerSlot": 0,
-                "summary": hypothesis_record.get("provenance", "Hypothesis generated from graph"),
+                "slot": program["hypothesisSlot"],
+                "biomarkerSlot": biomarker_slot,
+                "sourceHypothesisId": source_hypothesis_id,
+                "biomarkerGraphThingId": signal_id,
+                "summary": hypothesis_record.get("trace", "Hypothesis generated from graph"),
                 "evidenceSummary": (
-                    f"Support score {hypothesis_record.get('scores', {}).get('support')}"
+                    f"Support score {hypothesis_record.get('metrics', {}).get('support')}"
                 ),
-                "counterevidenceSummary": "; ".join(hypothesis_record.get("caveats", [])[:2]),
-                "limitations": hypothesis_record.get("caveats", []),
+                "counterevidenceSummary": "; ".join(
+                    highlight.get("text", "")
+                    for highlight in hypothesis_record.get("highlights", [])
+                    if isinstance(highlight, dict)
+                    and highlight.get("kind") == "contradiction"
+                ),
+                "limitations": [
+                    highlight.get("text")
+                    for highlight in hypothesis_record.get("highlights", [])
+                    if isinstance(highlight, dict)
+                    and highlight.get("kind") in {"caution", "failure"}
+                ],
                 "citations": program["citations"],
             },
         ),
         node(
             "roi",
-            "roi-slot-0",
-            "hyp-slot-0",
+            roi_node_id,
+            hypothesis_node_id,
             f"rNPV · {display_name}",
             {
                 "rnpv": program["metrics"]["rnpv"],
@@ -453,8 +562,8 @@ def _nodes(
             },
             program["uncertainty"],
             {
-                "slot": 0,
-                "biomarkerSlot": 0,
+                "slot": program["hypothesisSlot"],
+                "biomarkerSlot": biomarker_slot,
                 "summary": f"P50 rNPV from {roi_payload.get('simulations', 'unknown')} simulations",
                 "evidenceSummary": str(roi_payload.get("decision_grade", "NOT_DECISION_GRADE")),
                 "counterevidenceSummary": roi_counterevidence,
@@ -467,8 +576,8 @@ def _nodes(
         ),
         node(
             "recruitability",
-            "recruitability-slot-0",
-            "roi-slot-0",
+            recruit_node_id,
+            roi_node_id,
             f"{indication} enrollment feasibility",
             {
                 "recruit": program["metrics"]["recruit"],
@@ -476,10 +585,10 @@ def _nodes(
                 "screens": program["metrics"]["screens"],
                 "risk": program["metrics"]["risk"],
             },
-            f"Simulated month range: {clinical.get('simulated_months_range', 'missing')}",
+            f"Modeled enrollment range: {clinical.get('simulated_months_range', 'missing')}",
             {
-                "slot": 0,
-                "biomarkerSlot": 0,
+                "slot": program["hypothesisSlot"],
+                "biomarkerSlot": biomarker_slot,
                 "summary": clinical.get("why", "Recruitability output unavailable"),
                 "evidenceSummary": (
                     f"{clinical.get('evidence', {}).get('competing_trials', 'unknown')} "
@@ -500,14 +609,14 @@ def _nodes(
         ),
         node(
             "simulation",
-            "simulation-slot-0",
-            "recruitability-slot-0",
+            f"simulation-slot-{lane}",
+            recruit_node_id,
             f"{target} tractability dossier",
             {"support": None, "occupancy": None, "convergence": None},
             "Two evidence axes remain separate; no atomistic score was produced.",
             {
-                "slot": 0,
-                "biomarkerSlot": 0,
+                "slot": program["hypothesisSlot"],
+                "biomarkerSlot": biomarker_slot,
                 "summary": (
                     f"Verdict: {simulation.get('verdict', 'missing')} · basis: "
                     f"{simulation.get('verdict_basis', 'missing')}"
@@ -529,6 +638,23 @@ def _nodes(
     return nodes
 
 
+def _nodes(
+    setup: dict[str, Any],
+    stages: dict[str, dict[str, Any]],
+    outputs: dict[str, Any],
+    programs: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    nodes: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for program in programs:
+        for node in _nodes_for_program(setup, stages, outputs, program):
+            if node["id"] in seen_ids:
+                continue
+            seen_ids.add(node["id"])
+            nodes.append(node)
+    return nodes
+
+
 def project_ui_state(
     root: Path,
     registry: ModuleRegistry,
@@ -544,12 +670,14 @@ def project_ui_state(
         for stage in manifest["stages"]
         if stage["output_origin"] != "NOT_RUN"
     }
-    if "LIVE" in origins and origins - {"LIVE"}:
+    if "DEMO_FALLBACK" in origins and "LIVE" in origins:
         data_basis = "LIVE + LABELED FALLBACKS"
+    elif "LIVE" in origins and origins - {"LIVE"}:
+        data_basis = "LIVE + LABELED REPLAYS / CACHED OUTPUTS"
     elif origins == {"LIVE"}:
         data_basis = "LIVE MODULE OUTPUTS"
     elif origins:
-        data_basis = "CACHED / LABELED FALLBACKS"
+        data_basis = "LABELED REPLAYS / CACHED OUTPUTS"
     else:
         data_basis = "NO MODULE OUTPUTS YET"
     truth = {
@@ -557,15 +685,50 @@ def project_ui_state(
         "dataBasis": data_basis,
         "runtimeStatus": f"{terminal_count} OF 5 MODULES TERMINAL",
     }
-    program = _actual_program(setup, stages, outputs)
-    programs = [program] if program else []
-    highlander_programs = programs + (_proxy_programs() if program else [])
+    programs = _actual_programs(setup, stages, outputs)
+    nodes = _nodes(setup, stages, outputs, programs)
+    signals = _biomarker_signals(
+        outputs.get("evidence_mapper"), int(setup["maxBiomarkers"])
+    )
+    biomarker_nodes = {
+        int(node["metadata"]["slot"]): node
+        for node in nodes
+        if node["stage"] == "biomarker"
+    }
+    biomarkers = []
+    for slot, signal in enumerate(signals[: int(setup["maxBiomarkers"])]):
+        node = biomarker_nodes.get(slot)
+        if node is None:
+            continue
+        biomarkers.append(
+            {
+                "slot": slot,
+                "id": f"bio-slot-{slot}",
+                "graph_thing_id": str(signal.get("id")),
+                "label": str(signal.get("name") or f"RA readout {slot + 1}"),
+                "summary": (
+                    "Evidence-graph mechanistic/PD readout candidate; not a validated "
+                    "clinical biomarker."
+                ),
+                "metrics": node["metrics"],
+                "uncertainty": (
+                    "Recorded search was truncated and quotes remain unverified; inspect the "
+                    "evidence packet."
+                ),
+            }
+        )
     nonterminal = 5 - terminal_count
-    packet_count = 1 if program else 0
+    packet_count = len(programs)
+    source_hypothesis_count = len(
+        {
+            program.get("sourceHypothesisId") or program["id"]
+            for program in programs
+        }
+    )
     counts = {
         "complete": 0,
         "partial": packet_count,
-        "blocked": 0 if program else 1,
+        "blocked": 0 if programs else 1,
         "nonterminal": nonterminal,
     }
     stage_projection = [_stage_projection(stages[stage_id]) for stage_id in VISUAL_STAGE_ORDER]
@@ -612,44 +775,18 @@ def project_ui_state(
         "stages": stage_projection,
         "uiProjection": {
             "runData": {
-                "biomarkers": (
-                    [
-                        {
-                            "slot": 0,
-                            "id": "bio-slot-0",
-                            "label": str(
-                                setup.get("programFrame", {})
-                                .get("identity", {})
-                                .get("targetSymbol", "Target")
-                            ),
-                            "summary": str(
-                                setup.get("programFrame", {})
-                                .get("identity", {})
-                                .get("displayName", setup["validatedIndication"])
-                            ),
-                            "metrics": _nodes(setup, stages, outputs, program)[0]["metrics"],
-                            "uncertainty": (
-                                "Search coverage was reported as truncated."
-                                if "TRUNCATED_SEARCH"
-                                in stages["biomarker"].get("qualifiers", [])
-                                else "See the evidence module coverage and warnings."
-                            ),
-                        }
-                    ]
-                    if program
-                    else []
-                ),
+                "biomarkers": biomarkers,
                 "programs": programs,
                 "requestedLanes": setup["maxBiomarkers"]
                 * setup["maxHypothesesPerBiomarker"],
-                "biomarkerShortfall": max(0, setup["maxBiomarkers"] - (1 if program else 0)),
+                "biomarkerShortfall": max(0, setup["maxBiomarkers"] - len(biomarkers)),
                 "hypothesisShortfall": max(
                     0,
                     setup["maxBiomarkers"] * setup["maxHypothesesPerBiomarker"]
                     - len(programs),
                 ),
             },
-            "nodes": _nodes(setup, stages, outputs, program),
+            "nodes": nodes,
         },
         "highlander": {
             "ready": bool(manifest["highlander"]["ready"]),
@@ -660,10 +797,13 @@ def project_ui_state(
                 manifest["highlander"]["requires_gap_acknowledgement"]
             ),
             "counts": counts,
-            "programs": highlander_programs,
+            "programs": programs,
             "comparisonBasis": (
-                "One integrated candidate plus two clearly labeled illustrative proxy shells; "
-                "no Highlander module repository is wired."
+                f"{source_hypothesis_count} real HypGen structural candidates are "
+                f"contextualized beneath {len(biomarkers)} evidence-graph signals as "
+                f"{len(programs)} lane records. These are not independent generations, and "
+                "all downstream RA records are shared. The frontend performs the current "
+                "client-side Pareto comparison; the Highlander server consumer is not wired."
             ),
         },
         "modules": modules,

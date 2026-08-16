@@ -23,7 +23,10 @@ FRONTEND_SETUP = {
 class FrontendAPIContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.fixture = FixtureProject(
-            behaviors={"clinical_simulation": "interpretability"}
+            behaviors={
+                "evidence_mapper": "interpretability",
+                "clinical_simulation": "interpretability",
+            }
         )
         self.running = RunningServer(self.fixture)
 
@@ -74,6 +77,12 @@ class FrontendAPIContractTests(unittest.TestCase):
         )
         allowed = {"QUEUED", "RUNNING", "COMPLETE", "COMPLETE_WITH_WARNINGS", "FAILED"}
         self.assertTrue(all(stage["execution_status"] in allowed for stage in final["stages"]))
+        self.assertTrue(
+            all(
+                stage["result_status"] == stage["execution_status"]
+                for stage in final["stages"]
+            )
+        )
         self.assertTrue(final["programs"])
         program = final["programs"][0]
         self.assertEqual(program["lane"], 0)
@@ -83,7 +92,34 @@ class FrontendAPIContractTests(unittest.TestCase):
             ["schema_version"],
             "1.0.0",
         )
+        biomarker_stage = next(
+            stage for stage in final["stages"] if stage["stage_id"] == "biomarker"
+        )
+        self.assertEqual(biomarker_stage["module_execution_status"], "COMPLETE")
+        self.assertEqual(biomarker_stage["output_origin"], "LIVE")
+        self.assertEqual(biomarker_stage["runtime_maturity"], "LOCAL")
+        self.assertIsInstance(biomarker_stage["warnings"], list)
+        self.assertEqual(
+            final["biomarkers"][0]["station_payload"]["interpretability"]["schema_version"],
+            "1.0.0",
+        )
         self.assertEqual(final["last_event_id"], final_state["revision"])
+
+    def test_server_prefers_the_pinned_functional_frontend_checkout(self) -> None:
+        self.running.close()
+        functional_root = self.fixture.root / ".frontend" / "app"
+        functional_root.mkdir(parents=True)
+        (functional_root / "index.html").write_text(
+            "<!doctype html><title>Functional judging frontend</title>",
+            encoding="utf-8",
+        )
+        self.running = RunningServer(self.fixture)
+
+        status, _, body = self.running.request("GET", "/")
+
+        self.assertEqual(status, 200)
+        self.assertIn(b"Functional judging frontend", body)
+        self.assertNotIn(b'data-screen="setup"', body)
 
     def test_meta_and_options_are_cross_origin_safe(self) -> None:
         status, headers, raw = self.running.request(
@@ -105,6 +141,7 @@ class FrontendAPIContractTests(unittest.TestCase):
         self.assertEqual(meta["backend"], "labrador-orchestrator")
         self.assertEqual(len(meta["modules"]), 5)
         self.assertIn("PROPOSED TARGET", meta["truth_labels"])
+        self.assertIn("MIXED LIVE / CACHED REPLAY EXECUTION", meta["truth_labels"])
 
     def test_frontend_setup_is_strict_and_does_not_guess_another_program(self) -> None:
         malformed = dict(FRONTEND_SETUP)

@@ -7,6 +7,22 @@
     "modality": "small_molecule",
     "basis": "Frozen hackathon integration path; downstream clinical fields include explicit analyst-fixture assumptions."
   },
+  "frontend": {
+    "id": "frontend",
+    "repository": "REagent-LABrador/frontend",
+    "repository_url": "https://github.com/REagent-LABrador/frontend.git",
+    "commit": "01d752445564837ca69deb7d45b6bebc2513502b",
+    "module_root": ".frontend",
+    "static_root": ".frontend/app"
+  },
+  "portfolio_consumer": {
+    "id": "hypothesis_highlander",
+    "repository": "REagent-LABrador/hypothesis-highlander",
+    "repository_url": "https://github.com/REagent-LABrador/hypothesis-highlander.git",
+    "commit": "7a58c63fc2349eb7dc449a7b352997ec77904070",
+    "mode": "NOT_WIRED",
+    "active_comparison": "FRONTEND_CLIENT_SIDE"
+  },
   "modules": [
     {
       "id": "evidence_mapper",
@@ -14,20 +30,20 @@
       "order": 1,
       "repository": "REagent-LABrador/research-evidence-mapper",
       "repository_url": "https://github.com/REagent-LABrador/research-evidence-mapper.git",
-      "commit": "60ae23a4275282422416b45ea5bc5041ff3e9195",
+      "commit": "551a5a8c4c7ff4143c21dab2e37519ac9f482c04",
       "module_root": ".modules/research-evidence-mapper",
-      "mode": "cached",
+      "mode": "replay",
       "setup_command": ["bun", "install", "--frozen-lockfile"],
-      "command": [],
+      "command": ["python3", "{orchestrator_root}/scripts/run_evidence_replay.py", "--module-root", "{module_root}", "--recorded-input", "{orchestrator_root}/fixtures/golden/evidence.request.json", "--recorded-output", "{orchestrator_root}/fixtures/golden/fallbacks/evidence.json", "--input", "{input}", "--output", "{output}"],
       "timeout_seconds": 180,
       "input_schema": "schemas/evidence-input.schema.json",
-      "output_schema": ".modules/Hypothesis_Generator/schemas/knowledge-graph.schema.json",
+      "output_schema": ".modules/research-evidence-mapper/schema/graph.schema.json",
       "example_input": "fixtures/golden/evidence.request.json",
       "example_output": "fixtures/golden/fallbacks/evidence.json",
       "fallback_output": "fixtures/golden/fallbacks/evidence.json",
-      "runtime_maturity": "UNVERIFIED",
+      "runtime_maturity": "LOCAL",
       "result_basis": ["OBSERVED", "INFERRED"],
-      "qualifiers": ["CACHED_EVIDENCE_INPUT", "VERBATIM_QUOTES", "TRUNCATED_SEARCH"]
+      "qualifiers": ["RECORDED_SEARCH_REPLAY", "NO_NEW_LITERATURE_SEARCH", "VERBATIM_QUOTES", "TRUNCATED_SEARCH"]
     },
     {
       "id": "hypothesis_generator",
@@ -42,13 +58,13 @@
       "command": ["python3", "{orchestrator_root}/scripts/run_hypothesis.py", "--module-root", "{module_root}", "--input", "{input}", "--output", "{output}"],
       "timeout_seconds": 30,
       "input_schema": ".modules/Hypothesis_Generator/schemas/knowledge-graph.schema.json",
-      "output_schema": ".modules/Hypothesis_Generator/schemas/hypothesis.schema.json",
+      "output_schema": ".modules/Hypothesis_Generator/schemas/cards.schema.json",
       "example_input": "fixtures/golden/fallbacks/evidence.json",
       "example_output": "fixtures/golden/fallbacks/hypothesis.json",
       "fallback_output": "fixtures/golden/fallbacks/hypothesis.json",
       "runtime_maturity": "LOCAL",
       "result_basis": ["INFERRED"],
-      "qualifiers": ["DETERMINISTIC_DRY_RUN", "DERIVED_FROM_CACHED_EVIDENCE"]
+      "qualifiers": ["DETERMINISTIC_DRY_RUN", "STRUCTURAL_CANDIDATE_SLATE", "DERIVED_FROM_RECORDED_EVIDENCE"]
     },
     {
       "id": "clinical_simulation",
@@ -56,20 +72,20 @@
       "order": 3,
       "repository": "REagent-LABrador/clinical_simulation",
       "repository_url": "https://github.com/REagent-LABrador/clinical_simulation.git",
-      "commit": "494479bee1250d0b27ba939bbb063c6901ae3bad",
+      "commit": "1d417b43ee8cb3b20a0769eedfc8e97474d65e30",
       "module_root": ".modules/clinical_simulation",
-      "mode": "auto",
+      "mode": "replay",
       "setup_command": ["bun", "install", "--frozen-lockfile"],
-      "command": ["bun", "run", "simulate", "{input}", "--out", "{output}"],
+      "command": ["python3", "{orchestrator_root}/scripts/run_clinical_replay.py", "--recorded-output", "{orchestrator_root}/fixtures/golden/fallbacks/recruitability.json", "--input", "{input}", "--output", "{output}"],
       "timeout_seconds": 75,
       "input_schema": ".modules/clinical_simulation/schemas/input.schema.json",
       "output_schema": ".modules/clinical_simulation/schemas/output.schema.json",
       "example_input": ".modules/clinical_simulation/schemas/examples/irak4-ra-sourced.request.json",
       "example_output": ".modules/clinical_simulation/schemas/examples/irak4-ra-sourced.result.json",
       "fallback_output": "fixtures/golden/fallbacks/recruitability.json",
-      "runtime_maturity": "UNVERIFIED",
+      "runtime_maturity": "LOCAL",
       "result_basis": ["MODELED"],
-      "qualifiers": ["SIMULATED", "ANALYST_FIXTURE_INPUT", "NOT_PROBABILITY_OF_APPROVAL"]
+      "qualifiers": ["MODELED_FORECAST", "RECORDED_RESULT_REPLAY", "SHARED_RA_ANALYST_FRAME", "NOT_CANDIDATE_SPECIFIC", "NOT_PROBABILITY_OF_APPROVAL"]
     },
     {
       "id": "roi_calculator",
@@ -90,7 +106,7 @@
       "fallback_output": "fixtures/golden/fallbacks/roi.json",
       "runtime_maturity": "LOCAL",
       "result_basis": ["MODELED"],
-      "qualifiers": ["SYNTHETIC", "NOT_DECISION_GRADE"]
+      "qualifiers": ["SYNTHETIC", "NOT_DECISION_GRADE", "SHARED_RA_ANALYST_FRAME", "NOT_CANDIDATE_SPECIFIC"]
     },
     {
       "id": "simulation",
@@ -98,20 +114,20 @@
       "order": 5,
       "repository": "REagent-LABrador/simulation",
       "repository_url": "https://github.com/REagent-LABrador/simulation.git",
-      "commit": "15869b2c8e4ff68d13be357f72ef5d320a3920e6",
+      "commit": "63ed6e560e7c0e66e51085e9140fdcc28c7ca64d",
       "module_root": ".modules/simulation",
-      "mode": "cached",
+      "mode": "replay",
       "setup_command": ["python3", "-m", "pip", "install", "-r", "simulation/requirements.txt"],
-      "command": ["python3", "-m", "simulation", "run", "--input", "{input}", "--output", "{output}"],
-      "timeout_seconds": 75,
+      "command": ["python3", "{orchestrator_root}/scripts/run_simulation_replay.py", "--module-root", "{module_root}", "--recorded-output", "{orchestrator_root}/fixtures/golden/fallbacks/simulation.json", "--input", "{input}", "--output", "{output}"],
+      "timeout_seconds": 30,
       "input_schema": ".modules/simulation/schemas/input.schema.json",
       "output_schema": ".modules/simulation/schemas/output.schema.json",
       "example_input": ".modules/simulation/examples/input.json",
       "example_output": ".modules/simulation/examples/output.json",
       "fallback_output": "fixtures/golden/fallbacks/simulation.json",
-      "runtime_maturity": "UNVERIFIED",
+      "runtime_maturity": "LOCAL",
       "result_basis": ["OBSERVED", "MODELED"],
-      "qualifiers": ["CACHED_DOSSIER", "TRACTABILITY_NOT_ATOMISTIC", "TWO_AXES_NOT_COMBINED"]
+      "qualifiers": ["LOCAL_CACHE_RESOLVER", "CACHED_DOSSIER", "SCIENTIFIC_VALUES_FROM_BUNDLED_CACHE", "SHARED_RA_ANALYST_FRAME", "NOT_CANDIDATE_SPECIFIC", "TRACTABILITY_NOT_ATOMISTIC", "TWO_AXES_NOT_COMBINED"]
     }
   ]
 }
