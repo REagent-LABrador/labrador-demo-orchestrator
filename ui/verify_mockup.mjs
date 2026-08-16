@@ -209,6 +209,9 @@ assertInside(paretoFrontierLines, highlanderStart, Number.POSITIVE_INFINITY, "da
 if (!html.includes('frontierLine.setAttribute("points"')) {
   fail("The nominal Pareto frontier line must be positioned from rendered non-dominated records.");
 }
+if (/frontier-count|frontier-stat|frontier-total|gap-total/.test(html)) {
+  fail("Highlander summary count tiles must not be rendered or updated.");
+}
 
 // Contract 7: status changes have at least one polite announcement region.
 const politeRegions = tags.filter((tag) => tag.attrs.get("aria-live")?.toLowerCase() === "polite");

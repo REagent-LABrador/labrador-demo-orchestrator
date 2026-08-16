@@ -884,7 +884,7 @@
     .highlander-head {
       min-height: 126px;
       display: grid;
-      grid-template-columns: 1.4fr 1fr auto;
+      grid-template-columns: 1fr auto;
       gap: 28px;
       align-items: center;
       padding: 20px 30px;
@@ -895,11 +895,6 @@
 
     .highlander-head h1 { margin: 0 0 5px; font-size: 30px; }
     .highlander-head p { margin: 0; color: #a9b8b1; font-size: 10px; }
-    .frontier-count { display: flex; gap: 8px; }
-    .frontier-stat { min-width: 92px; padding: 10px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.13); border-radius: 9px; }
-    .frontier-stat strong { display: block; color: var(--green); font-size: 20px; }
-    .frontier-stat span { color: #aebcb5; font-size: 8px; font-weight: 800; text-transform: uppercase; }
-
     .highlander-grid {
       display: grid;
       grid-template-columns: 302px minmax(520px, 1.35fr) minmax(380px, .9fr);
@@ -1321,10 +1316,6 @@
           <p class="eyebrow">Screen 03 · hypothesis highlander</p>
           <h1 id="highlander-title">Tradeoffs remain visible.</h1>
           <p><span id="highlander-run-id" class="mono">RUN—</span> · <span id="highlander-mode-label">Highlander mock v0.1</span> · packet snapshot <span id="packet-snapshot" class="mono">—</span></p>
-        </div>
-        <div class="frontier-count">
-          <div class="frontier-stat"><strong id="frontier-total">0</strong><span>non-dominated</span></div>
-          <div class="frontier-stat"><strong id="gap-total">0</strong><span>with gaps</span></div>
         </div>
         <div class="truth-stack"><span class="truth-chip mock">Proxy frontier</span><span class="truth-chip unwired">Not decision grade</span></div>
       </header>
@@ -3269,11 +3260,6 @@
         renderComparison();
         renderParetoPlot();
         renderProgramDetail();
-        var programs = comparisonPrograms();
-        var frontier = programs.filter(function (program) { return programStatus(program) === "non-dominated"; }).length;
-        var gaps = state.transportMode === "api" ? state.packetCounts.partial + state.packetCounts.blocked : programs.length;
-        document.getElementById("frontier-total").textContent = String(frontier);
-        document.getElementById("gap-total").textContent = String(gaps);
       }
 
       function appendChatMessage(role, content, options) {

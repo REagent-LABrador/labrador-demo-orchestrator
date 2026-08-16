@@ -49,6 +49,8 @@ class StaticUIContractTests(unittest.TestCase):
         )
         self.assertNotIn("Human review actions", self.html)
         self.assertNotIn("Hard constraints are separate.", self.html)
+        for removed_hook in ("frontier-count", "frontier-stat", "frontier-total", "gap-total"):
+            self.assertNotIn(removed_hook, self.html)
 
     def test_setup_hooks_and_both_ten_point_ranges_remain_visible(self) -> None:
         self.assertEqual(
