@@ -1,0 +1,3608 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <title>LABrador — Interactive Product Alignment Mockup</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --cream: #f3eedf;
+      --cream-2: #e9e1ce;
+      --paper: #fffdf6;
+      --ink: #13201b;
+      --muted: #5d665f;
+      --line: #c9c3b2;
+      --dark: #15231e;
+      --dark-2: #21342c;
+      --green: #47d17c;
+      --green-dark: #116a3b;
+      --green-soft: #d8f6e4;
+      --amber: #b56e05;
+      --amber-soft: #fff0cc;
+      --red: #a83c32;
+      --red-soft: #ffe2dc;
+      --blue: #276777;
+      --blue-soft: #dceff3;
+      --violet: #68528f;
+      --violet-soft: #eee6fa;
+      --shadow: 0 20px 48px rgba(34, 39, 31, .16);
+      --radius: 16px;
+      --node-w: 224px;
+      --node-h: 144px;
+      --lane: 272px;
+      --band: 440px;
+      --fork: 144px;
+      --rail: 184px;
+      --plot: 264px;
+      --shelf: 64px;
+      --inspector: 380px;
+      --inspector-collapsed: 40px;
+      --motion: 400ms;
+      --focus: #146dff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-width: 1100px; min-height: 680px; background: var(--cream); }
+
+    body {
+      margin: 0;
+      min-width: 1100px;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255,255,255,.72), transparent 28rem),
+        linear-gradient(180deg, var(--cream), #eee7d7 65%, #e8deca);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button, select, input[type="range"] { cursor: pointer; }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    button:disabled { cursor: not-allowed; opacity: .48; }
+
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    .desktop-notice {
+      display: none;
+      position: fixed;
+      inset: 0 auto auto 0;
+      z-index: 1000;
+      width: 100%;
+      padding: 9px 18px;
+      color: #241500;
+      background: var(--amber-soft);
+      border-bottom: 2px solid var(--amber);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    @media (max-width: 1279px), (max-height: 719px) {
+      .desktop-notice { display: block; }
+      .app-header { top: 42px !important; }
+      .screen { padding-top: 118px !important; }
+    }
+
+    .app-header {
+      position: fixed;
+      z-index: 100;
+      inset: 0 0 auto;
+      height: 76px;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto minmax(340px, 1fr);
+      align-items: center;
+      gap: 20px;
+      padding: 0 24px;
+      color: #f8f5e9;
+      background: rgba(21, 35, 30, .98);
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 8px 28px rgba(20, 29, 25, .16);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      color: var(--dark);
+      background: var(--green);
+      border-radius: 10px 10px 10px 3px;
+      font-weight: 950;
+      letter-spacing: -.04em;
+    }
+
+    .brand-name { font-size: 17px; font-weight: 900; letter-spacing: -.02em; }
+    .brand-sub { color: #aebbb5; font-size: 11px; }
+
+    .screen-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(255,255,255,.07);
+      border-radius: 11px;
+    }
+
+    .nav-button {
+      min-width: 108px;
+      padding: 8px 12px;
+      color: #b7c2bd;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .nav-button[aria-current="page"] {
+      color: var(--dark);
+      background: var(--green);
+    }
+
+    .nav-button.locked::after { content: " · locked"; color: #7f8d86; font-size: 10px; }
+
+    .truth-stack {
+      justify-self: end;
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .truth-chip, .chip, .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      width: fit-content;
+      border-radius: 999px;
+      font-weight: 900;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .truth-chip {
+      padding: 4px 6px;
+      color: #f7f1dd;
+      border: 1px solid rgba(255,255,255,.24);
+      font-size: 8px;
+    }
+
+    .truth-chip.mock { color: #10291e; background: var(--green); border-color: var(--green); }
+    .truth-chip.unwired { color: #301800; background: #f5b55f; border-color: #f5b55f; }
+    .truth-chip.live { color: #10291e; background: var(--green); border-color: var(--green); }
+    .truth-chip.mixed { color: #301800; background: #f5b55f; border-color: #f5b55f; }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+      padding-top: 76px;
+    }
+
+    .screen.active { display: block; }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--green-dark);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(36px, 4vw, 64px); line-height: .98; letter-spacing: -.055em; }
+    h2 { font-size: 25px; line-height: 1.1; letter-spacing: -.035em; }
+    h3 { font-size: 15px; line-height: 1.2; }
+
+    .muted { color: var(--muted); }
+    .micro { font-size: 11px; line-height: 1.35; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    .button {
+      min-height: 38px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--ink);
+      background: var(--paper);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .button:hover:not(:disabled) { border-color: #8e8a7c; transform: translateY(-1px); }
+    .button.primary { color: #102218; background: var(--green); border-color: #2eae64; }
+    .button.primary:hover:not(:disabled) { background: #5de08d; }
+    .button.dark { color: white; background: var(--dark); border-color: var(--dark); }
+    .button.danger { color: var(--red); border-color: #d5a09a; background: #fff9f6; }
+    .button.ghost { background: transparent; }
+    .button.small { min-height: 30px; padding: 5px 9px; font-size: 10px; }
+
+    /* Screen 1 */
+    .setup-screen { padding-bottom: 54px; }
+
+    .setup-layout {
+      width: min(1320px, calc(100% - 64px));
+      margin: 0 auto;
+      padding: 54px 0 0;
+      display: grid;
+      grid-template-columns: minmax(300px, .75fr) minmax(760px, 1.65fr);
+      gap: 44px;
+      align-items: start;
+    }
+
+    .setup-intro { position: sticky; top: 118px; padding: 38px 12px 0 0; }
+    .setup-intro h1 { margin-bottom: 22px; }
+    .setup-intro > p:not(.eyebrow) { max-width: 490px; font-size: 17px; }
+
+    .journey-preview {
+      margin-top: 34px;
+      padding-left: 0;
+      list-style: none;
+      counter-reset: journey;
+    }
+
+    .journey-preview li {
+      counter-increment: journey;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      margin: 14px 0;
+      color: #4f5a53;
+      font-size: 13px;
+    }
+
+    .journey-preview li::before {
+      content: counter(journey, decimal-leading-zero);
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      color: var(--green-dark);
+      background: var(--green-soft);
+      border-radius: 9px;
+      font-weight: 950;
+      font-size: 10px;
+    }
+
+    .setup-panel {
+      color: #f7f4e8;
+      background:
+        radial-gradient(circle at 100% 0, rgba(71, 209, 124, .13), transparent 28rem),
+        var(--dark);
+      border: 1px solid #263b32;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .setup-panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 28px 30px 21px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+
+    .setup-panel-head h2 { margin-bottom: 5px; }
+    .setup-panel-head p { margin: 0; color: #aebdb6; font-size: 12px; }
+
+    .setup-form { padding: 8px 30px 28px; }
+
+    .setup-control {
+      min-width: 0;
+      margin: 0;
+      padding: 18px 0;
+      border: 0;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+
+    .setup-control:last-of-type { border-bottom: 0; }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .control-label, .setup-control legend {
+      padding: 0;
+      color: #fbf8ed;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .control-index { margin-right: 8px; color: var(--green); font-size: 10px; }
+    .control-help { color: #9eaaa5; font-size: 10px; font-weight: 650; }
+
+    .text-input {
+      width: 100%;
+      height: 46px;
+      padding: 0 13px;
+      color: #15251e;
+      background: #fbf8ec;
+      border: 2px solid transparent;
+      border-radius: 10px;
+    }
+
+    .text-input[aria-invalid="true"], .number-input[aria-invalid="true"] { border-color: #ff8d80; }
+    .field-error { min-height: 17px; margin: 6px 0 0; color: #ffb1a7; font-size: 10px; font-weight: 750; }
+
+    .dual-range-wrap { position: relative; padding: 3px 2px 0; }
+
+    .range-values {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: #d8e3de;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .range-values span {
+      padding: 4px 8px;
+      background: rgba(255,255,255,.08);
+      border-radius: 7px;
+    }
+
+    .dual-range {
+      position: relative;
+      height: 32px;
+    }
+
+    .range-track {
+      position: absolute;
+      inset: 12px 0 auto;
+      height: 5px;
+      background: #405149;
+      border-radius: 999px;
+    }
+
+    .range-fill {
+      position: absolute;
+      top: 12px;
+      height: 5px;
+      background: var(--green);
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .dual-range input[type="range"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 28px;
+      margin: 0;
+      background: transparent;
+      appearance: none;
+      pointer-events: none;
+    }
+
+    .dual-range input[type="range"]::-webkit-slider-thumb {
+      width: 18px;
+      height: 18px;
+      appearance: none;
+      pointer-events: auto;
+      background: #f9f7ed;
+      border: 4px solid var(--green);
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,.24);
+    }
+
+    .dual-range input[type="range"]::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      pointer-events: auto;
+      background: #f9f7ed;
+      border: 4px solid var(--green);
+      border-radius: 50%;
+    }
+
+    .range-scale {
+      display: flex;
+      justify-content: space-between;
+      color: #7f9189;
+      font-size: 9px;
+    }
+
+    .stepper-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 24px; }
+
+    .stepper {
+      display: grid;
+      grid-template-columns: 38px 64px 38px;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .stepper button {
+      height: 38px;
+      color: #f7f4e8;
+      background: #2c4037;
+      border: 1px solid #53685f;
+      border-radius: 8px;
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .number-input {
+      width: 64px;
+      height: 38px;
+      padding: 0 7px;
+      color: var(--ink);
+      background: #fcf8ea;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 900;
+      appearance: textfield;
+    }
+
+    .number-input::-webkit-inner-spin-button { appearance: none; }
+
+    .setup-summary {
+      margin-top: 20px;
+      padding: 16px;
+      color: #dce8e1;
+      background: rgba(71,209,124,.08);
+      border: 1px solid rgba(71,209,124,.28);
+      border-radius: 12px;
+    }
+
+    .setup-summary strong { color: var(--green); }
+
+    .setup-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    .setup-actions p { margin: 0; color: #9caaa3; font-size: 10px; }
+
+    .run-button {
+      min-width: 176px;
+      min-height: 52px;
+      padding: 0 22px;
+      color: #0f2419;
+      background: var(--green);
+      border: 0;
+      border-radius: 11px;
+      box-shadow: 0 10px 28px rgba(71,209,124,.18);
+      font-weight: 950;
+    }
+
+    .snapshot-note {
+      display: none;
+      margin-top: 14px;
+      padding: 11px 13px;
+      color: #c6d2cc;
+      background: rgba(255,255,255,.06);
+      border-radius: 9px;
+      font-size: 10px;
+    }
+
+    .snapshot-note.visible { display: block; }
+
+    /* Screen 2 */
+    .graph-screen {
+      --graph-header: 126px;
+      --graph-footer: 84px;
+      background: #ebe6d8;
+      overflow: hidden;
+    }
+
+    .run-header {
+      height: var(--graph-header);
+      display: grid;
+      grid-template-columns: minmax(320px, 1.2fr) minmax(500px, 1.8fr) auto;
+      gap: 20px;
+      align-items: center;
+      padding: 14px 22px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .run-identity h1 { margin: 0 0 5px; font-size: 25px; line-height: 1.1; letter-spacing: -.035em; }
+    .run-identity p { margin: 0; color: var(--muted); font-size: 10px; }
+
+    .progress-strip { display: grid; grid-template-columns: repeat(5, minmax(88px, 1fr)); gap: 5px; }
+
+    .progress-step {
+      min-width: 0;
+      padding: 9px 8px;
+      background: #f0ede3;
+      border: 1px solid #d7d0bf;
+      border-radius: 9px;
+    }
+
+    .progress-step .stage-num { color: #7a827c; font-size: 9px; font-weight: 900; }
+    .progress-step strong { display: block; overflow: hidden; text-overflow: ellipsis; font-size: 10px; white-space: nowrap; }
+    .progress-step .stage-state { color: #646c66; font-size: 9px; font-weight: 800; }
+    .progress-step[data-state="running"] { background: var(--blue-soft); border-color: #7cb0bb; }
+    .progress-step[data-state="complete"] { background: var(--green-soft); border-color: #88caa1; }
+    .progress-step[data-state="warning"] { background: var(--amber-soft); border-color: #d8aa58; }
+    .progress-step[data-state="failed"] { background: var(--red-soft); border-color: #cf8d84; }
+
+    .run-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 280px; }
+    .freshness { width: 100%; text-align: right; color: var(--muted); font-size: 9px; font-weight: 800; }
+    .freshness[data-state="stale"] { color: var(--red); }
+
+    .graph-scroller {
+      position: relative;
+      height: calc(100vh - 76px - var(--graph-header) - var(--graph-footer));
+      min-height: 430px;
+      overflow: auto;
+      overscroll-behavior: contain;
+      background: #e7e1d2;
+    }
+
+    .graph-surface {
+      position: relative;
+      width: 2968px;
+      height: calc(var(--band) * 6);
+      min-width: 100%;
+      background:
+        linear-gradient(90deg, rgba(25,44,36,.05) 1px, transparent 1px) 0 0 / var(--lane) 100%,
+        #eee9dc;
+    }
+
+    .band-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: var(--band);
+      border-bottom: 1px solid #cfc8b6;
+    }
+
+    .band-bg:nth-child(odd) { background: rgba(255,255,255,.26); }
+    .band-bg::after {
+      content: attr(data-shelf-label);
+      position: absolute;
+      left: 193px;
+      bottom: 10px;
+      padding: 2px 6px;
+      color: #7c7567;
+      background: rgba(255,255,255,.54);
+      border: 1px dashed #b8b09e;
+      border-radius: 5px;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .stage-rail {
+      position: sticky;
+      left: 0;
+      z-index: 20;
+      width: var(--rail);
+      height: calc(var(--band) * 6);
+      color: #ecf2ee;
+      background: rgba(21,35,30,.975);
+      box-shadow: 12px 0 25px rgba(34, 37, 31, .11);
+    }
+
+    .rail-band {
+      height: var(--band);
+      padding: 16px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.11);
+    }
+
+    .rail-band .rail-kicker { color: #8da198; font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .rail-band h2 { margin: 4px 0 8px; font-size: 14px; letter-spacing: -.015em; }
+    .rail-band p { margin: 0 0 9px; color: #a8b8b0; font-size: 8px; line-height: 1.35; }
+
+    .metric-select {
+      width: 100%;
+      height: 30px;
+      padding: 0 25px 0 7px;
+      color: #102218;
+      background: #f5f1e5;
+      border: 0;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 850;
+    }
+
+    .axis-mini {
+      position: relative;
+      height: 66px;
+      margin-top: 7px;
+      color: #92a59b;
+      font-size: 7px;
+    }
+
+    .axis-mini::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 7px;
+      bottom: 9px;
+      width: 1px;
+      background: #60756b;
+    }
+
+    .axis-low { position: absolute; top: 0; left: 15px; }
+    .axis-high { position: absolute; bottom: 3px; left: 15px; }
+    .axis-source { position: absolute; right: 0; bottom: 3px; color: #6f8279; text-align: right; }
+
+    .connectors {
+      position: absolute;
+      z-index: 4;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .connector {
+      fill: none;
+      stroke: #8e998f;
+      stroke-width: 1.5;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .connector.selected { stroke: var(--green-dark); stroke-width: 3; }
+    .connector.preview { stroke: var(--blue); stroke-width: 2.5; stroke-dasharray: 5 3; }
+    .connector.dimmed { opacity: .16; }
+
+    .graph-nodes { position: absolute; z-index: 8; inset: 0; pointer-events: none; }
+
+    .graph-node {
+      position: absolute;
+      width: var(--node-w);
+      height: var(--node-h);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 4px;
+      padding: 13px 14px;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1.5px solid #9f9a8c;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(40, 43, 36, .12);
+      text-align: left;
+      pointer-events: auto;
+      transition: top var(--motion) ease, box-shadow 150ms ease, opacity 150ms ease, border-color 150ms ease;
+    }
+
+    button.graph-node { appearance: none; }
+    .graph-node:hover { box-shadow: 0 8px 20px rgba(40,43,36,.2); }
+    .graph-node .node-stage-label { overflow: hidden; color: #6b746e; font-size: 8px; font-weight: 950; letter-spacing: .08em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+    .graph-node .node-label { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 14px; font-weight: 950; line-height: 1.16; }
+    .graph-node .node-value { overflow: hidden; color: #38453e; font-size: 11px; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+    .graph-node .node-detail { display: -webkit-box; min-height: 28px; flex: 1; overflow: hidden; color: #646d67; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 9px; line-height: 1.35; }
+    .graph-node .node-badges { display: grid; width: 100%; grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr); gap: 3px; overflow: hidden; }
+    .graph-node .badge { min-width: 0; padding: 1px 3px; font-size: 6px; text-overflow: ellipsis; white-space: nowrap; }
+
+    .badge {
+      max-width: 100%;
+      padding: 2px 4px;
+      overflow: hidden;
+      color: #38433d;
+      background: #e8e6dd;
+      border: 1px solid #cac6b8;
+      border-radius: 4px;
+      font-size: 6px;
+      text-overflow: ellipsis;
+    }
+
+    .badge.complete { color: #0c5730; background: var(--green-soft); border-color: #8dccaa; }
+    .badge.running { color: #174e5d; background: var(--blue-soft); border-color: #8abac5; }
+    .badge.failed { color: #7e251d; background: var(--red-soft); border-color: #d49b92; }
+    .badge.skipped, .badge.warning { color: #6a4105; background: var(--amber-soft); border-color: #d5ad69; }
+    .badge.proxy { color: #493570; background: var(--violet-soft); border-color: #b6a4d0; }
+    .badge.live { color: #0c5730; background: var(--green-soft); border-color: #8dccaa; }
+    .badge.fallback, .badge.cached { color: #6a4105; background: var(--amber-soft); border-color: #d5ad69; }
+
+    .graph-node.scaffold {
+      color: #747a75;
+      background: rgba(255,253,246,.46);
+      border: 1.5px dashed #aaa598;
+      box-shadow: none;
+    }
+
+    .graph-node.scaffold .node-label { font-size: 13px; }
+    .graph-node.scaffold .node-stage-label { color: #7c817c; }
+    .graph-node.scaffold.retired { opacity: .42; }
+    .graph-node.pending { border-style: dotted; }
+    .graph-node.failed { border-color: var(--red); }
+    .graph-node.skipped { border-color: var(--amber); }
+    .graph-node.overflow::after { content: "↧ domain"; position: absolute; right: 4px; top: -13px; color: var(--red); font-size: 7px; font-weight: 950; }
+    .graph-node.selected { border: 3px solid var(--green-dark); box-shadow: 0 0 0 4px rgba(71,209,124,.22), 0 8px 18px rgba(34,39,31,.22); }
+    .graph-node.lineage { border-color: var(--green-dark); box-shadow: 0 0 0 2px rgba(71,209,124,.16); }
+    .graph-node.preview { border: 3px dashed var(--blue); }
+    .graph-node.dimmed { opacity: .22; }
+    .graph-node.selected.dimmed, .graph-node.lineage.dimmed { opacity: 1; }
+
+    .graph-legend {
+      position: absolute;
+      z-index: 15;
+      top: 12px;
+      right: 14px;
+      display: flex;
+      gap: 5px;
+      padding: 6px;
+      background: rgba(255,253,246,.9);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 8px;
+      font-weight: 800;
+    }
+
+    .graph-footer {
+      position: fixed;
+      z-index: 40;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--graph-footer);
+      display: grid;
+      grid-template-columns: 1.2fr 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 22px;
+      color: #f7f4e8;
+      background: var(--dark);
+      border-top: 1px solid #3a5046;
+    }
+
+    .readiness-title { display: flex; align-items: baseline; gap: 9px; }
+    .readiness-title strong { font-size: 13px; }
+    .readiness-title span { color: #9eb0a7; font-size: 9px; }
+    .packet-counts { display: flex; gap: 5px; margin-top: 6px; }
+    .packet-count { padding: 3px 6px; color: #dce6e1; background: #273b32; border-radius: 5px; font-size: 8px; font-weight: 850; }
+
+    .gap-confirm { display: none; color: #ffd998; font-size: 9px; }
+    .gap-confirm.visible { display: flex; align-items: start; gap: 7px; }
+    .gap-confirm input { margin-top: 2px; }
+
+    .launch-button { min-width: 192px; min-height: 48px; }
+
+    /* Inspector */
+    .inspector {
+      position: fixed;
+      z-index: 80;
+      top: 94px;
+      right: 16px;
+      bottom: 100px;
+      width: var(--inspector);
+      display: none;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid #9e998b;
+      border-radius: 14px;
+      box-shadow: 0 28px 72px rgba(25,31,27,.28);
+      overflow: hidden;
+    }
+
+    .inspector.visible { display: grid; grid-template-rows: auto 1fr; }
+    .inspector.collapsed { width: var(--inspector-collapsed); }
+    .inspector.collapsed .inspector-head { height: 100%; padding: 10px 5px; flex-direction: column; justify-content: flex-start; }
+    .inspector.collapsed .inspector-title, .inspector.collapsed .inspector-body, .inspector.collapsed .close-inspector { display: none; }
+    .inspector.collapsed .collapse-inspector { transform: rotate(180deg); }
+    .inspector.collapsed .collapsed-identity { display: block; writing-mode: vertical-rl; margin-top: 12px; font-size: 8px; font-weight: 900; }
+
+    .inspector-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 13px 14px;
+      color: #f5f2e7;
+      background: var(--dark);
+    }
+
+    .inspector-title { min-width: 0; }
+    .inspector-title h2 { margin: 0 0 2px; overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+    .inspector-title p { margin: 0; color: #a3b2ab; font-size: 8px; }
+    .inspector-head-actions { display: flex; gap: 5px; }
+    .icon-button { width: 29px; height: 29px; padding: 0; color: #edf2ef; background: #2e4239; border: 1px solid #53665e; border-radius: 7px; font-weight: 950; }
+    .collapsed-identity { display: none; color: #cbd7d1; }
+
+    .inspector-body { overflow: auto; padding: 14px; }
+
+    .state-warning {
+      margin-bottom: 10px;
+      padding: 9px 10px;
+      color: #5b3500;
+      background: var(--amber-soft);
+      border-left: 4px solid var(--amber);
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .inspector-status-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 12px; }
+    .status-card { min-width: 0; padding: 7px; background: #efede4; border-radius: 7px; }
+    .status-card span { display: block; color: #777e78; font-size: 7px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+    .status-card strong { display: block; overflow: hidden; font-size: 9px; text-overflow: ellipsis; }
+
+    .primary-result { margin-bottom: 12px; padding: 12px; background: var(--green-soft); border: 1px solid #9bcfb0; border-radius: 9px; }
+    .primary-result span { display: block; color: var(--green-dark); font-size: 8px; font-weight: 950; text-transform: uppercase; }
+    .primary-result strong { display: block; margin-top: 3px; font-size: 20px; }
+    .primary-result p { margin: 4px 0 0; font-size: 8px; }
+
+    .inspector-section { margin: 10px 0; border-top: 1px solid #ddd8ca; }
+    .inspector-section summary { padding: 10px 0 6px; cursor: pointer; font-size: 10px; font-weight: 900; }
+    .inspector-section p, .inspector-section li { color: #4f5953; font-size: 9px; }
+    .inspector-section ul { margin: 4px 0 8px; padding-left: 17px; }
+
+    .evidence-artifact { padding: 9px; background: #f0eee5; border-radius: 8px; }
+    .evidence-bars { display: grid; gap: 5px; margin: 8px 0; }
+    .evidence-row { display: grid; grid-template-columns: 64px 1fr 26px; align-items: center; gap: 6px; font-size: 8px; }
+    .evidence-bar { height: 7px; background: #dad6ca; border-radius: 5px; overflow: hidden; }
+    .evidence-bar span { display: block; height: 100%; background: var(--green-dark); }
+
+    @media (min-width: 1800px) {
+      .graph-screen.inspector-open .run-header,
+      .graph-screen.inspector-open .graph-scroller,
+      .graph-screen.inspector-open .graph-footer { padding-right: calc(var(--inspector) + 34px); }
+      .inspector { top: 88px; right: 10px; bottom: 10px; border-radius: 10px; }
+    }
+
+    /* Screen 3 */
+    .highlander-screen { background: #ede8da; }
+
+    .highlander-head {
+      min-height: 126px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr auto;
+      gap: 28px;
+      align-items: center;
+      padding: 20px 30px;
+      color: #f8f5e9;
+      background: var(--dark);
+      border-bottom: 1px solid #334b40;
+    }
+
+    .highlander-head h1 { margin: 0 0 5px; font-size: 30px; }
+    .highlander-head p { margin: 0; color: #a9b8b1; font-size: 10px; }
+    .frontier-count { display: flex; gap: 8px; }
+    .frontier-stat { min-width: 92px; padding: 10px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.13); border-radius: 9px; }
+    .frontier-stat strong { display: block; color: var(--green); font-size: 20px; }
+    .frontier-stat span { color: #aebcb5; font-size: 8px; font-weight: 800; text-transform: uppercase; }
+
+    .highlander-grid {
+      display: grid;
+      grid-template-columns: 302px minmax(520px, 1.35fr) minmax(380px, .9fr);
+      gap: 12px;
+      height: calc(100vh - 76px - 126px);
+      min-height: 520px;
+      padding: 12px;
+      overflow: auto;
+    }
+
+    .region-stack { min-height: 0; display: grid; gap: 12px; overflow: auto; }
+    .left-stack { grid-template-rows: auto minmax(260px, 1fr); }
+    .middle-stack { grid-template-rows: minmax(350px, 1.25fr) minmax(230px, .75fr); }
+    .right-stack { grid-template-rows: minmax(330px, 1.1fr) minmax(250px, .9fr); }
+
+    .card {
+      min-width: 0;
+      padding: 15px;
+      background: var(--paper);
+      border: 1px solid #cbc5b5;
+      border-radius: 12px;
+      box-shadow: 0 5px 16px rgba(45,47,40,.06);
+      overflow: auto;
+    }
+
+    .card-head { display: flex; justify-content: space-between; gap: 10px; align-items: start; margin-bottom: 11px; }
+    .card-head h2 { margin: 0; font-size: 15px; }
+    .card-head p { margin: 3px 0 0; color: var(--muted); font-size: 8px; }
+
+    .scenario-select { width: 100%; height: 38px; padding: 0 9px; border: 1px solid #aaa596; border-radius: 8px; background: white; font-weight: 850; }
+    .scenario-meta { margin-top: 9px; padding: 9px; background: #efede4; border-radius: 8px; font-size: 8px; }
+    .weight-list { display: grid; gap: 6px; margin: 10px 0; }
+    .weight-row { display: grid; grid-template-columns: 1fr 70px; align-items: center; gap: 10px; font-size: 9px; }
+    .weight-track { height: 7px; background: #dbd7cb; border-radius: 7px; overflow: hidden; }
+    .weight-track span { display: block; height: 100%; background: var(--violet); }
+    .constraint-box { padding: 9px; color: #684000; background: var(--amber-soft); border: 1px solid #dfba79; border-radius: 7px; font-size: 8px; }
+
+    .program-filters { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; font-size: 9px; }
+    .program-filters label { display: flex; align-items: center; gap: 4px; }
+    .program-list { display: grid; gap: 7px; }
+    .program-item {
+      width: 100%;
+      padding: 9px;
+      color: var(--ink);
+      background: #f0eee6;
+      border: 1px solid #d2ccbd;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .program-item.selected { border: 3px solid var(--green-dark); background: var(--green-soft); }
+    .program-item strong { display: block; font-size: 10px; }
+    .program-item span { display: block; margin-top: 3px; color: #5f675f; font-size: 8px; }
+
+    .comparison-wrap { overflow: auto; }
+    .comparison-table { width: 100%; min-width: 650px; border-collapse: collapse; font-size: 9px; }
+    .comparison-table th { position: sticky; top: 0; z-index: 2; padding: 7px 6px; color: #5c655f; background: var(--paper); border-bottom: 2px solid #bcb6a7; text-align: right; font-size: 7px; text-transform: uppercase; }
+    .comparison-table th:first-child, .comparison-table td:first-child { text-align: left; }
+    .comparison-table td { padding: 8px 6px; border-bottom: 1px solid #ded9cb; text-align: right; }
+    .comparison-table tr[data-status="non-dominated"] td:first-child { border-left: 4px solid var(--green-dark); }
+    .comparison-table tr[data-status="dominated"] { opacity: .68; }
+    .comparison-table tr[data-status="incomparable"] td:first-child { border-left: 4px dashed var(--amber); }
+    .table-program { border: 0; padding: 0; color: var(--ink); background: transparent; font-size: 9px; font-weight: 900; text-align: left; }
+
+    .pareto-figure { margin: 12px 0 0; padding: 10px; background: #f0eee6; border-radius: 9px; }
+    .pareto-figure figcaption { color: #5e665f; font-size: 8px; }
+    .pareto-plot { display: block; width: 100%; height: 154px; margin-top: 6px; }
+    .plot-point { cursor: pointer; fill: var(--green-dark); stroke: white; stroke-width: 2; }
+    .plot-point.dominated { fill: #92988f; }
+    .plot-point.incomparable { fill: var(--amber); stroke-dasharray: 2 1; }
+    .plot-point.selected { stroke: var(--focus); stroke-width: 4; }
+
+    .detail-callout { padding: 10px; background: var(--green-soft); border-left: 4px solid var(--green-dark); border-radius: 7px; }
+    .detail-callout strong { display: block; font-size: 11px; }
+    .detail-callout p { margin: 4px 0 0; font-size: 9px; }
+    .objective-vector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
+    .objective { padding: 8px; background: #efede4; border-radius: 7px; }
+    .objective span { display: block; color: #6c746e; font-size: 7px; text-transform: uppercase; }
+    .objective strong { font-size: 11px; }
+    .detail-sections details { border-top: 1px solid #ded8ca; }
+    .detail-sections summary { padding: 8px 0; font-size: 9px; font-weight: 900; cursor: pointer; }
+    .detail-sections p, .detail-sections li { font-size: 8px; }
+
+    .chat-log { display: grid; gap: 8px; max-height: 250px; overflow: auto; padding-right: 3px; }
+    .chat-message { padding: 9px; border-radius: 9px; font-size: 9px; }
+    .chat-message.user { margin-left: 24px; background: var(--dark); color: white; }
+    .chat-message.assistant { margin-right: 14px; background: #efede4; }
+    .chat-message.abstain { border-left: 4px solid var(--amber); }
+    .answer-label { display: inline-flex; margin: 2px 3px 2px 0; padding: 2px 4px; border-radius: 4px; background: white; border: 1px solid #c9c3b5; font-size: 6px; font-weight: 950; text-transform: uppercase; }
+    .citation-button { padding: 2px 5px; color: var(--blue); background: #eef8fa; border: 1px solid #93c0c9; border-radius: 4px; font-size: 7px; font-weight: 900; }
+    .starter-row { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
+    .chat-form { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-top: 8px; }
+    .chat-form input { min-width: 0; height: 37px; padding: 0 9px; border: 1px solid #aaa596; border-radius: 8px; }
+
+    .action-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .audit-log { margin: 10px 0 0; padding-left: 0; list-style: none; }
+    .audit-log li { margin: 5px 0; padding: 7px; background: #efede4; border-radius: 6px; font-size: 7px; }
+
+    dialog {
+      width: min(520px, calc(100% - 48px));
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid #8f8b7f;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    dialog::backdrop { background: rgba(13,24,19,.58); backdrop-filter: blur(3px); }
+    .dialog-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    .dialog-head h2 { margin: 0; }
+    .dialog-close { width: 31px; height: 31px; border: 0; border-radius: 8px; background: #e7e3d8; font-weight: 900; }
+    .dialog-body { margin: 14px 0; }
+    .dialog-body textarea { width: 100%; min-height: 92px; padding: 9px; border: 1px solid #aaa596; border-radius: 8px; resize: vertical; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 7px; }
+
+    .module-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+    .module-table th, .module-table td { padding: 7px; border-bottom: 1px solid #ddd7ca; text-align: left; vertical-align: top; }
+    .module-table th { color: #5e665f; font-size: 7px; text-transform: uppercase; }
+
+    .toast {
+      position: fixed;
+      z-index: 200;
+      left: 50%;
+      bottom: 24px;
+      max-width: 520px;
+      padding: 10px 14px;
+      color: white;
+      background: #17251f;
+      border: 1px solid #496057;
+      border-radius: 9px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+      font-size: 10px;
+      font-weight: 800;
+      transform: translate(-50%, 90px);
+      opacity: 0;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+    .toast.visible { transform: translate(-50%, 0); opacity: 1; }
+
+    @media (min-width: 1280px) and (min-height: 820px) and (max-height: 950px) {
+      .setup-layout { padding-top: 22px; }
+      .setup-intro { padding-top: 20px; }
+      .setup-panel-head { padding: 16px 26px 12px; }
+      .setup-form { padding: 4px 26px 18px; }
+      .setup-control { padding: 7px 0; }
+      .control-label-row { margin-bottom: 5px; }
+      .text-input { height: 40px; }
+      .field-error { min-height: 12px; margin-top: 2px; }
+      .range-values { margin-bottom: 4px; }
+      .dual-range { height: 26px; }
+      .range-track, .range-fill { top: 10px; }
+      .dual-range input[type="range"] { height: 24px; }
+      .setup-summary { margin-top: 8px; padding: 8px 13px; }
+      .setup-actions { margin-top: 8px; }
+      .run-button { min-height: 44px; }
+      .snapshot-note { margin-top: 8px; padding: 7px 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-notice" role="status">Desktop wireframe only. The accepted review viewport is at least 1280 × 720; all content remains available by scrolling.</div>
+
+  <header class="app-header">
+    <div class="brand" aria-label="LABrador interactive product alignment mockup">
+      <span class="brand-mark" aria-hidden="true">L</span>
+      <div>
+        <div class="brand-name">LABrador</div>
+        <div class="brand-sub">program exploration · interactive alignment mockup</div>
+      </div>
+    </div>
+
+    <nav class="screen-nav" aria-label="Three-screen product flow">
+      <button class="nav-button" type="button" data-nav="setup" aria-current="page">1 · Run Setup</button>
+      <button class="nav-button locked" type="button" data-nav="graph" disabled>2 · Program Graph</button>
+      <button class="nav-button locked" type="button" data-nav="highlander" disabled>3 · Highlander</button>
+    </nav>
+
+    <div class="truth-stack" data-truth-strip aria-label="Prototype truth labels">
+      <span id="truth-design-status" class="truth-chip">PROPOSED TARGET</span>
+      <span id="truth-data-basis" class="truth-chip mock">ILLUSTRATIVE MOCK DATA</span>
+      <span id="truth-runtime-status" class="truth-chip unwired">NO MODULES WIRED</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="screen-setup" class="screen setup-screen active" data-screen="setup" aria-labelledby="setup-title">
+      <div class="setup-layout">
+        <aside class="setup-intro">
+          <p class="eyebrow">Screen 01 · define the exploration envelope</p>
+          <h1 id="setup-title">Start with a bounded question.</h1>
+          <p>Configure the breadth of a program exploration. Counts are ceilings—not promises—and every downstream result remains inspectable.</p>
+          <ol class="journey-preview" aria-label="Product journey">
+            <li><span><strong>Set a clinical frame.</strong><br>Choose indication and exploration breadth.</span></li>
+            <li><span><strong>Read the program as sheet music.</strong><br>Stable lanes keep each hypothesis and its downstream records aligned.</span></li>
+            <li><span><strong>Compare tradeoffs, not a winner.</strong><br>Highlander preserves the non-dominated frontier and visible gaps.</span></li>
+          </ol>
+          <p id="runtime-boundary-copy" class="micro muted"><strong>Prototype boundary:</strong> this standalone HTML calls no repository modules, APIs, models, or external services.</p>
+        </aside>
+
+        <article class="setup-panel" data-region="setup-panel">
+          <header class="setup-panel-head">
+            <div>
+              <h2>Run setup</h2>
+              <p>Six inputs · provisional product contract</p>
+            </div>
+            <span id="setup-mode-chip" class="truth-chip mock">Mock run</span>
+          </header>
+
+          <form id="setup-form" class="setup-form" novalidate>
+            <fieldset class="setup-control" data-setup-input="clinical-indication" data-input-order="1">
+              <div class="control-label-row">
+                <label class="control-label" for="clinical-indication"><span class="control-index">01</span>Clinical indication</label>
+                <span class="control-help">Required · retained on error</span>
+              </div>
+              <input id="clinical-indication" class="text-input" name="clinicalIndication" type="text" value="Rheumatoid arthritis" autocomplete="off" aria-describedby="indication-help indication-error">
+              <p id="indication-help" class="control-help">The fixed root of this exploration; it does not imply an approved target or claim.</p>
+              <p id="indication-error" class="field-error" aria-live="polite"></p>
+            </fieldset>
+
+            <fieldset class="setup-control" data-setup-input="biomarker-range" data-input-order="2">
+              <legend><span class="control-index">02</span>Biomarker exploration range</legend>
+              <div class="dual-range-wrap" data-range-group="biomarker">
+                <div class="range-values"><span id="biomarker-low-value">1 · Established</span><span id="biomarker-high-value">10 · Untested but plausible</span></div>
+                <div class="dual-range">
+                  <div class="range-track"></div><div id="biomarker-fill" class="range-fill"></div>
+                  <input id="biomarker-low" type="range" min="1" max="10" step="1" value="1" aria-label="Biomarker range lower bound" aria-describedby="biomarker-interval">
+                  <input id="biomarker-high" type="range" min="1" max="10" step="1" value="10" aria-label="Biomarker range upper bound" aria-describedby="biomarker-interval">
+                </div>
+                <div class="range-scale" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                <p id="biomarker-interval" class="control-help">Selected interval: 1 · Established through 10 · Untested but plausible.</p>
+              </div>
+            </fieldset>
+
+            <fieldset class="setup-control" data-setup-input="max-biomarkers" data-input-order="3">
+              <div class="stepper-row">
+                <div>
+                  <label class="control-label" for="max-biomarkers"><span class="control-index">03</span>Maximum biomarkers</label>
+                  <div class="control-help">Up to this many candidates · provisional limit 5</div>
+                  <p id="max-biomarkers-error" class="field-error"></p>
+                </div>
+                <div class="stepper">
+                  <button type="button" data-step-target="max-biomarkers" data-step="-1" aria-label="Decrease maximum biomarkers">−</button>
+                  <input id="max-biomarkers" class="number-input" type="number" min="1" max="5" step="1" value="3" inputmode="numeric" aria-describedby="max-biomarkers-error">
+                  <button type="button" data-step-target="max-biomarkers" data-step="1" aria-label="Increase maximum biomarkers">+</button>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="setup-control" data-setup-input="max-literature-papers" data-input-order="4">
+              <div class="stepper-row">
+                <div>
+                  <label class="control-label" for="max-papers"><span class="control-index">04</span>Maximum literature papers</label>
+                  <div class="control-help">One shared cap · provisional limit 100</div>
+                  <p id="max-papers-error" class="field-error"></p>
+                </div>
+                <div class="stepper">
+                  <button type="button" data-step-target="max-papers" data-step="-1" aria-label="Decrease maximum literature papers">−</button>
+                  <input id="max-papers" class="number-input" type="number" min="1" max="100" step="1" value="40" inputmode="numeric" aria-describedby="max-papers-error">
+                  <button type="button" data-step-target="max-papers" data-step="1" aria-label="Increase maximum literature papers">+</button>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="setup-control" data-setup-input="hypothesis-range" data-input-order="5">
+              <legend><span class="control-index">05</span>Hypothesis boldness range</legend>
+              <div class="dual-range-wrap" data-range-group="hypothesis">
+                <div class="range-values"><span id="hypothesis-low-value">1 · Standard</span><span id="hypothesis-high-value">10 · Radical</span></div>
+                <div class="dual-range">
+                  <div class="range-track"></div><div id="hypothesis-fill" class="range-fill"></div>
+                  <input id="hypothesis-low" type="range" min="1" max="10" step="1" value="1" aria-label="Hypothesis range lower bound" aria-describedby="hypothesis-interval">
+                  <input id="hypothesis-high" type="range" min="1" max="10" step="1" value="10" aria-label="Hypothesis range upper bound" aria-describedby="hypothesis-interval">
+                </div>
+                <div class="range-scale" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+                <p id="hypothesis-interval" class="control-help">Selected interval: 1 · Standard through 10 · Radical.</p>
+              </div>
+            </fieldset>
+
+            <fieldset class="setup-control" data-setup-input="max-hypotheses-per-biomarker" data-input-order="6">
+              <div class="stepper-row">
+                <div>
+                  <label class="control-label" for="max-hypotheses"><span class="control-index">06</span>Maximum hypotheses per biomarker</label>
+                  <div class="control-help">Up to this many branches · provisional limit 5</div>
+                  <p id="max-hypotheses-error" class="field-error"></p>
+                </div>
+                <div class="stepper">
+                  <button type="button" data-step-target="max-hypotheses" data-step="-1" aria-label="Decrease maximum hypotheses per biomarker">−</button>
+                  <input id="max-hypotheses" class="number-input" type="number" min="1" max="5" step="1" value="3" inputmode="numeric" aria-describedby="max-hypotheses-error">
+                  <button type="button" data-step-target="max-hypotheses" data-step="1" aria-label="Increase maximum hypotheses per biomarker">+</button>
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="setup-summary" data-region="validation-summary">
+              <strong id="branch-preview">Up to 3 biomarkers and up to 9 hypothesis branches.</strong>
+              <div id="paper-preview" class="micro">Requested literature ceiling: 40 records. In fixture mode this is illustrative only.</div>
+            </div>
+
+            <div id="snapshot-note" class="snapshot-note" role="status"></div>
+
+            <div class="setup-actions">
+              <p id="run-mode-copy">Run creates an immutable setup snapshot, then plays an accelerated deterministic stage demo. Target product refresh fallback: 5 seconds.</p>
+              <button id="run-button" class="run-button" type="submit">Run illustrative exploration →</button>
+            </div>
+          </form>
+        </article>
+      </div>
+    </section>
+
+    <section id="screen-graph" class="screen graph-screen" data-screen="graph" aria-labelledby="graph-title">
+      <header class="run-header" data-region="run-header">
+        <div class="run-identity">
+          <p class="eyebrow">Screen 02 · program graph</p>
+          <h1 id="graph-title"><span id="graph-indication">Rheumatoid arthritis</span></h1>
+          <p><span id="graph-run-id" class="mono">RUN—</span> · immutable setup: <span id="graph-snapshot">up to 3 × 3; 40 papers</span></p>
+        </div>
+        <div id="progress-strip" class="progress-strip" aria-label="Sequential five-stage progress"></div>
+        <div class="run-tools">
+          <button id="freshness-button" class="button small" type="button">Simulate stale UI</button>
+          <button id="restart-demo" class="button small" type="button">Restart mock arrivals</button>
+          <button id="module-map-button" class="button small" type="button">Module alignment</button>
+          <div id="freshness" class="freshness" data-state="fresh">UI freshness: FRESH · awaiting run</div>
+        </div>
+      </header>
+
+      <div id="graph-scroller" class="graph-scroller" data-region="graph-viewport" tabindex="0" aria-label="Scrollable program graph viewport">
+        <div id="graph-surface" class="graph-surface" data-region="graph-canvas">
+          <div class="band-bg" data-graph-root="indication" data-stage="indication" data-shelf-label="fixed indication root" style="top:0"></div>
+          <div class="band-bg" data-graph-stage="biomarker" data-stage="biomarker" data-shelf-label="pending / missing shelf" style="top:440px"></div>
+          <div class="band-bg" data-graph-stage="hypothesis" data-stage="hypothesis" data-shelf-label="pending / missing shelf" style="top:880px"></div>
+          <div class="band-bg" data-graph-stage="roi" data-stage="roi" data-shelf-label="pending / missing shelf" style="top:1320px"></div>
+          <div class="band-bg" data-graph-stage="recruitability" data-stage="recruitability" data-shelf-label="pending / missing shelf" style="top:1760px"></div>
+          <div class="band-bg" data-graph-stage="simulation" data-stage="simulation" data-shelf-label="pending / missing shelf" style="top:2200px"></div>
+
+          <svg id="connectors" class="connectors" aria-hidden="true" viewBox="0 0 2968 2640" preserveAspectRatio="none"></svg>
+          <div id="graph-nodes" class="graph-nodes"></div>
+
+          <aside class="stage-rail" data-region="metric-rail" aria-label="Sticky stage and metric rail">
+            <div class="rail-band" data-stage="indication">
+              <span class="rail-kicker">Fixed root</span><h2>Indication</h2>
+              <p>Submitted clinical frame. No metric repositions this root.</p>
+            </div>
+            <div class="rail-band" data-stage="biomarker">
+              <span class="rail-kicker">Stage 01</span><h2>Biomarker / target</h2>
+              <label class="sr-only" for="metric-biomarker">Biomarker display metric</label>
+              <select id="metric-biomarker" class="metric-select" data-metric-stage="biomarker">
+                <option value="exploration">Exploration posture</option><option value="evidence">Evidence support</option><option value="pursuit">Prior pursuit</option>
+              </select>
+              <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">named scale<br>illustrative</span></div>
+            </div>
+            <div class="rail-band" data-stage="hypothesis">
+              <span class="rail-kicker">Stage 02</span><h2>Hypothesis</h2>
+              <label class="sr-only" for="metric-hypothesis">Hypothesis display metric</label>
+              <select id="metric-hypothesis" class="metric-select" data-metric-stage="hypothesis">
+                <option value="boldness">Boldness</option><option value="evidence">Evidence support</option><option value="plausibility">Biological plausibility</option>
+              </select>
+              <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">1–10<br>proxy</span></div>
+            </div>
+            <div class="rail-band" data-stage="roi">
+              <span class="rail-kicker">Stage 03</span><h2>ROI / impact</h2>
+              <label class="sr-only" for="metric-roi">ROI display metric</label>
+              <select id="metric-roi" class="metric-select" data-metric-stage="roi">
+                <option value="rnpv">P50 rNPV</option><option value="positive">Probability positive rNPV</option><option value="impact">Clinical impact</option>
+              </select>
+              <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">$M / %<br>modeled</span></div>
+            </div>
+            <div class="rail-band" data-stage="recruitability">
+              <span class="rail-kicker">Stage 04</span><h2>Recruitability</h2>
+              <label class="sr-only" for="metric-recruitability">Recruitability display metric</label>
+              <select id="metric-recruitability" class="metric-select" data-metric-stage="recruitability">
+                <option value="recruit">Recruitability</option><option value="duration">Enrollment duration</option><option value="screens">Screens per enrollee</option><option value="risk">Recruitability risk</option>
+              </select>
+              <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">0–100<br>simulated</span></div>
+            </div>
+            <div class="rail-band" data-stage="simulation">
+              <span class="rail-kicker">Stage 05</span><h2>Atomistic simulation</h2>
+              <label class="sr-only" for="metric-simulation">Simulation display metric</label>
+              <select id="metric-simulation" class="metric-select" data-metric-stage="simulation">
+                <option value="support">Atomistic support</option><option value="occupancy">Pose occupancy</option><option value="convergence">Convergence</option>
+              </select>
+              <div class="axis-mini"><span class="axis-low">low · top</span><span class="axis-high">high · bottom</span><span class="axis-source">missing shelf<br>not wired</span></div>
+            </div>
+          </aside>
+
+          <div class="graph-legend" aria-label="Graph state legend"><span>solid = bound record</span><span>·</span><span>dashed = requested capacity</span><span>·</span><span>dotted = real pending</span></div>
+        </div>
+      </div>
+
+      <footer class="graph-footer" data-region="highlander-readiness">
+        <div>
+          <div class="readiness-title"><strong>Highlander readiness</strong><span id="readiness-state">BLOCKED · stages nonterminal</span></div>
+          <div id="packet-counts" class="packet-counts"><span class="packet-count">0 complete</span><span class="packet-count">0 partial</span><span class="packet-count">0 blocked</span><span class="packet-count">5 nonterminal stages</span></div>
+        </div>
+        <label id="gap-confirm" class="gap-confirm"><input id="gap-confirm-input" type="checkbox"> I acknowledge terminal packet gaps and proxy / not-wired inputs. Continue for product review only.</label>
+        <button id="launch-highlander" class="button primary launch-button" type="button" disabled>Launch Highlander · blocked</button>
+      </footer>
+
+      <aside id="inspector" class="inspector" data-region="interpretability-inspector" aria-labelledby="inspector-heading" aria-hidden="true">
+        <header class="inspector-head">
+          <div class="inspector-title"><h2 id="inspector-heading" tabindex="-1">Node inspector</h2><p id="inspector-subtitle">No record selected</p></div>
+          <div class="inspector-head-actions">
+            <button class="icon-button collapse-inspector" type="button" aria-label="Collapse inspector">›</button>
+            <button class="icon-button close-inspector" type="button" aria-label="Clear selection and close inspector">×</button>
+          </div>
+          <span id="collapsed-identity" class="collapsed-identity"></span>
+        </header>
+        <div id="inspector-body" class="inspector-body"></div>
+      </aside>
+
+      <details class="sr-only">
+        <summary>Semantic indication to downstream lineage outline</summary>
+        <div id="semantic-outline"></div>
+      </details>
+    </section>
+
+    <section id="screen-highlander" class="screen highlander-screen" data-screen="highlander" aria-labelledby="highlander-title">
+      <header class="highlander-head" data-region="frontier-header">
+        <div>
+          <p class="eyebrow">Screen 03 · hypothesis highlander</p>
+          <h1 id="highlander-title">Tradeoffs remain visible.</h1>
+          <p><span id="highlander-run-id" class="mono">RUN—</span> · <span id="highlander-mode-label">Highlander mock v0.1</span> · packet snapshot <span id="packet-snapshot" class="mono">—</span></p>
+        </div>
+        <div class="frontier-count">
+          <div class="frontier-stat"><strong id="frontier-total">0</strong><span>non-dominated</span></div>
+          <div class="frontier-stat"><strong id="gap-total">0</strong><span>with gaps</span></div>
+        </div>
+        <div class="truth-stack"><span class="truth-chip mock">Proxy frontier</span><span class="truth-chip unwired">Not decision grade</span></div>
+      </header>
+
+      <div class="highlander-grid">
+        <div class="region-stack left-stack">
+          <section class="card" data-region="scenario-controls" aria-labelledby="scenario-title">
+            <div class="card-head"><div><h2 id="scenario-title">Viewing scenario</h2><p>Preferences alter view order—not raw objectives or baseline Pareto status.</p></div></div>
+            <label class="sr-only" for="scenario-profile">Scenario profile</label>
+            <select id="scenario-profile" class="scenario-select">
+              <option value="balanced">Balanced evidence · v1</option>
+              <option value="capital">Capital preservation · v1</option>
+              <option value="speed">Enrollment speed · v1</option>
+            </select>
+            <div id="scenario-meta" class="scenario-meta"></div>
+            <div id="weight-list" class="weight-list" aria-label="Viewing preference weights"></div>
+            <div class="constraint-box"><strong>Hard constraints are separate.</strong><br>Applying one requires rationale and creates a new decision-set version. No constraint has been applied.</div>
+          </section>
+
+          <section class="card" data-region="program-list" aria-labelledby="program-list-title">
+            <div class="card-head"><div><h2 id="program-list-title">Programs</h2><p>Non-dominated first. Selection is not a winner designation.</p></div></div>
+            <div class="program-filters">
+              <label><input id="show-dominated" type="checkbox" checked> dominated</label>
+              <label><input id="show-incomparable" type="checkbox" checked> incomparable</label>
+            </div>
+            <div id="program-list" class="program-list"></div>
+          </section>
+        </div>
+
+        <div class="region-stack middle-stack">
+          <section class="card" data-region="program-comparison" data-highlander-section="comparison" aria-labelledby="comparison-title">
+            <div class="card-head"><div><h2 id="comparison-title">Raw objective comparison</h2><p>Original units, uncertainty, qualifiers, and baseline frontier membership. No global winner.</p></div><span class="badge proxy">illustrative</span></div>
+            <div class="comparison-wrap"><table class="comparison-table"><thead><tr><th>Program</th><th>P50 rNPV</th><th>Positive rNPV</th><th>Recruitability</th><th>Enroll</th><th>Plausibility</th><th>Simulation</th><th>Baseline status</th></tr></thead><tbody id="comparison-body"></tbody></table></div>
+            <figure class="pareto-figure">
+              <figcaption><strong>Pareto view:</strong> recruitability vs P50 rNPV. Shape/status retains incomplete records; axes do not collapse missing values to zero.</figcaption>
+              <svg id="pareto-plot" class="pareto-plot" viewBox="0 0 640 154" role="img" aria-label="Illustrative Pareto comparison plot"></svg>
+            </figure>
+          </section>
+
+          <section class="card" data-region="selected-program-detail" data-highlander-section="detail" aria-labelledby="detail-title">
+            <div class="card-head"><div><h2 id="detail-title">Selected program detail</h2><p>Public, inspectable justification; no hidden reasoning.</p></div><button id="open-source-node" class="button small" type="button">Open source branch</button></div>
+            <div id="program-detail"></div>
+          </section>
+        </div>
+
+        <div class="region-stack right-stack">
+          <section class="card" data-region="grounded-chat" data-highlander-section="chat" aria-labelledby="chat-title">
+            <div class="card-head"><div><h2 id="chat-title">Run-grounded chat</h2><p id="chat-scope">Read-only evidence scope · this run and Highlander job only</p></div><span class="badge skipped">not wired</span></div>
+            <div class="starter-row" aria-label="Starter questions">
+              <button class="button small starter" type="button" data-question="Why is the selected program non-dominated?">Why non-dominated?</button>
+              <button class="button small starter" type="button" data-question="What evidence would change this conclusion?">What would change it?</button>
+              <button class="button small starter" type="button" data-question="What are the main evidence gaps?">Main gaps?</button>
+            </div>
+            <div id="chat-log" class="chat-log" aria-live="polite"><div id="chat-scope-message" class="chat-message assistant"><span class="answer-label">Scope</span> I can synthesize only the immutable mock packet snapshot. I cannot browse, mutate a record, or create new evidence.</div></div>
+            <form id="chat-form" class="chat-form"><label class="sr-only" for="chat-input">Ask about this mock run</label><input id="chat-input" type="text" placeholder="Ask about this run…" autocomplete="off"><button class="button dark" type="submit">Ask</button></form>
+          </section>
+
+          <section class="card" data-region="human-review-actions" data-highlander-section="actions" aria-labelledby="actions-title">
+            <div class="card-head"><div><h2 id="actions-title">Human review actions</h2><p>Prototype-only audit events. Actor identity and authorization are unverified.</p></div></div>
+            <div class="action-grid">
+              <button class="button review-action" type="button" data-action="Shortlist">Shortlist</button>
+              <button class="button review-action" type="button" data-action="Add hard constraint">Add hard constraint</button>
+              <button class="button review-action" type="button" data-action="Request another run">Request another run</button>
+              <button class="button danger review-action" type="button" data-action="Exclude">Exclude</button>
+            </div>
+            <ol id="audit-log" class="audit-log"><li>No review events yet. Source scientific records remain unchanged.</li></ol>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="module-dialog" aria-labelledby="module-dialog-title">
+    <div class="dialog-head"><div><p class="eyebrow">Repository alignment</p><h2 id="module-dialog-title">Target adapters vs current reality</h2></div><button class="dialog-close" type="button" data-close-dialog="module-dialog" aria-label="Close module alignment">×</button></div>
+    <div class="dialog-body">
+      <p id="module-map-copy" class="micro">This map is documentation—not an integration claim. The standalone mockup makes no module calls.</p>
+      <table class="module-table"><thead><tr><th>Target stage</th><th>Repository module</th><th>Current runtime truth</th></tr></thead><tbody id="module-map-body">
+        <tr><td>Evidence mapping</td><td>research-evidence-mapper</td><td>Target adapter; standalone deployment exists, flow adapter unverified.</td></tr>
+        <tr><td>Hypothesis generation</td><td>planned hypothesis node</td><td>NOT WIRED; source node has no pushed implementation.</td></tr>
+        <tr><td>ROI / impact</td><td>therapeutic-program-economics</td><td>Runnable locally; mock outputs synthetic and NOT_DECISION_GRADE.</td></tr>
+        <tr><td>Recruitability</td><td>trial-recruitment-forecaster</td><td>Runnable locally; this UI uses simulated proxy fields only.</td></tr>
+        <tr><td>Atomistic simulation</td><td>target capability</td><td>SKIPPED · MODULE_NOT_WIRED · result basis NOT WIRED.</td></tr>
+        <tr><td>Highlander</td><td>hypothesis-highlander</td><td>Local proxy module; real node-contract interop unverified.</td></tr>
+      </tbody></table>
+    </div>
+    <div class="dialog-actions"><button class="button dark" type="button" data-close-dialog="module-dialog">Close</button></div>
+  </dialog>
+
+  <dialog id="action-dialog" aria-labelledby="action-dialog-title">
+    <form id="action-form" method="dialog" novalidate>
+      <div class="dialog-head"><div><p class="eyebrow">Prototype audit event</p><h2 id="action-dialog-title">Record review action</h2></div><button class="dialog-close" type="button" data-close-dialog="action-dialog" aria-label="Cancel review action">×</button></div>
+      <div class="dialog-body">
+        <p id="action-description" class="micro"></p>
+        <label for="action-rationale"><strong>Required rationale</strong></label>
+        <textarea id="action-rationale" required placeholder="Explain why this human review action is appropriate…"></textarea>
+        <p id="action-error" class="field-error"></p>
+      </div>
+      <div class="dialog-actions"><button class="button" type="button" data-close-dialog="action-dialog">Cancel</button><button class="button primary" type="submit">Record mock event</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STAGES = [
+        { id: "biomarker", label: "Biomarker" },
+        { id: "hypothesis", label: "Hypothesis" },
+        { id: "roi", label: "ROI / impact" },
+        { id: "recruitability", label: "Recruitability" },
+        { id: "simulation", label: "Simulation" }
+      ];
+
+      var API_STATE_SCHEMA = "labrador.ui-run-state.v1";
+      var API_POLL_MS = 700;
+      var API_STALE_MS = 5000;
+      var explicitFixtureMode = new URLSearchParams(window.location.search).get("mode") === "fixture";
+      var TRANSPORT_MODE = window.location.protocol === "file:" || explicitFixtureMode ? "fixture" : "api";
+
+      var BAND_INDEX = {
+        indication: 0,
+        biomarker: 1,
+        hypothesis: 2,
+        roi: 3,
+        recruitability: 4,
+        simulation: 5
+      };
+
+      var GRAPH_GEOMETRY = {
+        xOrigin: 260,
+        nodeWidth: 224,
+        nodeHeight: 144,
+        lane: 272,
+        band: 440,
+        canvasMinWidth: 2968,
+        canvasHeight: 2640,
+        rootOffset: 140,
+        shelfOffset: 280,
+        plotOffset: 68,
+        plotTravel: 164,
+        busInset: 20
+      };
+
+      var METRICS = {
+        biomarker: {
+          exploration: { label: "Exploration posture", unit: "1–10 named scale", domain: [1, 10], names: [null, "1 · Established", "2 of 10", "3 of 10", "4 of 10", "5 of 10", "6 of 10", "7 of 10", "8 of 10", "9 of 10", "10 · Untested but plausible"], basis: "Illustrative 10-point ordinal mapping; equal steps are not calibrated scientific distance." },
+          evidence: { label: "Evidence support", unit: "/100 proxy", domain: [0, 100], basis: "Illustrative paper-level support proxy; no literature service called." },
+          pursuit: { label: "Prior pursuit", unit: "named scale", domain: [0, 3], names: ["Sparse", "Limited", "Active", "Crowded"], basis: "Illustrative ordinal pursuit signal." }
+        },
+        hypothesis: {
+          boldness: { label: "Boldness", unit: "/10 proxy", domain: [1, 10], basis: "Illustrative 10-point ordinal mapping." },
+          evidence: { label: "Evidence support", unit: "/100 proxy", domain: [0, 100], basis: "Illustrative synthesis; mapper not called." },
+          plausibility: { label: "Biological plausibility", unit: "/100 proxy", domain: [0, 100], basis: "Illustrative hypothesis field, not a calibrated probability." }
+        },
+        roi: {
+          rnpv: { label: "P50 rNPV", unit: "$M modeled", domain: [0, 250], basis: "Synthetic economics-compatible field; NOT_DECISION_GRADE." },
+          positive: { label: "Probability positive rNPV", unit: "% modeled", domain: [0, 100], basis: "Synthetic probability-positive field; not a probability of approval." },
+          impact: { label: "Clinical impact", unit: "/100 proxy", domain: [0, 100], basis: "Illustrative product-impact proxy." }
+        },
+        recruitability: {
+          recruit: { label: "Recruitability", unit: "/100 simulated", domain: [0, 100], basis: "Positive low-to-high display of an illustrative forecaster-compatible field." },
+          duration: { label: "Enrollment duration", unit: "months simulated", domain: [12, 40], basis: "Synthetic simulatedMonthsToEnroll-compatible field." },
+          screens: { label: "Screens per enrollee", unit: "ratio simulated", domain: [1, 8], basis: "Synthetic screensPerEnrollee-compatible field." },
+          risk: { label: "Recruitability risk", unit: "/100 proxy", domain: [0, 100], basis: "Illustrative transformation; higher appears lower on this low-to-high axis." }
+        },
+        simulation: {
+          support: { label: "Atomistic support", unit: "/100", domain: [0, 100], basis: "No values available: target module is not wired." },
+          occupancy: { label: "Pose occupancy", unit: "%", domain: [0, 100], basis: "No values available: target module is not wired." },
+          convergence: { label: "Convergence", unit: "%", domain: [0, 100], basis: "No values available: target module is not wired." }
+        }
+      };
+
+      var BIOMARKER_LEVELS = [null, "1 · Established", "2 of 10", "3 of 10", "4 of 10", "5 of 10", "6 of 10", "7 of 10", "8 of 10", "9 of 10", "10 · Untested but plausible"];
+      var HYPOTHESIS_LEVELS = [null, "1 · Standard", "2 of 10", "3 of 10", "4 of 10", "5 of 10", "6 of 10", "7 of 10", "8 of 10", "9 of 10", "10 · Radical"];
+
+      var BIOMARKER_TEMPLATES = [
+        { label: "IL6R", summary: "Inflammatory signaling anchor", metrics: { exploration: 1, evidence: 86, pursuit: 3 }, uncertainty: "±8 proxy points" },
+        { label: "TYK2", summary: "Cytokine pathway regulator", metrics: { exploration: 4, evidence: 74, pursuit: 2 }, uncertainty: "±11 proxy points" },
+        { label: "NLRP3", summary: "Inflammasome activation node", metrics: { exploration: 7, evidence: 62, pursuit: 2 }, uncertainty: "±14 proxy points" }
+      ];
+
+      var HYPOTHESIS_TEMPLATES = [
+        [
+          { label: "Stromal memory disruption", short: "IL6R · stromal memory", boldness: 5, evidence: 72, plausibility: 70, rnpv: 145, positive: 58, impact: 82, recruit: 89, duration: 18, screens: 2.2, risk: 24, uncertainty: "rNPV P10–P90: $52M–$261M", publicWhy: "Strong recruitability and clinical-impact proxies offset a lower modeled cash value than several alternatives." },
+          { label: "Peripheral tolerance pulse", short: "IL6R · tolerance pulse", boldness: 7, evidence: 64, plausibility: 84, rnpv: 120, positive: 54, impact: 76, recruit: 91, duration: 17, screens: 2.0, risk: 20, uncertainty: "rNPV P10–P90: $30M–$236M", publicWhy: "Highest biological-plausibility and recruitability proxies preserve a frontier tradeoff despite lower modeled value." },
+          { label: "Synovial clock reset", short: "IL6R · synovial reset", boldness: 8, evidence: 41, plausibility: 52, rnpv: 98, positive: 39, impact: 64, recruit: 68, duration: 25, screens: 3.6, risk: 46, uncertainty: "rNPV P10–P90: −$18M–$205M", publicWhy: "The record is dominated on the available baseline axes and remains useful as an explicit comparison." }
+        ],
+        [
+          { label: "Immune checkpoint reset", short: "TYK2 · checkpoint reset", boldness: 7, evidence: 68, plausibility: 78, rnpv: 182, positive: 61, impact: 84, recruit: 74, duration: 22, screens: 3.1, risk: 38, uncertainty: "rNPV P10–P90: $61M–$312M", publicWhy: "Balanced modeled value, plausibility, and recruitability make this record non-dominated without making it a winner." },
+          { label: "Isoform-selective switch", short: "TYK2 · isoform switch", boldness: 9, evidence: 57, plausibility: 72, rnpv: 195, positive: 57, impact: 79, recruit: 60, duration: 28, screens: 4.2, risk: 54, uncertainty: "rNPV P10–P90: $38M–$347M", publicWhy: "Higher modeled value trades against weaker recruitment, retaining a distinct frontier position." },
+          { label: "Tissue-selective modulation", short: "TYK2 · tissue selective", boldness: 9, evidence: 46, plausibility: 80, rnpv: null, positive: null, impact: 88, recruit: null, duration: null, screens: null, risk: null, roiFailed: true, recruitFailed: true, uncertainty: "Economics and recruitment outputs missing", publicWhy: "Incomparable because required objective records failed; missing values are not treated as zero." }
+        ],
+        [
+          { label: "Trained-immunity brake", short: "NLRP3 · trained immunity", boldness: 8, evidence: 62, plausibility: 66, rnpv: 280, positive: 49, impact: 91, recruit: 52, duration: 31, screens: 5.4, risk: 68, overflowRnpv: true, notAmenable: true, uncertainty: "rNPV P10–P90: $44M–$426M", publicWhy: "The raw $280M modeled value exceeds the display domain and trades against slower simulated recruitment." }
+        ]
+      ];
+
+      var SCENARIOS = {
+        balanced: {
+          name: "Balanced evidence",
+          version: "v1",
+          description: "Keeps evidence confidence, modeled value, and recruitment in view.",
+          author: "Product design fixture",
+          timestamp: "2026-08-15 · illustrative",
+          weights: [["Evidence confidence", 40], ["Modeled value", 30], ["Enrollment speed", 30]]
+        },
+        capital: {
+          name: "Capital preservation",
+          version: "v1",
+          description: "Views positive-rNPV probability and evidence before upside.",
+          author: "Product design fixture",
+          timestamp: "2026-08-15 · illustrative",
+          weights: [["Evidence confidence", 45], ["Positive rNPV", 40], ["Enrollment speed", 15]]
+        },
+        speed: {
+          name: "Enrollment speed",
+          version: "v1",
+          description: "Views recruitability and enrollment duration before modeled upside.",
+          author: "Product design fixture",
+          timestamp: "2026-08-15 · illustrative",
+          weights: [["Enrollment speed", 55], ["Evidence confidence", 25], ["Modeled value", 20]]
+        }
+      };
+
+      var state = {
+        screen: "setup",
+        transportMode: TRANSPORT_MODE,
+        submitting: false,
+        runId: null,
+        packetSnapshot: null,
+        snapshot: null,
+        runData: null,
+        nodes: [],
+        stageStates: ["queued", "queued", "queued", "queued", "queued"],
+        stageNotes: ["queued", "queued", "queued", "queued", "queued"],
+        timers: [],
+        selectedId: null,
+        previewId: null,
+        inspectorVisible: false,
+        inspectorCollapsed: false,
+        freshness: "fresh",
+        lastUpdated: null,
+        highlanderReady: false,
+        highlanderLaunched: false,
+        highlanderPrograms: [],
+        selectedProgramId: null,
+        scenario: "balanced",
+        pendingAction: null,
+        decisionSetVersion: 1,
+        auditEvents: [],
+        pollTimer: null,
+        pollAbortController: null,
+        pollGeneration: 0,
+        lastRevision: -1,
+        lastSuccessfulPollAt: 0,
+        runStatus: null,
+        highlanderSubmitting: false,
+        pendingIdempotencyKey: null,
+        pendingRequestSignature: null,
+        packetCounts: { complete: 0, partial: 0, blocked: 0, nonterminal: 5 },
+        modules: [],
+        truth: null,
+        metrics: {
+          biomarker: "exploration",
+          hypothesis: "boldness",
+          roi: "rnpv",
+          recruitability: "recruit",
+          simulation: "support"
+        }
+      };
+
+      var elements = {
+        form: document.getElementById("setup-form"),
+        indication: document.getElementById("clinical-indication"),
+        maxBiomarkers: document.getElementById("max-biomarkers"),
+        maxPapers: document.getElementById("max-papers"),
+        maxHypotheses: document.getElementById("max-hypotheses"),
+        runButton: document.getElementById("run-button"),
+        branchPreview: document.getElementById("branch-preview"),
+        paperPreview: document.getElementById("paper-preview"),
+        snapshotNote: document.getElementById("snapshot-note"),
+        progress: document.getElementById("progress-strip"),
+        graphSurface: document.getElementById("graph-surface"),
+        graphNodes: document.getElementById("graph-nodes"),
+        connectors: document.getElementById("connectors"),
+        graphScroller: document.getElementById("graph-scroller"),
+        graphScreen: document.getElementById("screen-graph"),
+        inspector: document.getElementById("inspector"),
+        inspectorHeading: document.getElementById("inspector-heading"),
+        inspectorSubtitle: document.getElementById("inspector-subtitle"),
+        inspectorBody: document.getElementById("inspector-body"),
+        collapsedIdentity: document.getElementById("collapsed-identity"),
+        freshness: document.getElementById("freshness"),
+        freshnessButton: document.getElementById("freshness-button"),
+        readinessState: document.getElementById("readiness-state"),
+        packetCounts: document.getElementById("packet-counts"),
+        gapConfirm: document.getElementById("gap-confirm"),
+        gapConfirmInput: document.getElementById("gap-confirm-input"),
+        launchHighlander: document.getElementById("launch-highlander"),
+        live: document.getElementById("live-region"),
+        toast: document.getElementById("toast"),
+        programList: document.getElementById("program-list"),
+        comparisonBody: document.getElementById("comparison-body"),
+        paretoPlot: document.getElementById("pareto-plot"),
+        programDetail: document.getElementById("program-detail"),
+        scenarioMeta: document.getElementById("scenario-meta"),
+        weightList: document.getElementById("weight-list"),
+        chatLog: document.getElementById("chat-log"),
+        actionDialog: document.getElementById("action-dialog"),
+        actionTitle: document.getElementById("action-dialog-title"),
+        actionDescription: document.getElementById("action-description"),
+        actionRationale: document.getElementById("action-rationale"),
+        actionError: document.getElementById("action-error"),
+        auditLog: document.getElementById("audit-log")
+      };
+
+      elements.truthDesignStatus = document.getElementById("truth-design-status");
+      elements.truthDataBasis = document.getElementById("truth-data-basis");
+      elements.truthRuntimeStatus = document.getElementById("truth-runtime-status");
+      elements.runtimeBoundaryCopy = document.getElementById("runtime-boundary-copy");
+      elements.setupModeChip = document.getElementById("setup-mode-chip");
+      elements.runModeCopy = document.getElementById("run-mode-copy");
+      elements.highlanderModeLabel = document.getElementById("highlander-mode-label");
+      elements.chatScopeMessage = document.getElementById("chat-scope-message");
+      elements.moduleMapCopy = document.getElementById("module-map-copy");
+      elements.moduleMapBody = document.getElementById("module-map-body");
+
+      function escapeHTML(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function announce(message) {
+        elements.live.textContent = "";
+        window.requestAnimationFrame(function () {
+          elements.live.textContent = message;
+        });
+      }
+
+      function showToast(message) {
+        elements.toast.textContent = message;
+        elements.toast.classList.add("visible");
+        window.setTimeout(function () {
+          elements.toast.classList.remove("visible");
+        }, 2600);
+      }
+
+      function setTimer(callback, delay) {
+        var timer = window.setTimeout(callback, delay);
+        state.timers.push(timer);
+        return timer;
+      }
+
+      function clearTimers() {
+        state.timers.forEach(function (timer) { window.clearTimeout(timer); });
+        state.timers = [];
+      }
+
+      function cancelPolling() {
+        state.pollGeneration += 1;
+        if (state.pollTimer !== null) window.clearTimeout(state.pollTimer);
+        state.pollTimer = null;
+        if (state.pollAbortController) state.pollAbortController.abort();
+        state.pollAbortController = null;
+      }
+
+      function isObject(value) {
+        return value !== null && typeof value === "object" && !Array.isArray(value);
+      }
+
+      function readableList(value, emptyLabel) {
+        if (!Array.isArray(value)) return value ? String(value) : emptyLabel;
+        if (!value.length) return emptyLabel;
+        return value.map(function (item) {
+          if (!isObject(item)) return String(item);
+          return [item.stage, item.executionStatus || item.execution_status, item.reasonCode || item.reason_code].filter(Boolean).join(" · ");
+        }).join("; ");
+      }
+
+      function apiFetchJSON(path, options) {
+        if (state.transportMode !== "api") return Promise.reject(new Error("API transport is disabled in fixture mode."));
+        if (!/^\/api\/runs(?:$|\/[A-Za-z0-9_-]+(?:\/(?:state|highlander))?)$/.test(path)) {
+          return Promise.reject(new Error("Blocked non-run API path."));
+        }
+        var request = Object.assign({}, options || {});
+        request.headers = Object.assign({ Accept: "application/json" }, request.headers || {});
+        if (request.body) request.headers["Content-Type"] = "application/json";
+        return window.fetch(path, request).then(function (response) {
+          return response.json().catch(function () { return {}; }).then(function (payload) {
+            if (!response.ok) {
+              var errorBody = isObject(payload.error) ? payload.error : {};
+              var message = payload.detail || errorBody.message || errorBody.code || payload.error || payload.message || ("Request failed with HTTP " + response.status + ".");
+              throw new Error(String(message));
+            }
+            return payload;
+          });
+        });
+      }
+
+      function isTerminalRunStatus(value) {
+        return ["COMPLETE", "COMPLETED", "COMPLETE_WITH_WARNINGS", "COMPLETED_WITH_WARNINGS", "FAILED", "TERMINAL", "READY"].includes(String(value || "").toUpperCase());
+      }
+
+      function schedulePoll(runId, generation, delay) {
+        if (state.transportMode !== "api" || generation !== state.pollGeneration || runId !== state.runId) return;
+        if (state.pollTimer !== null) window.clearTimeout(state.pollTimer);
+        state.pollTimer = window.setTimeout(function () {
+          pollRunState(runId, generation);
+        }, typeof delay === "number" ? delay : API_POLL_MS);
+      }
+
+      function pollRunState(runId, generation, manual) {
+        if (state.transportMode !== "api" || generation !== state.pollGeneration || runId !== state.runId) return;
+        if (state.pollTimer !== null) window.clearTimeout(state.pollTimer);
+        state.pollTimer = null;
+        if (state.pollAbortController) state.pollAbortController.abort();
+        var controller = new AbortController();
+        state.pollAbortController = controller;
+        apiFetchJSON("/api/runs/" + encodeURIComponent(runId) + "/state", { signal: controller.signal })
+          .then(function (payload) {
+            if (generation !== state.pollGeneration || runId !== state.runId) return;
+            state.lastSuccessfulPollAt = Date.now();
+            state.freshness = "fresh";
+            applyRunState(payload);
+            updateFreshness(manual ? "Run state refreshed" : null, payload.updatedAt || payload.updated_at);
+            if (!isTerminalRunStatus(state.runStatus)) schedulePoll(runId, generation, API_POLL_MS);
+          })
+          .catch(function (error) {
+            if (error && error.name === "AbortError") return;
+            if (generation !== state.pollGeneration || runId !== state.runId) return;
+            if (!state.lastSuccessfulPollAt || Date.now() - state.lastSuccessfulPollAt >= API_STALE_MS) {
+              state.freshness = "stale";
+              updateFreshness("Connection unavailable; last confirmed graph retained");
+              renderGraph();
+            }
+            if (manual) showToast("Could not refresh run state: " + error.message);
+            schedulePoll(runId, generation, API_POLL_MS);
+          })
+          .finally(function () {
+            if (state.pollAbortController === controller) state.pollAbortController = null;
+            if (manual) {
+              elements.freshnessButton.disabled = false;
+              elements.freshnessButton.textContent = "Retry API connection";
+            }
+          });
+      }
+
+      function setTruthChip(element, text, variant) {
+        element.textContent = text;
+        element.classList.remove("mock", "unwired", "live", "mixed");
+        if (variant) element.classList.add(variant);
+      }
+
+      function truthVariant(text, runtime) {
+        var value = String(text || "").toUpperCase();
+        if (/NO MODULES|NOT WIRED|AWAITING/.test(value)) return runtime ? "unwired" : "mock";
+        if (/FALLBACK|CACHED|SYNTHETIC|MIXED|PARTIAL|UNVERIFIED/.test(value)) return "mixed";
+        if (/LIVE|CONNECTED|TERMINAL|LOCAL ORCHESTRATOR/.test(value)) return "live";
+        return runtime ? "mixed" : "mock";
+      }
+
+      function renderTruth() {
+        var truth = state.truth || (state.transportMode === "fixture"
+          ? { designStatus: "PROPOSED TARGET", dataBasis: "ILLUSTRATIVE MOCK DATA", runtimeStatus: "NO MODULES WIRED" }
+          : { designStatus: "PROPOSED TARGET", dataBasis: "AWAITING RUN", runtimeStatus: "LOCAL ORCHESTRATOR" });
+        setTruthChip(elements.truthDesignStatus, truth.designStatus || "PROPOSED TARGET", null);
+        setTruthChip(elements.truthDataBasis, truth.dataBasis || "BASIS NOT REPORTED", truthVariant(truth.dataBasis, false));
+        setTruthChip(elements.truthRuntimeStatus, truth.runtimeStatus || "RUNTIME NOT REPORTED", truthVariant(truth.runtimeStatus, true));
+      }
+
+      function renderTransportMode() {
+        if (state.transportMode === "fixture") {
+          elements.runtimeBoundaryCopy.innerHTML = "<strong>Prototype boundary:</strong> explicit offline fixture mode; no repository modules, APIs, models, or external services are called.";
+          elements.setupModeChip.textContent = "Fixture run";
+          elements.setupModeChip.className = "truth-chip mock";
+          elements.runModeCopy.textContent = "Run creates an immutable local setup snapshot, then plays the deterministic offline stage fixture.";
+          elements.runButton.textContent = "Run illustrative exploration \u2192";
+          elements.freshnessButton.textContent = "Simulate stale UI";
+          document.getElementById("restart-demo").textContent = "Restart mock arrivals";
+          elements.highlanderModeLabel.textContent = "Highlander mock v0.1";
+          elements.moduleMapCopy.textContent = "Offline fixture documentation only; no module calls are made.";
+        } else {
+          elements.runtimeBoundaryCopy.innerHTML = "<strong>Local integration mode:</strong> this UI calls only the same-origin LABrador orchestrator. Every node retains its execution, result-basis, and runtime labels.";
+          elements.setupModeChip.textContent = "Local orchestrator";
+          elements.setupModeChip.className = "truth-chip live";
+          elements.runModeCopy.textContent = "This six-control screen launches the frozen RA / IRAK4 profile. Custom analyst frames use the v2 API or CLI contract.";
+          elements.runButton.textContent = "Run RA / IRAK4 profile \u2192";
+          elements.freshnessButton.textContent = "Retry API connection";
+          document.getElementById("restart-demo").textContent = "Refresh run state";
+          elements.highlanderModeLabel.textContent = "Highlander packet + UI proxy";
+          elements.moduleMapCopy.textContent = "Runtime module state is projected from the current immutable run manifest.";
+          elements.moduleMapBody.innerHTML = '<tr><td colspan="3">Create a run to load the pinned module registry and runtime state.</td></tr>';
+          elements.chatScopeMessage.innerHTML = '<span class="answer-label">Scope</span> I can synthesize only the immutable packet projection for this local run. I cannot browse, mutate source module artifacts, or create new evidence.';
+        }
+        renderTruth();
+      }
+
+      function renderModuleMap() {
+        if (state.transportMode === "fixture" || !state.modules.length) return;
+        elements.moduleMapBody.innerHTML = "";
+        state.modules.forEach(function (module) {
+          var row = document.createElement("tr");
+          var stage = document.createElement("td");
+          var name = document.createElement("td");
+          var runtime = document.createElement("td");
+          stage.textContent = module.stage || module.id || "unreported";
+          name.textContent = module.name || module.moduleId || "unreported";
+          runtime.textContent = [module.execution, module.outputOrigin, module.resultBasis, module.runtime, module.reasonCode, module.gitSha ? String(module.gitSha).slice(0, 8) : null].filter(Boolean).join(" \u00b7 ");
+          row.appendChild(stage);
+          row.appendChild(name);
+          row.appendChild(runtime);
+          elements.moduleMapBody.appendChild(row);
+        });
+      }
+
+      function numberFieldState(input, label) {
+        var raw = input.value.trim();
+        var number = Number(raw);
+        var minimum = Number(input.min);
+        var maximum = Number(input.max);
+        var error = document.getElementById(input.id + "-error");
+        var valid = raw !== "" && Number.isInteger(number) && number >= minimum && number <= maximum;
+        input.setAttribute("aria-invalid", valid ? "false" : "true");
+        if (!valid) {
+          error.textContent = label + " must be a whole number from " + minimum + " to " + maximum + ".";
+          return { valid: false, value: null };
+        }
+        error.textContent = "";
+        return { valid: true, value: number };
+      }
+
+      function validateSetup() {
+        var indication = elements.indication.value.trim();
+        var indicationError = document.getElementById("indication-error");
+        var indicationValid = indication.length > 0;
+        elements.indication.setAttribute("aria-invalid", indicationValid ? "false" : "true");
+        indicationError.textContent = indicationValid ? "" : "Enter a clinical indication; whitespace alone is not valid.";
+
+        var biomarkers = numberFieldState(elements.maxBiomarkers, "Maximum biomarkers");
+        var papers = numberFieldState(elements.maxPapers, "Maximum literature papers");
+        var hypotheses = numberFieldState(elements.maxHypotheses, "Maximum hypotheses per biomarker");
+        var valid = indicationValid && biomarkers.valid && papers.valid && hypotheses.valid;
+
+        if (biomarkers.valid && hypotheses.valid) {
+          var branches = biomarkers.value * hypotheses.value;
+          elements.branchPreview.textContent = "Up to " + biomarkers.value + " biomarker" + (biomarkers.value === 1 ? "" : "s") + " and up to " + branches + " hypothesis branch" + (branches === 1 ? "" : "es") + ".";
+        } else {
+          elements.branchPreview.textContent = "Enter valid ceilings to preview requested capacity.";
+        }
+        elements.paperPreview.textContent = papers.valid
+          ? (state.transportMode === "fixture"
+            ? "Requested literature ceiling: " + papers.value + " record" + (papers.value === 1 ? "" : "s") + ". In fixture mode this is illustrative only."
+            : "Requested literature ceiling: " + papers.value + " record" + (papers.value === 1 ? "" : "s") + ". The frozen evidence artifact keeps its recorded coverage; this control does not rewrite it.")
+          : "The literature ceiling is invalid; no count has been assumed.";
+        elements.runButton.disabled = !valid || state.submitting;
+        return {
+          valid: valid,
+          indication: indication,
+          biomarkers: biomarkers.value,
+          papers: papers.value,
+          hypotheses: hypotheses.value
+        };
+      }
+
+      function updateDualRange(name, changed) {
+        var low = document.getElementById(name + "-low");
+        var high = document.getElementById(name + "-high");
+        var names = name === "biomarker" ? BIOMARKER_LEVELS : HYPOTHESIS_LEVELS;
+        var lowValue = Number(low.value);
+        var highValue = Number(high.value);
+        if (changed === "low" && lowValue > highValue) {
+          low.value = String(highValue);
+          lowValue = highValue;
+        }
+        if (changed === "high" && highValue < lowValue) {
+          high.value = String(lowValue);
+          highValue = lowValue;
+        }
+        var denominator = Number(low.max) - Number(low.min);
+        var lowPercent = ((lowValue - Number(low.min)) / denominator) * 100;
+        var highPercent = ((highValue - Number(high.min)) / denominator) * 100;
+        var fill = document.getElementById(name + "-fill");
+        fill.style.left = lowPercent + "%";
+        fill.style.width = (highPercent - lowPercent) + "%";
+        document.getElementById(name + "-low-value").textContent = names[lowValue];
+        document.getElementById(name + "-high-value").textContent = names[highValue];
+        document.getElementById(name + "-interval").textContent = "Selected interval: " + names[lowValue] + " through " + names[highValue] + ".";
+        low.setAttribute("aria-valuetext", names[lowValue] + "; complete interval " + names[lowValue] + " through " + names[highValue]);
+        high.setAttribute("aria-valuetext", names[highValue] + "; complete interval " + names[lowValue] + " through " + names[highValue]);
+        low.style.zIndex = lowValue === Number(low.max) ? "5" : "3";
+        high.style.zIndex = "4";
+      }
+
+      function buildRunData(snapshot) {
+        var biomarkers = [];
+        var programs = [];
+        var returnedBiomarkers = Math.min(snapshot.biomarkers, BIOMARKER_TEMPLATES.length);
+        var lane = 0;
+
+        for (var b = 0; b < snapshot.biomarkers; b += 1) {
+          var template = b < returnedBiomarkers ? BIOMARKER_TEMPLATES[b] : null;
+          if (template) {
+            biomarkers.push({
+              slot: b,
+              id: "bio-slot-" + b,
+              label: template.label,
+              summary: template.summary,
+              metrics: template.metrics,
+              uncertainty: template.uncertainty
+            });
+          }
+          for (var h = 0; h < snapshot.hypotheses; h += 1) {
+            var hypothesisTemplate = template && HYPOTHESIS_TEMPLATES[b] && h < HYPOTHESIS_TEMPLATES[b].length
+              ? HYPOTHESIS_TEMPLATES[b][h]
+              : null;
+            if (hypothesisTemplate) {
+              programs.push({
+                id: "program-" + (programs.length + 1),
+                lane: lane,
+                biomarkerSlot: b,
+                hypothesisSlot: h,
+                hypothesisNodeId: "hyp-slot-" + lane,
+                roiNodeId: "roi-slot-" + lane,
+                recruitNodeId: "recruitability-slot-" + lane,
+                simulationNodeId: "simulation-slot-" + lane,
+                label: hypothesisTemplate.label,
+                short: hypothesisTemplate.short,
+                metrics: {
+                  boldness: hypothesisTemplate.boldness,
+                  evidence: hypothesisTemplate.evidence,
+                  plausibility: hypothesisTemplate.plausibility,
+                  rnpv: hypothesisTemplate.rnpv,
+                  positive: hypothesisTemplate.positive,
+                  impact: hypothesisTemplate.impact,
+                  recruit: hypothesisTemplate.recruit,
+                  duration: hypothesisTemplate.duration,
+                  screens: hypothesisTemplate.screens,
+                  risk: hypothesisTemplate.risk,
+                  support: null,
+                  occupancy: null,
+                  convergence: null
+                },
+                uncertainty: hypothesisTemplate.uncertainty,
+                publicWhy: hypothesisTemplate.publicWhy,
+                roiFailed: Boolean(hypothesisTemplate.roiFailed),
+                recruitFailed: Boolean(hypothesisTemplate.recruitFailed),
+                overflowRnpv: Boolean(hypothesisTemplate.overflowRnpv),
+                notAmenable: Boolean(hypothesisTemplate.notAmenable),
+                revision: "packet-r1",
+                hash: "mock-" + String(b + 1) + String(h + 1) + "a7"
+              });
+            }
+            lane += 1;
+          }
+        }
+
+        return {
+          biomarkers: biomarkers,
+          programs: programs,
+          requestedLanes: snapshot.biomarkers * snapshot.hypotheses,
+          biomarkerShortfall: snapshot.biomarkers - biomarkers.length,
+          hypothesisShortfall: snapshot.biomarkers * snapshot.hypotheses - programs.length
+        };
+      }
+
+      function laneX(lane) {
+        return GRAPH_GEOMETRY.xOrigin + lane * GRAPH_GEOMETRY.lane;
+      }
+
+      function groupX(slot) {
+        var startLane = slot * state.snapshot.hypotheses;
+        var endLane = startLane + state.snapshot.hypotheses - 1;
+        var halfNode = GRAPH_GEOMETRY.nodeWidth / 2;
+        return ((laneX(startLane) + halfNode) + (laneX(endLane) + halfNode)) / 2 - halfNode;
+      }
+
+      function rootX() {
+        var laneCount = Math.max(1, state.runData.requestedLanes);
+        var halfNode = GRAPH_GEOMETRY.nodeWidth / 2;
+        var start = laneX(0) + halfNode;
+        var end = laneX(laneCount - 1) + halfNode;
+        return (start + end) / 2 - halfNode;
+      }
+
+      function scaffoldNode(id, stage, label, lane, parentId, metadata) {
+        var x = stage === "biomarker" ? groupX(metadata.slot) : laneX(lane);
+        return {
+          id: id,
+          stage: stage,
+          label: label,
+          lane: lane,
+          x: x,
+          parentId: parentId,
+          kind: "scaffold",
+          execution: null,
+          resultBasis: null,
+          runtime: null,
+          metrics: {},
+          uncertainty: null,
+          reason: null,
+          metadata: metadata || {}
+        };
+      }
+
+      function buildScaffold() {
+        var nodes = [{
+          id: "indication-root",
+          stage: "indication",
+          label: state.snapshot.indication,
+          lane: null,
+          x: rootX(),
+          parentId: null,
+          kind: "real",
+          execution: "COMPLETE",
+          resultBasis: "USER INPUT",
+          runtime: "STATIC SNAPSHOT",
+          metrics: {},
+          uncertainty: "Not applicable",
+          reason: null,
+          metadata: { summary: "Immutable clinical indication submitted for this " + (state.transportMode === "fixture" ? "fixture" : "orchestrated") + " run." }
+        }];
+
+        for (var b = 0; b < state.snapshot.biomarkers; b += 1) {
+          var groupStart = b * state.snapshot.hypotheses;
+          nodes.push(scaffoldNode("bio-slot-" + b, "biomarker", "Requested biomarker slot B" + (b + 1), groupStart, "indication-root", { slot: b }));
+          for (var h = 0; h < state.snapshot.hypotheses; h += 1) {
+            var lane = groupStart + h;
+            nodes.push(scaffoldNode("hyp-slot-" + lane, "hypothesis", "Candidate pending", lane, "bio-slot-" + b, { slot: h, biomarkerSlot: b }));
+            nodes.push(scaffoldNode("roi-slot-" + lane, "roi", "Requested ROI capacity", lane, "hyp-slot-" + lane, { slot: h, biomarkerSlot: b }));
+            nodes.push(scaffoldNode("recruitability-slot-" + lane, "recruitability", "Requested recruitability capacity", lane, "roi-slot-" + lane, { slot: h, biomarkerSlot: b }));
+            nodes.push(scaffoldNode("simulation-slot-" + lane, "simulation", "Requested simulation capacity", lane, "recruitability-slot-" + lane, { slot: h, biomarkerSlot: b }));
+          }
+        }
+        state.nodes = nodes;
+        resizeGraph();
+      }
+
+      function resizeGraph() {
+        var width = Math.max(
+          GRAPH_GEOMETRY.canvasMinWidth,
+          GRAPH_GEOMETRY.xOrigin + state.runData.requestedLanes * GRAPH_GEOMETRY.lane + 260
+        );
+        elements.graphSurface.style.width = width + "px";
+        elements.connectors.setAttribute("viewBox", "0 0 " + width + " " + GRAPH_GEOMETRY.canvasHeight);
+      }
+
+      function finiteMetric(value) {
+        return typeof value === "number" && Number.isFinite(value) ? value : null;
+      }
+
+      function normalizeMetrics(metrics) {
+        var source = isObject(metrics) ? metrics : {};
+        var result = {};
+        Object.keys(source).forEach(function (key) {
+          result[key] = finiteMetric(source[key]);
+        });
+        return result;
+      }
+
+      function normalizeSetupSnapshot(payload) {
+        var setup = payload.setupSnapshot || payload.setup_snapshot || payload.setup;
+        if (!isObject(setup)) throw new Error("Run state is missing setupSnapshot.");
+        var biomarkers = Number(setup.biomarkers !== undefined ? setup.biomarkers : setup.maxBiomarkers !== undefined ? setup.maxBiomarkers : setup.max_biomarkers);
+        var papers = Number(setup.papers !== undefined ? setup.papers : setup.maxLiteraturePapers !== undefined ? setup.maxLiteraturePapers : setup.max_literature_papers);
+        var hypotheses = Number(setup.hypotheses !== undefined ? setup.hypotheses : setup.maxHypothesesPerBiomarker !== undefined ? setup.maxHypothesesPerBiomarker : setup.max_hypotheses_per_biomarker);
+        var indication = setup.indication || setup.clinicalIndication || setup.clinical_indication;
+        if (!indication || !Number.isInteger(biomarkers) || !Number.isInteger(papers) || !Number.isInteger(hypotheses)) {
+          throw new Error("Run state setupSnapshot is incomplete.");
+        }
+        return Object.freeze({
+          indication: String(indication),
+          biomarkers: biomarkers,
+          papers: papers,
+          hypotheses: hypotheses,
+          biomarkerRange: Array.isArray(setup.biomarkerRange) ? setup.biomarkerRange.slice(0, 2) : Array.isArray(setup.biomarker_range) ? setup.biomarker_range.slice(0, 2) : [1, 10],
+          hypothesisRange: Array.isArray(setup.hypothesisRange) ? setup.hypothesisRange.slice(0, 2) : Array.isArray(setup.hypothesis_range) ? setup.hypothesis_range.slice(0, 2) : [1, 10]
+        });
+      }
+
+      function normalizeRunData(payload, snapshot) {
+        var projection = payload.uiProjection || payload.ui_projection || {};
+        var source = projection.runData || projection.run_data || payload.runData || payload.run_data || {};
+        var expectedLanes = snapshot.biomarkers * snapshot.hypotheses;
+        var requestedLanes = Number(source.requestedLanes !== undefined ? source.requestedLanes : source.requested_lanes);
+        var result = {
+          biomarkers: Array.isArray(source.biomarkers) ? source.biomarkers.map(function (biomarker, index) {
+            return Object.assign({}, biomarker, {
+              slot: Number.isInteger(Number(biomarker.slot)) ? Number(biomarker.slot) : index,
+              metrics: normalizeMetrics(biomarker.metrics)
+            });
+          }) : [],
+          programs: Array.isArray(source.programs) ? source.programs.map(function (program, index) {
+            var normalized = Object.assign({}, program);
+            normalized.id = String(program.id || ("program-" + (index + 1)));
+            normalized.lane = Number.isInteger(Number(program.lane)) ? Number(program.lane) : index;
+            normalized.metrics = normalizeMetrics(program.metrics);
+            normalized.metadata = isObject(program.metadata) ? Object.assign({}, program.metadata) : {};
+            return normalized;
+          }) : [],
+          requestedLanes: Number.isInteger(requestedLanes) && requestedLanes > 0 ? requestedLanes : expectedLanes,
+          biomarkerShortfall: Number(source.biomarkerShortfall || source.biomarker_shortfall || 0),
+          hypothesisShortfall: Number(source.hypothesisShortfall || source.hypothesis_shortfall || 0)
+        };
+        return result;
+      }
+
+      function normalizeExecution(value) {
+        var execution = String(value || "QUEUED").toUpperCase();
+        if (execution === "SUCCEEDED" || execution === "SUCCESS") return "COMPLETE";
+        if (execution === "PENDING" || execution === "CREATED") return "QUEUED";
+        if (["QUEUED", "RUNNING", "COMPLETE", "COMPLETE_WITH_WARNINGS", "FAILED", "TIMED_OUT", "SKIPPED"].includes(execution)) return execution;
+        return "FAILED";
+      }
+
+      function normalizeNodeRecord(record) {
+        if (!isObject(record)) return null;
+        var allowedStages = ["indication"].concat(STAGES.map(function (stage) { return stage.id; }));
+        var stage = String(record.stage || "");
+        var kind = String(record.kind || "real").toLowerCase();
+        if (!record.id || !allowedStages.includes(stage) || !["real", "pending", "scaffold"].includes(kind)) return null;
+        return {
+          id: String(record.id),
+          stage: stage,
+          lane: record.lane === null || record.lane === undefined ? null : Number(record.lane),
+          parentId: record.parentId === null || record.parentId === undefined ? null : String(record.parentId),
+          label: String(record.label || "Untitled record"),
+          kind: kind,
+          execution: normalizeExecution(record.execution),
+          resultBasis: String(record.resultBasis || record.result_basis || "NOT REPORTED"),
+          runtime: String(record.runtime || record.runtimeMaturity || record.runtime_maturity || "NOT REPORTED"),
+          metrics: normalizeMetrics(record.metrics),
+          uncertainty: record.uncertainty === null || record.uncertainty === undefined ? null : String(record.uncertainty),
+          reason: record.reason === null || record.reason === undefined
+            ? (record.reasonCode || record.reason_code ? String(record.reasonCode || record.reason_code) : null)
+            : String(record.reason),
+          metadata: isObject(record.metadata) ? Object.assign({}, record.metadata) : {}
+        };
+      }
+
+      function stageDisplayState(value) {
+        var status = String(value || "QUEUED").toUpperCase();
+        if (status === "RUNNING") return "running";
+        if (status === "COMPLETE" || status === "COMPLETED" || status === "SUCCEEDED") return "complete";
+        if (status === "COMPLETE_WITH_WARNINGS") return "warning";
+        if (status === "FAILED" || status === "TIMED_OUT") return "failed";
+        if (status === "SKIPPED" || status === "WARNING" || status === "PARTIAL") return "warning";
+        return "queued";
+      }
+
+      function normalizeModule(module, fallbackStage) {
+        var nested = isObject(module.module) ? module.module : {};
+        var basis = module.resultBasis || module.result_basis;
+        if (Array.isArray(basis)) basis = basis.join(" + ");
+        return {
+          stage: String(module.stage || module.id || fallbackStage || "unreported"),
+          name: String(module.name || module.moduleId || module.module_id || module.id || nested.name || "unreported"),
+          execution: String(module.execution || module.executionStatus || module.execution_status || module.status || "QUEUED"),
+          outputOrigin: String(module.outputOrigin || module.output_origin || "NOT_RUN"),
+          resultBasis: basis ? String(basis) : null,
+          runtime: String(module.runtime || module.runtimeMaturity || module.runtime_maturity || "NOT REPORTED"),
+          reasonCode: module.reasonCode || module.reason_code || null,
+          gitSha: module.gitSha || module.git_sha || nested.gitSha || nested.git_sha || null
+        };
+      }
+
+      function deriveTruth(payload, modules) {
+        var supplied = payload.truth;
+        if (isObject(supplied)) {
+          return {
+            designStatus: String(supplied.designStatus || supplied.design_status || "PROPOSED TARGET"),
+            dataBasis: String(supplied.dataBasis || supplied.data_basis || "BASIS NOT REPORTED"),
+            runtimeStatus: String(supplied.runtimeStatus || supplied.runtime_status || "RUNTIME NOT REPORTED")
+          };
+        }
+        var origins = modules.map(function (module) { return module.outputOrigin.toUpperCase(); }).filter(function (origin) { return origin !== "NOT_RUN"; });
+        var hasLive = origins.includes("LIVE");
+        var hasFallback = origins.some(function (origin) { return /FALLBACK|CACHED/.test(origin); });
+        var terminal = modules.filter(function (module) { return /COMPLETE|FAILED|SKIPPED|TIMED_OUT/.test(module.execution.toUpperCase()); }).length;
+        var basis = !origins.length ? "AWAITING MODULE OUTPUTS" : hasLive && hasFallback ? "LIVE + DEMO_FALLBACK" : hasLive ? "LIVE MODULE OUTPUTS" : "DEMO_FALLBACK / CACHED OUTPUTS";
+        return {
+          designStatus: "PROPOSED TARGET",
+          dataBasis: basis,
+          runtimeStatus: "LOCAL ORCHESTRATOR \u00b7 " + terminal + "/" + modules.length + " TERMINAL"
+        };
+      }
+
+      function applyRunState(payload) {
+        if (!isObject(payload)) throw new Error("Run state must be a JSON object.");
+        var schemaVersion = payload.schemaVersion || payload.schema_version;
+        if (schemaVersion !== API_STATE_SCHEMA) throw new Error("Unsupported run-state schema " + String(schemaVersion || "missing") + ".");
+        var runId = String(payload.runId || payload.run_id || "");
+        var revision = Number(payload.revision);
+        if (!runId || !Number.isInteger(revision) || revision < 0) throw new Error("Run state identity or revision is invalid.");
+        if (state.runId === runId && revision <= state.lastRevision) return false;
+
+        var snapshot = normalizeSetupSnapshot(payload);
+        var runData = normalizeRunData(payload, snapshot);
+        state.runId = runId;
+        state.lastRevision = revision;
+        state.runStatus = String(payload.runStatus || payload.run_status || "RUNNING");
+        state.snapshot = snapshot;
+        state.runData = runData;
+        buildScaffold();
+
+        var projection = payload.uiProjection || payload.ui_projection || {};
+        var records = Array.isArray(projection.nodes) ? projection.nodes : (Array.isArray(payload.nodes) ? payload.nodes : []);
+        var byId = new Map(state.nodes.map(function (node) { return [node.id, node]; }));
+        records.forEach(function (record) {
+          var normalized = normalizeNodeRecord(record);
+          if (!normalized || !byId.has(normalized.id)) return;
+          var target = byId.get(normalized.id);
+          var stableX = target.x;
+          Object.assign(target, normalized);
+          target.x = stableX;
+          target.metadata = Object.assign({}, target.metadata || {}, normalized.metadata);
+        });
+        retireUnusedCapacity();
+
+        var suppliedStages = Array.isArray(payload.stages) ? payload.stages : [];
+        state.stageStates = STAGES.map(function (stage) {
+          var source = suppliedStages.find(function (candidate) { return candidate.id === stage.id; });
+          return stageDisplayState(source ? source.status : "QUEUED");
+        });
+        state.stageNotes = STAGES.map(function (stage) {
+          var source = suppliedStages.find(function (candidate) { return candidate.id === stage.id; });
+          return String(source && source.note ? source.note : "queued");
+        });
+
+        var rawModules = Array.isArray(payload.modules) ? payload.modules : suppliedStages;
+        state.modules = rawModules.map(function (module) { return normalizeModule(module, module.id); });
+        state.truth = deriveTruth(payload, state.modules);
+
+        var highlander = isObject(payload.highlander) ? payload.highlander : {};
+        var counts = isObject(highlander.counts) ? highlander.counts : {};
+        state.highlanderReady = highlander.ready === true;
+        state.highlanderLaunched = highlander.launched === true;
+        var packetSnapshot = highlander.packetSnapshot || highlander.packet_snapshot || null;
+        state.packetSnapshot = isObject(packetSnapshot)
+          ? String(packetSnapshot.id || packetSnapshot.snapshotId || packetSnapshot.snapshot_id || "PACKET SNAPSHOT")
+          : packetSnapshot === null ? null : String(packetSnapshot);
+        state.packetCounts = {
+          complete: Number(counts.complete || 0),
+          partial: Number(counts.partial || 0),
+          blocked: Number(counts.blocked || 0),
+          nonterminal: Number(counts.nonterminal !== undefined ? counts.nonterminal : state.stageStates.filter(function (status) { return status === "queued" || status === "running"; }).length)
+        };
+        state.highlanderPrograms = Array.isArray(highlander.programs)
+          ? normalizeRunData({ uiProjection: { runData: { programs: highlander.programs } } }, snapshot).programs
+          : [];
+        var selectablePrograms = comparisonPrograms();
+        if (!state.selectedProgramId || !selectablePrograms.some(function (program) { return program.id === state.selectedProgramId; })) {
+          state.selectedProgramId = selectablePrograms.length ? selectablePrograms[0].id : null;
+        }
+        if (state.selectedId && !findNode(state.selectedId)) {
+          state.selectedId = null;
+          state.previewId = null;
+          state.inspectorVisible = false;
+          elements.inspector.classList.remove("visible", "collapsed");
+          elements.graphScreen.classList.remove("inspector-open");
+        }
+
+        document.getElementById("graph-indication").textContent = state.snapshot.indication;
+        document.getElementById("graph-run-id").textContent = state.runId;
+        document.getElementById("graph-snapshot").textContent = "up to " + state.snapshot.biomarkers + " \u00d7 " + state.snapshot.hypotheses + "; up to " + state.snapshot.papers + " papers";
+        document.getElementById("highlander-run-id").textContent = state.runId;
+        document.getElementById("packet-snapshot").textContent = state.packetSnapshot || "\u2014";
+        document.getElementById("chat-scope").textContent = "Read-only evidence scope \u00b7 " + state.runId + " \u00b7 immutable packet projection";
+        document.querySelector('[data-nav="graph"]').disabled = false;
+        document.querySelector('[data-nav="graph"]').classList.remove("locked");
+        var highlanderNav = document.querySelector('[data-nav="highlander"]');
+        highlanderNav.disabled = !state.highlanderLaunched;
+        highlanderNav.classList.toggle("locked", !state.highlanderLaunched);
+
+        renderProgress();
+        renderGraph();
+        renderReadiness();
+        renderTruth();
+        renderModuleMap();
+        if (state.screen === "highlander" && state.highlanderLaunched) renderHighlander();
+        announce("Run " + state.runId + " updated to revision " + revision + ".");
+        return true;
+      }
+
+      function findNode(id) {
+        return state.nodes.find(function (node) { return node.id === id; }) || null;
+      }
+
+      function findProgramForNode(node) {
+        if (!node || !state.runData) return null;
+        return state.runData.programs.find(function (program) {
+          return program.hypothesisNodeId === node.id ||
+            program.roiNodeId === node.id ||
+            program.recruitNodeId === node.id ||
+            program.simulationNodeId === node.id;
+        }) || null;
+      }
+
+      function actualBiomarker(slot) {
+        return state.runData.biomarkers.find(function (biomarker) { return biomarker.slot === slot; }) || null;
+      }
+
+      function actualProgramForLane(lane) {
+        return state.runData.programs.find(function (program) { return program.lane === lane; }) || null;
+      }
+
+      function markStagePending(stage) {
+        state.nodes.forEach(function (node) {
+          if (node.stage !== stage) return;
+          var biomarker = stage === "biomarker" ? actualBiomarker(node.metadata.slot) : null;
+          var program = stage !== "biomarker" ? actualProgramForLane(node.lane) : null;
+          if (!biomarker && !program) return;
+
+          node.kind = "pending";
+          node.execution = "RUNNING";
+          node.resultBasis = "AWAITING RESULT";
+          node.runtime = stage === "simulation" ? "NOT WIRED" : "LOCAL TARGET / MOCK UI";
+          node.metrics = {};
+          node.uncertainty = "Pending; no value placed on the metric axis.";
+          if (stage === "biomarker") node.label = biomarker.label;
+          if (stage === "hypothesis") node.label = program.label;
+          if (stage === "roi") node.label = "Economics · " + program.short;
+          if (stage === "recruitability") node.label = "Recruitment · " + program.short;
+          if (stage === "simulation") node.label = "Atomistic · " + program.short;
+        });
+      }
+
+      function retireUnusedCapacity() {
+        state.nodes.forEach(function (node) {
+          if (node.stage === "indication") return;
+          var isActual = node.stage === "biomarker"
+            ? Boolean(actualBiomarker(node.metadata.slot))
+            : Boolean(actualProgramForLane(node.lane));
+          if (!isActual && node.kind === "scaffold") {
+            node.metadata.retired = true;
+            if (node.stage === "hypothesis") node.label = "Unused requested capacity";
+          }
+        });
+      }
+
+      function bindStage(stage) {
+        state.nodes.forEach(function (node) {
+          if (node.stage !== stage) return;
+          var biomarker = stage === "biomarker" ? actualBiomarker(node.metadata.slot) : null;
+          var program = stage !== "biomarker" ? actualProgramForLane(node.lane) : null;
+          if (!biomarker && !program) return;
+
+          node.kind = "real";
+          node.reason = null;
+          if (stage === "biomarker") {
+            node.label = biomarker.label;
+            node.execution = "COMPLETE";
+            node.resultBasis = "ILLUSTRATIVE PROXY";
+            node.runtime = "TARGET ADAPTER";
+            node.metrics = biomarker.metrics;
+            node.uncertainty = biomarker.uncertainty;
+            node.metadata.summary = biomarker.summary;
+          }
+          if (stage === "hypothesis") {
+            node.label = program.label;
+            node.execution = "COMPLETE";
+            node.resultBasis = "ILLUSTRATIVE PROXY";
+            node.runtime = "NOT WIRED";
+            node.metrics = {
+              boldness: program.metrics.boldness,
+              evidence: program.metrics.evidence,
+              plausibility: program.metrics.plausibility
+            };
+            node.uncertainty = "Proxy scores are ordinal product fixtures.";
+            node.metadata.summary = "Illustrative terminal hypothesis; no generator module was called.";
+          }
+          if (stage === "roi") {
+            node.label = "Economics · " + program.short;
+            node.execution = program.roiFailed ? "FAILED" : "COMPLETE";
+            node.resultBasis = program.roiFailed ? "MISSING" : "SYNTHETIC MODELED";
+            node.runtime = "LOCAL MODULE TARGET";
+            node.metrics = {
+              rnpv: program.metrics.rnpv,
+              positive: program.metrics.positive,
+              impact: program.metrics.impact
+            };
+            node.uncertainty = program.uncertainty;
+            node.reason = program.roiFailed ? "MOCK_ECONOMICS_FAILURE · value remains missing" : null;
+            node.metadata.overflow = program.overflowRnpv;
+            node.metadata.summary = "Synthetic AnalysisSummary-compatible fields; NOT_DECISION_GRADE.";
+          }
+          if (stage === "recruitability") {
+            node.label = "Recruitment · " + program.short;
+            node.execution = program.recruitFailed ? "FAILED" : "COMPLETE";
+            node.resultBasis = program.recruitFailed ? "MISSING" : "SIMULATED PROXY";
+            node.runtime = "LOCAL MODULE TARGET";
+            node.metrics = {
+              recruit: program.metrics.recruit,
+              duration: program.metrics.duration,
+              screens: program.metrics.screens,
+              risk: program.metrics.risk
+            };
+            node.uncertainty = program.recruitFailed ? "No numeric output returned." : "Illustrative duration range ±4 months.";
+            node.reason = program.recruitFailed ? "MOCK_FORECAST_FAILURE · sibling branches continued" : null;
+            node.metadata.summary = "Synthetic RecruitabilityResult-compatible fields.";
+          }
+          if (stage === "simulation") {
+            node.label = "Atomistic · " + program.short;
+            node.execution = "SKIPPED";
+            node.resultBasis = program.notAmenable ? "NO RESULT" : "NOT WIRED";
+            node.runtime = "NOT WIRED";
+            node.metrics = { support: null, occupancy: null, convergence: null };
+            node.uncertainty = "Not available; missing values stay on the shelf.";
+            node.reason = program.notAmenable
+              ? "NOT_AMENABLE · resolving evidence would be an experimentally supported binding mechanism"
+              : "MODULE_NOT_WIRED";
+            node.metadata.summary = "No atomistic capability was called by this standalone mockup.";
+          }
+        });
+        retireUnusedCapacity();
+      }
+
+      function metricDefinition(node) {
+        if (!METRICS[node.stage]) return null;
+        var metricKey = state.metrics[node.stage];
+        return METRICS[node.stage][metricKey];
+      }
+
+      function metricValue(node) {
+        if (!METRICS[node.stage]) return null;
+        return Object.prototype.hasOwnProperty.call(node.metrics, state.metrics[node.stage])
+          ? node.metrics[state.metrics[node.stage]]
+          : null;
+      }
+
+      function formatMetric(node) {
+        if (node.kind === "scaffold") return "Capacity shell · no scientific record";
+        var definition = metricDefinition(node);
+        if (!definition) return "Fixed root";
+        var value = metricValue(node);
+        if (value === null || typeof value !== "number" || Number.isNaN(value)) {
+          return node.kind === "pending" ? "Pending · shelf" : "Missing · shelf";
+        }
+        if (definition.names) return definition.names[Math.round(value)] + " · ordinal";
+        if (state.metrics[node.stage] === "rnpv") return "$" + value + "M · modeled";
+        if (state.metrics[node.stage] === "positive" || state.metrics[node.stage] === "occupancy" || state.metrics[node.stage] === "convergence") return value + "% · " + definition.unit.replace("% ", "");
+        if (state.metrics[node.stage] === "duration") return value + " months · simulated";
+        if (state.metrics[node.stage] === "screens") return value.toFixed(1) + "× · simulated";
+        return value + " " + definition.unit;
+      }
+
+      function nodeTop(node) {
+        var bandTop = BAND_INDEX[node.stage] * GRAPH_GEOMETRY.band;
+        if (node.stage === "indication") return bandTop + GRAPH_GEOMETRY.rootOffset;
+        if (node.kind === "scaffold" || node.kind === "pending") return bandTop + GRAPH_GEOMETRY.shelfOffset;
+        var definition = metricDefinition(node);
+        var value = metricValue(node);
+        if (!definition || value === null || typeof value !== "number" || Number.isNaN(value)) return bandTop + GRAPH_GEOMETRY.shelfOffset;
+        var normalized = (value - definition.domain[0]) / (definition.domain[1] - definition.domain[0]);
+        normalized = Math.max(0, Math.min(1, normalized));
+        return bandTop + GRAPH_GEOMETRY.plotOffset + normalized * GRAPH_GEOMETRY.plotTravel;
+      }
+
+      function descendantsOf(id) {
+        var result = new Set();
+        var queue = [id];
+        while (queue.length) {
+          var current = queue.shift();
+          state.nodes.forEach(function (node) {
+            if (node.parentId === current && !result.has(node.id)) {
+              result.add(node.id);
+              queue.push(node.id);
+            }
+          });
+        }
+        return result;
+      }
+
+      function ancestorsOf(id) {
+        var result = new Set();
+        var node = findNode(id);
+        while (node && node.parentId) {
+          result.add(node.parentId);
+          node = findNode(node.parentId);
+        }
+        return result;
+      }
+
+      function lineageOf(id) {
+        var lineage = descendantsOf(id);
+        ancestorsOf(id).forEach(function (ancestor) { lineage.add(ancestor); });
+        lineage.add(id);
+        return lineage;
+      }
+
+      function previewSet() {
+        if (!state.previewId) return new Set();
+        var preview = descendantsOf(state.previewId);
+        preview.add(state.previewId);
+        return preview;
+      }
+
+      function executionBadgeClass(execution) {
+        var value = normalizeExecution(execution);
+        if (value === "COMPLETE") return "complete";
+        if (value === "COMPLETE_WITH_WARNINGS") return "warning";
+        if (value === "RUNNING" || value === "QUEUED") return "running";
+        if (value === "FAILED" || value === "TIMED_OUT") return "failed";
+        if (value === "SKIPPED") return "skipped";
+        return "warning";
+      }
+
+      function basisBadgeClass(resultBasis) {
+        var value = String(resultBasis || "").toUpperCase();
+        if (/FALLBACK/.test(value)) return "fallback";
+        if (/CACHED/.test(value)) return "cached";
+        if (/LIVE|OBSERVED/.test(value)) return "live";
+        return "proxy";
+      }
+
+      function renderGraph() {
+        if (!state.snapshot) return;
+        var selection = state.selectedId ? lineageOf(state.selectedId) : new Set();
+        var preview = previewSet();
+        elements.graphNodes.innerHTML = "";
+
+        state.nodes.forEach(function (node) {
+          var nodeElement = document.createElement(node.kind === "scaffold" ? "div" : "button");
+          nodeElement.className = "graph-node " + node.kind;
+          if (node.kind !== "scaffold") nodeElement.type = "button";
+          nodeElement.dataset.nodeId = node.id;
+          nodeElement.dataset.stage = node.stage;
+          nodeElement.dataset.state = node.kind === "scaffold" ? "requested-capacity" : String(node.execution || "unknown").toLowerCase();
+          nodeElement.style.left = node.x + "px";
+          nodeElement.style.top = nodeTop(node) + "px";
+
+          if (node.kind === "scaffold") {
+            nodeElement.setAttribute("aria-hidden", "true");
+            if (node.metadata.retired) nodeElement.classList.add("retired");
+          } else {
+            var accessibleValue = formatMetric(node);
+            nodeElement.setAttribute("aria-label", node.label + "; " + node.stage + "; " + accessibleValue + "; execution " + node.execution + "; result basis " + node.resultBasis + "; runtime " + node.runtime + "; uncertainty " + (node.uncertainty || "not supplied"));
+            nodeElement.addEventListener("mouseenter", function () { setPreview(node.id); });
+            nodeElement.addEventListener("mouseleave", function () { clearPreview(node.id); });
+            nodeElement.addEventListener("focus", function () { setPreview(node.id); });
+            nodeElement.addEventListener("blur", function () { clearPreview(node.id); });
+            nodeElement.addEventListener("click", function () { selectNode(node.id, true); });
+          }
+
+          if (node.execution === "FAILED") nodeElement.classList.add("failed");
+          if (node.execution === "SKIPPED") nodeElement.classList.add("skipped");
+          if (node.metadata.overflow && state.metrics[node.stage] === "rnpv") nodeElement.classList.add("overflow");
+          if (node.id === state.selectedId) nodeElement.classList.add("selected");
+          else if (selection.has(node.id)) nodeElement.classList.add("lineage");
+          if (preview.has(node.id)) nodeElement.classList.add("preview");
+          if (state.previewId && !preview.has(node.id) && !selection.has(node.id)) nodeElement.classList.add("dimmed");
+
+          var badges = "";
+          if (node.kind !== "scaffold") {
+            var executionClass = executionBadgeClass(node.execution);
+            var basisClass = basisBadgeClass(node.resultBasis);
+            badges = '<div class="node-badges"><span class="badge ' + executionClass + '">' + escapeHTML(node.execution) + '</span><span class="badge ' + basisClass + '">' + escapeHTML(node.resultBasis) + '</span><span class="badge">' + escapeHTML(node.runtime) + "</span></div>";
+          }
+          var nodeDetail = node.kind === "scaffold"
+            ? (node.metadata.retired ? "Unused requested capacity · no scientific record created." : "Requested capacity · identity has not been created.")
+            : node.kind === "pending"
+              ? "Candidate identity exists · selected stage output is pending."
+              : (node.reason || node.metadata.summary || node.uncertainty || "No additional public summary supplied.");
+          nodeElement.innerHTML = '<span class="node-stage-label">' + escapeHTML(node.kind === "scaffold" ? "requested capacity" : node.stage) + '</span><span class="node-label">' + escapeHTML(node.label) + '</span><span class="node-value">' + escapeHTML(formatMetric(node)) + '</span><span class="node-detail">' + escapeHTML(nodeDetail) + "</span>" + badges;
+          elements.graphNodes.appendChild(nodeElement);
+        });
+
+        renderConnectors();
+        renderSemanticOutline();
+        if (state.inspectorVisible && state.selectedId) renderInspector(findNode(state.selectedId));
+      }
+
+      function renderConnectors() {
+        var selection = state.selectedId ? lineageOf(state.selectedId) : new Set();
+        var preview = previewSet();
+        elements.connectors.innerHTML = "";
+        state.nodes.forEach(function (node) {
+          if (!node.parentId) return;
+          var parent = findNode(node.parentId);
+          if (!parent) return;
+          var halfNode = GRAPH_GEOMETRY.nodeWidth / 2;
+          var startX = parent.x + halfNode;
+          var startY = nodeTop(parent) + GRAPH_GEOMETRY.nodeHeight;
+          var endX = node.x + halfNode;
+          var endY = nodeTop(node);
+          var parentIndex = BAND_INDEX[parent.stage];
+          var downstream = parent.stage === "hypothesis" || parent.stage === "roi" || parent.stage === "recruitability";
+          var pathValue;
+          if (downstream && Math.abs(startX - endX) < 0.01) {
+            pathValue = "M " + startX + " " + startY + " V " + endY;
+          } else {
+            var busY = (parentIndex + 1) * GRAPH_GEOMETRY.band - GRAPH_GEOMETRY.busInset;
+            pathValue = "M " + startX + " " + startY + " V " + busY + " H " + endX + " V " + endY;
+          }
+          var path = document.createElementNS(elements.connectors.namespaceURI, "path");
+          path.setAttribute("d", pathValue);
+          path.setAttribute("class", "connector");
+          path.dataset.parentId = parent.id;
+          path.dataset.childId = node.id;
+          if (selection.has(parent.id) && selection.has(node.id)) path.classList.add("selected");
+          if (preview.has(parent.id) && preview.has(node.id)) path.classList.add("preview");
+          if (state.previewId && !(preview.has(parent.id) && preview.has(node.id)) && !(selection.has(parent.id) && selection.has(node.id))) path.classList.add("dimmed");
+          elements.connectors.appendChild(path);
+        });
+      }
+
+      function renderSemanticOutline() {
+        var root = findNode("indication-root");
+        if (!root) return;
+        var html = "<ul><li>" + escapeHTML(root.label) + "<ul>";
+        state.runData.biomarkers.forEach(function (biomarker) {
+          html += "<li>" + escapeHTML(biomarker.label) + "<ul>";
+          state.runData.programs.filter(function (program) { return program.biomarkerSlot === biomarker.slot; }).forEach(function (program) {
+            html += "<li>" + escapeHTML(program.label) + "<ul><li>ROI record</li><li>Recruitability record</li><li>Atomistic simulation record</li></ul></li>";
+          });
+          html += "</ul></li>";
+        });
+        html += "</ul></li></ul>";
+        document.getElementById("semantic-outline").innerHTML = html;
+      }
+
+      function setPreview(id) {
+        state.previewId = id;
+        applyInteractionClasses();
+      }
+
+      function clearPreview(id) {
+        if (state.previewId !== id) return;
+        state.previewId = null;
+        applyInteractionClasses();
+      }
+
+      function applyInteractionClasses() {
+        var selection = state.selectedId ? lineageOf(state.selectedId) : new Set();
+        var preview = previewSet();
+        elements.graphNodes.querySelectorAll(".graph-node").forEach(function (nodeElement) {
+          var id = nodeElement.dataset.nodeId;
+          nodeElement.classList.toggle("selected", id === state.selectedId);
+          nodeElement.classList.toggle("lineage", id !== state.selectedId && selection.has(id));
+          nodeElement.classList.toggle("preview", preview.has(id));
+          nodeElement.classList.toggle("dimmed", Boolean(state.previewId) && !preview.has(id) && !selection.has(id));
+        });
+        elements.connectors.querySelectorAll(".connector").forEach(function (path) {
+          var parentId = path.dataset.parentId;
+          var childId = path.dataset.childId;
+          var selectedEdge = selection.has(parentId) && selection.has(childId);
+          var previewEdge = preview.has(parentId) && preview.has(childId);
+          path.classList.toggle("selected", selectedEdge);
+          path.classList.toggle("preview", previewEdge);
+          path.classList.toggle("dimmed", Boolean(state.previewId) && !previewEdge && !selectedEdge);
+        });
+      }
+
+      function selectNode(id, moveFocus) {
+        var node = findNode(id);
+        if (!node || node.kind === "scaffold") return;
+        state.selectedId = id;
+        state.inspectorVisible = true;
+        state.inspectorCollapsed = false;
+        elements.inspector.classList.add("visible");
+        elements.inspector.classList.remove("collapsed");
+        elements.inspector.setAttribute("aria-hidden", "false");
+        elements.graphScreen.classList.add("inspector-open");
+        renderGraph();
+        if (moveFocus) {
+          window.setTimeout(function () { elements.inspectorHeading.focus(); }, 0);
+        }
+      }
+
+      function evidenceCopy(node) {
+        if (node.metadata && node.metadata.evidenceSummary) return String(node.metadata.evidenceSummary);
+        if (node.stage === "biomarker") return "Illustrative supporting findings: 6; contradictory findings: 2; shared literature cap applies across the run.";
+        if (node.stage === "hypothesis") return "Illustrative synthesis cites the parent biomarker record and two mock finding IDs. No generator or mapper was called.";
+        if (node.stage === "roi") return "Synthetic economics fields mirror AnalysisSummary-style outputs; the basis remains NOT_DECISION_GRADE.";
+        if (node.stage === "recruitability") return "Synthetic record mirrors score, simulatedMonthsToEnroll, screensPerEnrollee, sites basis, and counterfactual fields.";
+        if (node.stage === "simulation") return "No artifact exists because execution was skipped. Missing atomistic evidence is not evidence against the program.";
+        return "User-submitted indication snapshot; no scientific evidence is attached to the root.";
+      }
+
+      function renderInspector(node) {
+        if (!node) return;
+        var metadata = isObject(node.metadata) ? node.metadata : {};
+        var definition = metricDefinition(node);
+        var hasTerminalGap = node.resultBasis === "NOT WIRED" || node.runtime === "NOT WIRED" || node.resultBasis === "MISSING" || node.resultBasis === "NO RESULT" || node.execution === "FAILED" || node.execution === "TIMED_OUT";
+        var warning = hasTerminalGap
+          ? '<div class="state-warning">This record has a terminal gap. ' + escapeHTML(node.reason || "A target module is not wired.") + " It must not be read as positive or negative scientific evidence.</div>"
+          : state.transportMode === "fixture"
+            ? '<div class="state-warning">ILLUSTRATIVE MOCK DATA · inspect structure and handoffs, not scientific validity.</div>'
+            : '<div class="state-warning">' + escapeHTML(node.resultBasis || "RESULT BASIS NOT REPORTED") + " · inspect the provenance and qualifiers before interpreting this result.</div>";
+        var value = formatMetric(node);
+        var definitionCopy = definition ? definition.label + " · " + definition.unit + " · domain " + definition.domain[0] + "–" + definition.domain[1] + ". " + definition.basis : "Fixed submitted root.";
+        var program = findProgramForNode(node);
+        var rationale = program ? program.publicWhy : (metadata.summary || "This record anchors the available public lineage.");
+        var parent = node.parentId ? findNode(node.parentId) : null;
+        var childCount = state.nodes.filter(function (candidate) { return candidate.parentId === node.id; }).length;
+        var interaction = state.previewId === node.id ? "SELECTED + PREVIEWED" : "SELECTED";
+        var counterevidence = metadata.counterevidenceSummary || (state.transportMode === "fixture" ? "Mock contradictory evidence is retained; it is never collapsed into the support value." : "No counterevidence summary was projected by the adapter.");
+        var assumption = readableList(metadata.assumptions || metadata.assumption, state.transportMode === "fixture" ? "Field compatibility is a proposed adapter contract, not verified module interoperability." : "No additional adapter assumption was reported.");
+        var limitations = readableList(metadata.limitations, state.transportMode === "fixture" ? "Deterministic fixture, no live papers, no identity, no authorization, no module invocation." : "See the module result basis, runtime maturity, and run-level warnings.");
+        var wouldChange = metadata.wouldChange || "Grounded contradictory findings, a materially changed input, or a validated downstream result could create a new packet revision.";
+        var inherited = state.transportMode === "fixture" ? "ILLUSTRATIVE MOCK DATA; NO MODULES WIRED." : (state.truth ? state.truth.dataBasis + "; " + state.truth.runtimeStatus + "." : "Run truth labels not reported.");
+        var artifactCopy = state.transportMode === "fixture"
+          ? '<details class="inspector-section"><summary>Rich artifact · evidence balance</summary><div class="evidence-artifact"><strong>Text alternative:</strong> illustrative evidence balance with more support than counterevidence; availability MOCK ONLY.<div class="evidence-bars"><div class="evidence-row"><span>support</span><div class="evidence-bar"><span style="width:68%"></span></div><strong>6</strong></div><div class="evidence-row"><span>counter</span><div class="evidence-bar"><span style="width:24%"></span></div><strong>2</strong></div><div class="evidence-row"><span>unknown</span><div class="evidence-bar"><span style="width:36%"></span></div><strong>3</strong></div></div><span class="micro">Source: local product fixture · revision artifact-r1 · no external asset.</span></div></details>'
+          : '<details class="inspector-section"><summary>Artifacts</summary><p>' + escapeHTML(metadata.artifactSummary || "No browser-safe artifact summary was projected. Raw artifacts remain in the immutable run directory.") + "</p></details>";
+
+        elements.inspectorHeading.textContent = node.label;
+        elements.inspectorSubtitle.textContent = node.stage + " · " + node.id;
+        elements.collapsedIdentity.textContent = node.label + " · " + node.execution;
+        elements.inspectorBody.innerHTML =
+          warning +
+          '<div class="inspector-status-grid">' +
+            '<div class="status-card"><span>Execution</span><strong>' + escapeHTML(node.execution || "NONE") + "</strong></div>" +
+            '<div class="status-card"><span>Result basis</span><strong>' + escapeHTML(node.resultBasis || "NONE") + "</strong></div>" +
+            '<div class="status-card"><span>Runtime maturity</span><strong>' + escapeHTML(node.runtime || "NONE") + "</strong></div>" +
+            '<div class="status-card"><span>UI freshness</span><strong>' + escapeHTML(state.freshness.toUpperCase()) + "</strong></div>" +
+            '<div class="status-card"><span>Interaction</span><strong>' + interaction + "</strong></div>" +
+            '<div class="status-card"><span>Design status</span><strong>PROPOSED TARGET</strong></div>' +
+          "</div>" +
+          '<div class="primary-result"><span>Active display value</span><strong>' + escapeHTML(value) + '</strong><p>' + escapeHTML(definitionCopy) + " Uncertainty: " + escapeHTML(node.uncertainty || "not supplied") + ".</p></div>" +
+          '<details class="inspector-section" open><summary>Evidence, counterevidence & public rationale</summary><p><strong>Evidence:</strong> ' + escapeHTML(evidenceCopy(node)) + '</p><p><strong>Counterevidence:</strong> ' + escapeHTML(counterevidence) + '</p><p><strong>Public rationale:</strong> ' + escapeHTML(rationale || "No public rationale projected.") + '</p><p><strong>Assumption:</strong> ' + escapeHTML(assumption) + "</p></details>" +
+          '<details class="inspector-section"><summary>Falsifier, sensitivity & limitations</summary><p><strong>Would change this:</strong> ' + escapeHTML(wouldChange) + '</p><p><strong>Limitations:</strong> ' + escapeHTML(limitations) + '</p><p><strong>Resolution reason:</strong> ' + escapeHTML(node.reason || "No failure or skip reason reported.") + ".</p></details>" +
+          artifactCopy +
+          '<details class="inspector-section"><summary>Lineage & inherited qualifiers</summary><ul><li>Parent: ' + escapeHTML(parent ? parent.label : "none · root") + "</li><li>Direct descendants: " + childCount + "</li><li>Inherited: " + escapeHTML(inherited) + "</li><li>Selection locks all available ancestors and descendants.</li></ul></details>" +
+          '<details class="inspector-section"><summary>Provenance & audit</summary><ul><li>Module/model: ' + escapeHTML(metadata.moduleName || node.runtime || "none") + "</li><li>Module version: " + escapeHTML(metadata.moduleVersion || metadata.gitSha || "not reported") + "</li><li>Configuration: frozen setup snapshot</li><li>Timestamp: " + escapeHTML(metadata.timestamp || state.lastUpdated || "awaiting update") + "</li><li>Hash: " + escapeHTML(metadata.outputHash || (program && program.hash) || (state.transportMode === "fixture" ? "mock-root-a1" : "not reported")) + "</li><li>Attempts: " + escapeHTML(metadata.attempts !== undefined ? metadata.attempts : state.transportMode === "fixture" ? "1 illustrative" : "not reported") + "</li><li>Packet revision: " + escapeHTML(metadata.packetRevision || (program && program.revision) || "not applicable") + "</li><li>Provenance: " + escapeHTML(metadata.provenanceSummary || (state.transportMode === "fixture" ? "bound once in accelerated mock demo" : "see immutable run manifest")) + "</li></ul></details>";
+      }
+
+      function collapseInspector(returnFocus) {
+        if (!state.inspectorVisible) return;
+        state.inspectorCollapsed = true;
+        elements.inspector.classList.add("collapsed");
+        elements.inspector.querySelector(".collapse-inspector").setAttribute("aria-label", "Expand inspector");
+        if (returnFocus && state.selectedId) {
+          var nodeElement = elements.graphNodes.querySelector('[data-node-id="' + state.selectedId + '"]');
+          if (nodeElement) nodeElement.focus();
+        }
+      }
+
+      function expandInspector() {
+        state.inspectorCollapsed = false;
+        elements.inspector.classList.remove("collapsed");
+        elements.inspector.querySelector(".collapse-inspector").setAttribute("aria-label", "Collapse inspector");
+        elements.inspectorHeading.focus();
+      }
+
+      function clearSelection() {
+        var selectedId = state.selectedId;
+        state.selectedId = null;
+        state.inspectorVisible = false;
+        state.inspectorCollapsed = false;
+        elements.inspector.classList.remove("visible", "collapsed");
+        elements.inspector.setAttribute("aria-hidden", "true");
+        elements.graphScreen.classList.remove("inspector-open");
+        renderGraph();
+        if (selectedId) {
+          var nodeElement = elements.graphNodes.querySelector('[data-node-id="' + selectedId + '"]');
+          if (nodeElement) nodeElement.focus();
+        }
+      }
+
+      function renderProgress() {
+        elements.progress.innerHTML = "";
+        STAGES.forEach(function (stage, index) {
+          var item = document.createElement("div");
+          item.className = "progress-step";
+          item.dataset.stage = stage.id;
+          item.dataset.state = state.stageStates[index];
+          item.innerHTML = '<span class="stage-num">0' + (index + 1) + '</span><strong>' + escapeHTML(stage.label) + '</strong><span class="stage-state">' + escapeHTML(state.stageNotes[index]) + "</span>";
+          elements.progress.appendChild(item);
+        });
+      }
+
+      function updateFreshness(label, timestamp) {
+        if (timestamp || state.freshness === "fresh" || !state.lastUpdated) {
+          var date = timestamp ? new Date(timestamp) : new Date();
+          if (Number.isNaN(date.getTime())) date = new Date();
+          state.lastUpdated = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        }
+        if (state.freshness === "fresh") {
+          elements.freshness.dataset.state = "fresh";
+          elements.freshness.textContent = "UI freshness: FRESH · last " + (state.transportMode === "fixture" ? "fixture" : "server") + " update " + state.lastUpdated + " · stale threshold 5s";
+        } else {
+          elements.freshness.dataset.state = "stale";
+          elements.freshness.textContent = "UI freshness: STALE / RECONNECTING · retained last confirmed data from " + state.lastUpdated;
+        }
+        if (label) announce(label + ". Last successful " + (state.transportMode === "fixture" ? "fixture" : "server") + " update " + state.lastUpdated + ".");
+      }
+
+      function startStage(index) {
+        if (index >= STAGES.length) {
+          finishPipeline();
+          return;
+        }
+        var stage = STAGES[index];
+        state.stageStates[index] = "running";
+        var branchCount = stage.id === "biomarker" ? state.runData.biomarkers.length : state.runData.programs.length;
+        state.stageNotes[index] = "0 complete · " + branchCount + " running";
+        markStagePending(stage.id);
+        renderProgress();
+        renderGraph();
+        updateFreshness(stage.label + " stage running with branches concurrently");
+
+        setTimer(function () {
+          bindStage(stage.id);
+          var warning = false;
+          var note = branchCount + " complete";
+          if (stage.id === "biomarker" && state.runData.biomarkerShortfall > 0) {
+            warning = true;
+            note += " · " + state.runData.biomarkerShortfall + " shortfall";
+          }
+          if (stage.id === "hypothesis" && state.runData.hypothesisShortfall > 0) {
+            warning = true;
+            note += " · " + state.runData.hypothesisShortfall + " capacity unused";
+          }
+          if (stage.id === "roi") {
+            var roiFailures = state.runData.programs.filter(function (program) { return program.roiFailed; }).length;
+            if (roiFailures) {
+              warning = true;
+              note = (branchCount - roiFailures) + " complete · " + roiFailures + " failed";
+            }
+          }
+          if (stage.id === "recruitability") {
+            var recruitFailures = state.runData.programs.filter(function (program) { return program.recruitFailed; }).length;
+            if (recruitFailures) {
+              warning = true;
+              note = (branchCount - recruitFailures) + " complete · " + recruitFailures + " failed";
+            }
+          }
+          if (stage.id === "simulation") {
+            warning = true;
+            note = branchCount + " terminal gaps · skipped";
+          }
+          state.stageStates[index] = warning ? "warning" : "complete";
+          state.stageNotes[index] = note;
+          renderProgress();
+          renderGraph();
+          updateFreshness(stage.label + " stage terminal");
+          if (stage.id === "hypothesis" && state.runData.hypothesisShortfall > 0) {
+            showToast(state.runData.programs.length + " hypotheses returned; " + state.runData.hypothesisShortfall + " requested lanes remain unused without shifting bound lanes.");
+          }
+          setTimer(function () { startStage(index + 1); }, 230);
+        }, 620);
+      }
+
+      function finishPipeline() {
+        state.highlanderReady = state.runData.programs.length > 0;
+        renderReadiness();
+        announce("All eligible mock records are terminal. Highlander is ready with acknowledged gaps required.");
+      }
+
+      function renderReadiness() {
+        var nonterminal = state.stageStates.filter(function (stage) { return stage === "queued" || stage === "running"; }).length;
+        var programCount = state.runData ? state.runData.programs.length : 0;
+        if (state.transportMode === "api") {
+          var counts = state.packetCounts;
+          elements.packetCounts.innerHTML = '<span class="packet-count">' + counts.complete + ' complete</span><span class="packet-count">' + counts.partial + ' partial</span><span class="packet-count">' + counts.blocked + ' blocked</span><span class="packet-count">' + counts.nonterminal + " nonterminal</span>";
+          if (!state.highlanderReady) {
+            elements.readinessState.textContent = counts.nonterminal > 0 ? "BLOCKED · " + counts.nonterminal + " nonterminal" : "BLOCKED · no eligible packet";
+            elements.gapConfirm.classList.remove("visible");
+            elements.launchHighlander.disabled = true;
+            elements.launchHighlander.textContent = "Launch Highlander · blocked";
+            return;
+          }
+          elements.readinessState.textContent = counts.partial || counts.blocked ? "READY WITH TERMINAL GAPS" : "READY · packets terminal";
+          elements.gapConfirm.classList.add("visible");
+          elements.launchHighlander.disabled = state.highlanderSubmitting || !elements.gapConfirmInput.checked;
+          elements.launchHighlander.textContent = state.highlanderSubmitting ? "Launching Highlander…" : elements.gapConfirmInput.checked ? "Launch Highlander →" : "Acknowledge gaps to launch";
+          return;
+        }
+        if (!programCount) {
+          elements.readinessState.textContent = "BLOCKED · no candidates";
+          elements.packetCounts.innerHTML = '<span class="packet-count">0 complete</span><span class="packet-count">0 partial</span><span class="packet-count">0 blocked</span><span class="packet-count">no candidates</span>';
+          elements.gapConfirm.classList.remove("visible");
+          elements.launchHighlander.disabled = true;
+          elements.launchHighlander.textContent = "Launch Highlander · no candidates";
+          return;
+        }
+        if (nonterminal > 0) {
+          elements.readinessState.textContent = "BLOCKED · " + nonterminal + " nonterminal stage" + (nonterminal === 1 ? "" : "s");
+          elements.packetCounts.innerHTML = '<span class="packet-count">0 complete</span><span class="packet-count">0 partial</span><span class="packet-count">' + programCount + ' running</span><span class="packet-count">' + nonterminal + " nonterminal stages</span>";
+          elements.gapConfirm.classList.remove("visible");
+          elements.launchHighlander.disabled = true;
+          elements.launchHighlander.textContent = "Launch Highlander · blocked";
+          return;
+        }
+        elements.readinessState.textContent = "READY WITH TERMINAL GAPS · no nonterminal records";
+        elements.packetCounts.innerHTML = '<span class="packet-count">0 complete</span><span class="packet-count">' + programCount + ' partial</span><span class="packet-count">0 blocked</span><span class="packet-count">0 nonterminal</span>';
+        elements.gapConfirm.classList.add("visible");
+        elements.launchHighlander.disabled = !elements.gapConfirmInput.checked;
+        elements.launchHighlander.textContent = elements.gapConfirmInput.checked ? "Launch Highlander →" : "Acknowledge gaps to launch";
+      }
+
+      function resetDemo() {
+        if (state.transportMode !== "fixture") return;
+        if (!state.snapshot) return;
+        clearTimers();
+        state.stageStates = ["queued", "queued", "queued", "queued", "queued"];
+        state.stageNotes = ["queued", "queued", "queued", "queued", "queued"];
+        state.selectedId = null;
+        state.previewId = null;
+        state.inspectorVisible = false;
+        state.highlanderReady = false;
+        state.highlanderLaunched = false;
+        elements.gapConfirmInput.checked = false;
+        document.querySelector('[data-nav="highlander"]').disabled = true;
+        document.querySelector('[data-nav="highlander"]').classList.add("locked");
+        elements.inspector.classList.remove("visible", "collapsed");
+        elements.graphScreen.classList.remove("inspector-open");
+        buildScaffold();
+        renderProgress();
+        renderGraph();
+        renderReadiness();
+        updateFreshness("Illustrative arrivals restarted");
+        setTimer(function () { startStage(0); }, 400);
+      }
+
+      function restartCurrentRun() {
+        if (state.transportMode === "fixture") {
+          resetDemo();
+          return;
+        }
+        if (!state.runId) {
+          showToast("Create an integrated run before refreshing state.");
+          return;
+        }
+        pollRunState(state.runId, state.pollGeneration, true);
+      }
+
+      function switchScreen(screen) {
+        if (screen === "graph" && !state.runId) return;
+        if (screen === "highlander" && !state.highlanderLaunched) return;
+        state.screen = screen;
+        document.querySelectorAll("[data-screen]").forEach(function (section) {
+          section.classList.toggle("active", section.dataset.screen === screen);
+        });
+        document.querySelectorAll("[data-nav]").forEach(function (button) {
+          if (button.dataset.nav === screen) button.setAttribute("aria-current", "page");
+          else button.removeAttribute("aria-current");
+        });
+        if (screen === "graph") {
+          renderGraph();
+          renderReadiness();
+        }
+        if (screen === "highlander") renderHighlander();
+        window.scrollTo(0, 0);
+      }
+
+      function submitRun(event) {
+        event.preventDefault();
+        var validation = validateSetup();
+        if (!validation.valid || state.submitting) return;
+        if (state.transportMode === "api") {
+          submitApiRun(validation);
+          return;
+        }
+        submitFixtureRun(validation);
+      }
+
+      function setupRequest(validation) {
+        return {
+          clinicalIndication: validation.indication,
+          biomarkerRange: [Number(document.getElementById("biomarker-low").value), Number(document.getElementById("biomarker-high").value)],
+          maxBiomarkers: validation.biomarkers,
+          maxLiteraturePapers: validation.papers,
+          hypothesisRange: [Number(document.getElementById("hypothesis-low").value), Number(document.getElementById("hypothesis-high").value)],
+          maxHypothesesPerBiomarker: validation.hypotheses
+        };
+      }
+
+      function newIdempotencyKey() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return "browser-" + window.crypto.randomUUID();
+        }
+        return "browser-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+      }
+
+      function apiRunButtonLabel() {
+        return state.runId ? "Create another integrated run →" : "Run RA / IRAK4 profile →";
+      }
+
+      async function submitApiRun(validation) {
+        var previousRunId = state.runId;
+        cancelPolling();
+        clearTimers();
+        var generation = state.pollGeneration;
+        state.submitting = true;
+        state.highlanderSubmitting = false;
+        elements.gapConfirmInput.checked = false;
+        elements.runButton.textContent = "Creating immutable server snapshot…";
+        elements.snapshotNote.classList.remove("visible");
+        validateSetup();
+        try {
+          var requestBody = setupRequest(validation);
+          var requestSignature = JSON.stringify(requestBody);
+          if (!state.pendingIdempotencyKey || state.pendingRequestSignature !== requestSignature) {
+            state.pendingIdempotencyKey = newIdempotencyKey();
+            state.pendingRequestSignature = requestSignature;
+          }
+          var payload = await apiFetchJSON("/api/runs", {
+            method: "POST",
+            headers: { "Idempotency-Key": state.pendingIdempotencyKey },
+            body: requestSignature
+          });
+          state.pendingIdempotencyKey = null;
+          state.pendingRequestSignature = null;
+          state.lastRevision = -1;
+          applyRunState(payload);
+          state.lastSuccessfulPollAt = Date.now();
+          state.freshness = "fresh";
+          updateFreshness("Integrated run created", payload.updatedAt || payload.updated_at);
+          elements.snapshotNote.classList.add("visible");
+          elements.snapshotNote.textContent = "Snapshot " + state.runId + " is frozen. Editing the form now would define a different run.";
+          switchScreen("graph");
+          if (!isTerminalRunStatus(state.runStatus)) schedulePoll(state.runId, generation, 0);
+        } catch (error) {
+          state.runId = previousRunId;
+          elements.snapshotNote.classList.add("visible");
+          elements.snapshotNote.textContent = "Run creation failed. All valid inputs were preserved: " + error.message;
+          announce("Integrated run creation failed. Inputs preserved; retry available.");
+          if (previousRunId && !isTerminalRunStatus(state.runStatus)) schedulePoll(previousRunId, generation, API_POLL_MS);
+        } finally {
+          state.submitting = false;
+          elements.runButton.textContent = apiRunButtonLabel();
+          validateSetup();
+        }
+      }
+
+      function submitFixtureRun(validation) {
+        state.submitting = true;
+        elements.runButton.textContent = "Creating immutable snapshot…";
+        validateSetup();
+
+        setTimer(function () {
+          if (/simulate failure/i.test(validation.indication)) {
+            state.submitting = false;
+            elements.snapshotNote.classList.add("visible");
+            elements.snapshotNote.textContent = "Simulated submission error. Every valid input has been preserved; change the indication or activate Run to retry.";
+            elements.runButton.textContent = "Retry illustrative exploration →";
+            validateSetup();
+            announce("Simulated run creation failed. Inputs preserved; retry available.");
+            return;
+          }
+
+          state.runId = "LR-MOCK-" + Date.now().toString(36).toUpperCase().slice(-6);
+          state.snapshot = Object.freeze({
+            indication: validation.indication,
+            biomarkers: validation.biomarkers,
+            papers: validation.papers,
+            hypotheses: validation.hypotheses,
+            biomarkerRange: [Number(document.getElementById("biomarker-low").value), Number(document.getElementById("biomarker-high").value)],
+            hypothesisRange: [Number(document.getElementById("hypothesis-low").value), Number(document.getElementById("hypothesis-high").value)]
+          });
+          state.runData = buildRunData(state.snapshot);
+          state.packetSnapshot = "PKT-" + state.runId.slice(-6) + "-R1";
+          state.selectedProgramId = state.runData.programs.length ? state.runData.programs[0].id : null;
+          state.submitting = false;
+          elements.snapshotNote.classList.add("visible");
+          elements.snapshotNote.textContent = "Snapshot " + state.runId + " is frozen. Editing the form now would define a different run.";
+          elements.runButton.textContent = "Create another illustrative run →";
+          document.getElementById("graph-indication").textContent = state.snapshot.indication;
+          document.getElementById("graph-run-id").textContent = state.runId;
+          document.getElementById("graph-snapshot").textContent = "up to " + state.snapshot.biomarkers + " × " + state.snapshot.hypotheses + "; up to " + state.snapshot.papers + " papers";
+          document.getElementById("highlander-run-id").textContent = state.runId;
+          document.getElementById("packet-snapshot").textContent = state.packetSnapshot;
+          document.getElementById("chat-scope").textContent = "Read-only evidence scope · " + state.runId + " · mock Highlander job only";
+          var graphNav = document.querySelector('[data-nav="graph"]');
+          graphNav.disabled = false;
+          graphNav.classList.remove("locked");
+          switchScreen("graph");
+          resetDemo();
+          announce("Run " + state.runId + " created. Program Graph opened with requested capacity scaffolding.");
+          validateSetup();
+        }, 320);
+      }
+
+      function comparisonPrograms() {
+        return state.highlanderPrograms.length ? state.highlanderPrograms : (state.runData ? state.runData.programs : []);
+      }
+
+      function dominates(a, b) {
+        var keys = ["rnpv", "recruit", "plausibility"];
+        if (keys.some(function (key) { return !Number.isFinite(a.metrics[key]) || !Number.isFinite(b.metrics[key]); })) return false;
+        var noWorse = keys.every(function (key) { return a.metrics[key] >= b.metrics[key]; });
+        var better = keys.some(function (key) { return a.metrics[key] > b.metrics[key]; });
+        return noWorse && better;
+      }
+
+      function programStatus(program) {
+        var reported = String(program.paretoStatus || program.pareto_status || "").toLowerCase();
+        if (["non-dominated", "dominated", "incomparable"].includes(reported)) return reported;
+        if (!Number.isFinite(program.metrics.rnpv) || !Number.isFinite(program.metrics.recruit) || !Number.isFinite(program.metrics.plausibility)) return "incomparable";
+        var dominated = comparisonPrograms().some(function (other) {
+          return other.id !== program.id && dominates(other, program);
+        });
+        return dominated ? "dominated" : "non-dominated";
+      }
+
+      function scenarioSort(programs) {
+        var copy = programs.slice();
+        copy.sort(function (a, b) {
+          var statusOrder = { "non-dominated": 0, incomparable: 1, dominated: 2 };
+          var statusDifference = statusOrder[programStatus(a)] - statusOrder[programStatus(b)];
+          if (statusDifference) return statusDifference;
+          if (state.scenario === "speed") return (Number.isFinite(b.metrics.recruit) ? b.metrics.recruit : -1) - (Number.isFinite(a.metrics.recruit) ? a.metrics.recruit : -1);
+          if (state.scenario === "capital") return (Number.isFinite(b.metrics.positive) ? b.metrics.positive : -1) - (Number.isFinite(a.metrics.positive) ? a.metrics.positive : -1);
+          return (Number.isFinite(b.metrics.plausibility) ? b.metrics.plausibility : -1) - (Number.isFinite(a.metrics.plausibility) ? a.metrics.plausibility : -1);
+        });
+        return copy;
+      }
+
+      function metricCell(value, prefix, suffix) {
+        if (!Number.isFinite(value)) return '<span class="badge failed">MISSING</span>';
+        return (prefix || "") + value + (suffix || "");
+      }
+
+      function renderScenario() {
+        var scenario = SCENARIOS[state.scenario];
+        elements.scenarioMeta.innerHTML = '<strong>' + escapeHTML(scenario.name + " " + scenario.version) + '</strong><br>' + escapeHTML(scenario.description) + '<br><span class="muted">Author/source: ' + escapeHTML(scenario.author) + " · " + escapeHTML(scenario.timestamp) + "</span>";
+        elements.weightList.innerHTML = "";
+        scenario.weights.forEach(function (weight) {
+          var row = document.createElement("div");
+          row.className = "weight-row";
+          row.innerHTML = '<span>' + escapeHTML(weight[0]) + " · " + weight[1] + '%</span><span class="weight-track"><span style="width:' + weight[1] + '%"></span></span>';
+          elements.weightList.appendChild(row);
+        });
+      }
+
+      function visiblePrograms() {
+        var showDominated = document.getElementById("show-dominated").checked;
+        var showIncomparable = document.getElementById("show-incomparable").checked;
+        return scenarioSort(comparisonPrograms()).filter(function (program) {
+          var status = programStatus(program);
+          if (status === "dominated" && !showDominated) return false;
+          if (status === "incomparable" && !showIncomparable) return false;
+          return true;
+        });
+      }
+
+      function selectProgram(id) {
+        state.selectedProgramId = id;
+        renderHighlander();
+      }
+
+      function renderProgramList() {
+        elements.programList.innerHTML = "";
+        visiblePrograms().forEach(function (program) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "program-item" + (program.id === state.selectedProgramId ? " selected" : "");
+          var status = programStatus(program);
+          button.dataset.programId = program.id;
+          button.innerHTML = "<strong>" + escapeHTML(program.short || program.label || program.id) + "</strong><span>" + escapeHTML(status) + " · " + escapeHTML(program.revision || "packet revision not reported") + " · selection is not a winner</span>";
+          button.addEventListener("click", function () { selectProgram(program.id); });
+          elements.programList.appendChild(button);
+        });
+      }
+
+      function renderComparison() {
+        elements.comparisonBody.innerHTML = "";
+        visiblePrograms().forEach(function (program) {
+          var row = document.createElement("tr");
+          var status = programStatus(program);
+          var simulationBasis = String(program.simulationBasis || program.simulation_basis || (state.transportMode === "fixture" ? "NOT WIRED" : "NOT REPORTED"));
+          var simulationClass = basisBadgeClass(simulationBasis);
+          row.dataset.status = status;
+          row.innerHTML =
+            '<td><button class="table-program" type="button">' + escapeHTML(program.short || program.label || program.id) + '</button><br><span class="micro muted">' + escapeHTML(program.uncertainty || "uncertainty not reported") + "</span></td>" +
+            "<td>" + metricCell(program.metrics.rnpv, "$", "M") + (program.overflowRnpv ? '<br><span class="badge failed">above display domain</span>' : "") + "</td>" +
+            "<td>" + metricCell(program.metrics.positive, "", "%") + "</td>" +
+            "<td>" + metricCell(program.metrics.recruit, "", "/100") + "</td>" +
+            "<td>" + metricCell(program.metrics.duration, "", " mo") + "</td>" +
+            "<td>" + metricCell(program.metrics.plausibility, "", "/100") + "</td>" +
+            '<td><span class="badge ' + simulationClass + '">' + escapeHTML(simulationBasis) + "</span></td>" +
+            "<td><strong>" + escapeHTML(status) + "</strong></td>";
+          row.querySelector(".table-program").addEventListener("click", function () { selectProgram(program.id); });
+          elements.comparisonBody.appendChild(row);
+        });
+      }
+
+      function renderParetoPlot() {
+        var svg = elements.paretoPlot;
+        svg.innerHTML = '<line x1="46" y1="126" x2="616" y2="126" stroke="#7f857e"/><line x1="46" y1="12" x2="46" y2="126" stroke="#7f857e"/><text x="330" y="149" text-anchor="middle" font-size="9" fill="#56615a">P50 rNPV · $M modeled →</text><text x="12" y="75" transform="rotate(-90 12 75)" text-anchor="middle" font-size="9" fill="#56615a">Recruitability /100 →</text><text x="48" y="10" font-size="7" fill="#7a817b">high</text><text x="48" y="138" font-size="7" fill="#7a817b">missing shelf</text>';
+        comparisonPrograms().forEach(function (program) {
+          var status = programStatus(program);
+          var x = !Number.isFinite(program.metrics.rnpv) ? 58 : 46 + Math.max(0, Math.min(300, program.metrics.rnpv)) / 300 * 570;
+          var y = !Number.isFinite(program.metrics.recruit) ? 133 : 126 - program.metrics.recruit / 100 * 108;
+          var circle = document.createElementNS(svg.namespaceURI, "circle");
+          circle.setAttribute("cx", String(x));
+          circle.setAttribute("cy", String(y));
+          circle.setAttribute("r", program.id === state.selectedProgramId ? "7" : "5");
+          circle.setAttribute("class", "plot-point " + status + (program.id === state.selectedProgramId ? " selected" : ""));
+          circle.setAttribute("tabindex", "0");
+          circle.setAttribute("role", "button");
+          circle.setAttribute("aria-label", program.short + "; " + status + "; select program");
+          var title = document.createElementNS(svg.namespaceURI, "title");
+          title.textContent = program.short + " · " + status;
+          circle.appendChild(title);
+          circle.addEventListener("click", function () { selectProgram(program.id); });
+          circle.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              selectProgram(program.id);
+            }
+          });
+          svg.appendChild(circle);
+        });
+      }
+
+      function selectedProgram() {
+        var programs = comparisonPrograms();
+        return programs.find(function (program) { return program.id === state.selectedProgramId; }) || programs[0] || null;
+      }
+
+      function renderProgramDetail() {
+        var program = selectedProgram();
+        if (!program) {
+          elements.programDetail.innerHTML = '<div class="state-warning">No candidates exist, so no program can be selected.</div>';
+          return;
+        }
+        var status = programStatus(program);
+        var whyStatus = status === "non-dominated"
+          ? "No other complete record is at least as strong on P50 rNPV, recruitability, and plausibility while being strictly stronger on one."
+          : status === "dominated"
+            ? "At least one complete record is no worse on all three baseline axes and stronger on at least one."
+            : "A required objective is missing, so dominance is not inferred.";
+        var tradeoffs = comparisonPrograms().filter(function (candidate) { return candidate.id !== program.id && programStatus(candidate) === "non-dominated"; }).slice(0, 2).map(function (candidate) { return candidate.short || candidate.label || candidate.id; }).join("; ");
+        var qualifiers = Array.isArray(program.qualifiers) ? program.qualifiers.join("; ") : (program.qualifiers || (state.transportMode === "fixture" ? "illustrative product fixture" : "none projected"));
+        var gaps = Array.isArray(program.gaps) ? program.gaps.join("; ") : (program.gaps || (state.transportMode === "fixture" ? "atomistic records not wired; live citations absent; module interop unverified" : "none projected"));
+        var economicsBasis = program.economicsBasis || program.economics_basis || (state.transportMode === "fixture" ? "synthetic modeled · NOT_DECISION_GRADE" : "not reported");
+        var simulationBasis = program.simulationBasis || program.simulation_basis || (state.transportMode === "fixture" ? "SKIPPED · MODULE_NOT_WIRED" : "not reported");
+        var rawFailureHistory = program.failureHistory || program.failure_history;
+        var failureHistory = rawFailureHistory ? readableList(rawFailureHistory, "No failed attempt was reported.") : (state.transportMode === "fixture"
+          ? (program.roiFailed || program.recruitFailed ? "one or more mock downstream records failed; sibling branches continued." : "no branch failure beyond the terminal simulation gap.")
+          : "No failure history was projected.");
+        elements.programDetail.innerHTML =
+          '<div class="detail-callout"><strong>' + escapeHTML(program.short || program.label || program.id) + " · " + escapeHTML(status) + '</strong><p>' + escapeHTML(program.publicWhy || program.public_why || "No public rationale was projected.") + "</p></div>" +
+          '<div class="objective-vector"><div class="objective"><span>P50 rNPV</span><strong>' + metricCell(program.metrics.rnpv, "$", "M") + '</strong></div><div class="objective"><span>Recruitability</span><strong>' + metricCell(program.metrics.recruit, "", "/100") + '</strong></div><div class="objective"><span>Plausibility</span><strong>' + metricCell(program.metrics.plausibility, "", "/100") + "</strong></div></div>" +
+          '<div class="detail-sections"><details open><summary>Why this Pareto status?</summary><p>' + escapeHTML(whyStatus) + "</p><p><strong>Selected viewing profile:</strong> " + escapeHTML(SCENARIOS[state.scenario].name) + " changes presentation order only. Baseline unweighted status remains <strong>" + escapeHTML(status) + "</strong>.</p><p><strong>Closest tradeoffs:</strong> " + escapeHTML(tradeoffs || "none with complete common axes") + ".</p></details>" +
+          "<details><summary>Packet, uncertainty & qualifiers</summary><ul><li>Source branch: " + escapeHTML(program.short || program.id) + "</li><li>Packet revision/hash: " + escapeHTML((program.revision || "not reported") + " · " + (program.hash || "not reported")) + "</li><li>Uncertainty: " + escapeHTML(program.uncertainty || "not reported") + "</li><li>Qualifiers: " + escapeHTML(qualifiers) + "</li><li>Simulation: " + escapeHTML(simulationBasis) + "</li><li>Economics basis: " + escapeHTML(economicsBasis) + "</li></ul></details>" +
+          "<details><summary>Evidence, counterevidence & gaps</summary><p><strong>Support:</strong> " + escapeHTML(program.evidenceSummary || program.evidence_summary || (state.transportMode === "fixture" ? "illustrative evidence and branch-linked proxy outputs" : "see projected node evidence summaries")) + ".</p><p><strong>Counterevidence:</strong> " + escapeHTML(program.counterevidenceSummary || program.counterevidence_summary || (state.transportMode === "fixture" ? "retained contradictory findings and modeled downside" : "see projected node counterevidence summaries")) + ".</p><p><strong>Gaps:</strong> " + escapeHTML(gaps) + ".</p><p><strong>Failure history:</strong> " + escapeHTML(failureHistory) + "</p></details>" +
+          "<details><summary>What would change the conclusion?</summary><p>A grounded contradictory finding, validated atomistic evidence, decision-grade economic inputs, a materially different enrollment precedent, or a confirmed hard constraint could create a new decision-set version. Viewing weights alone cannot.</p></details></div>";
+        document.getElementById("open-source-node").dataset.nodeId = program.hypothesisNodeId || program.hypothesis_node_id || "";
+      }
+
+      function renderHighlander() {
+        if (!state.runData) return;
+        renderScenario();
+        renderProgramList();
+        renderComparison();
+        renderParetoPlot();
+        renderProgramDetail();
+        var programs = comparisonPrograms();
+        var frontier = programs.filter(function (program) { return programStatus(program) === "non-dominated"; }).length;
+        var gaps = state.transportMode === "api" ? state.packetCounts.partial + state.packetCounts.blocked : programs.length;
+        document.getElementById("frontier-total").textContent = String(frontier);
+        document.getElementById("gap-total").textContent = String(gaps);
+      }
+
+      function appendChatMessage(role, content, options) {
+        var message = document.createElement("div");
+        message.className = "chat-message " + role + (options && options.abstain ? " abstain" : "");
+        if (role === "user") {
+          message.textContent = content;
+        } else {
+          var text = document.createElement("div");
+          if (options && options.labels) {
+            options.labels.forEach(function (label) {
+              var span = document.createElement("span");
+              span.className = "answer-label";
+              span.textContent = label;
+              text.appendChild(span);
+            });
+            text.appendChild(document.createElement("br"));
+          }
+          text.appendChild(document.createTextNode(content));
+          message.appendChild(text);
+          if (options && options.citations) {
+            var citations = document.createElement("div");
+            citations.style.marginTop = "7px";
+            options.citations.forEach(function (citation) {
+              var button = document.createElement("button");
+              button.type = "button";
+              button.className = "citation-button";
+              button.textContent = citation.label;
+              button.dataset.citeNode = citation.nodeId;
+              button.addEventListener("click", function () { openGraphRecord(citation.nodeId); });
+              citations.appendChild(button);
+              citations.appendChild(document.createTextNode(" "));
+            });
+            message.appendChild(citations);
+          }
+        }
+        elements.chatLog.appendChild(message);
+        elements.chatLog.scrollTop = elements.chatLog.scrollHeight;
+      }
+
+      function answerChat(question) {
+        var normalized = question.toLowerCase();
+        var program = selectedProgram();
+        appendChatMessage("user", question);
+        if (!program) {
+          appendChatMessage("assistant", "Evidence-gap abstention: this run has no candidate packet to ground an answer.", { abstain: true, labels: ["abstention", "evidence gap"] });
+          return;
+        }
+        if (/latest|external|web|guideline|news|outside|other run/.test(normalized)) {
+          appendChatMessage("assistant", "Scope abstention: external information is outside this immutable run snapshot. The mock chat cannot browse or import evidence.", { abstain: true, labels: ["abstention", "outside run"] });
+          return;
+        }
+        if (/why|non-dominated|tradeoff|evidence|gap|change|risk|compare/.test(normalized)) {
+          var status = programStatus(program);
+          var truthSummary = state.transportMode === "fixture"
+            ? "The synthesis is uncertain because atomistic evidence is NOT WIRED and all displayed outputs are illustrative."
+            : "The synthesis inherits the execution, result-basis, runtime, and gap labels shown on its source nodes.";
+          var content = (program.short || program.label || program.id) + " is " + status + " on the baseline common axes. " + (program.publicWhy || program.public_why || "No public rationale was projected.") + " " + truthSummary;
+          var citations = [
+            { label: "Hypothesis record", nodeId: program.hypothesisNodeId || program.hypothesis_node_id },
+            { label: "ROI record", nodeId: program.roiNodeId || program.roi_node_id },
+            { label: "Recruitability record", nodeId: program.recruitNodeId || program.recruit_node_id }
+          ].filter(function (citation) { return citation.nodeId && findNode(citation.nodeId); });
+          appendChatMessage("assistant", content, {
+            labels: ["source output", "inference / synthesis", "uncertainty"],
+            citations: citations
+          });
+          return;
+        }
+        appendChatMessage("assistant", "Evidence-gap abstention: the packet snapshot does not support that claim. Ask about visible tradeoffs, evidence gaps, or what could change the Pareto status.", { abstain: true, labels: ["abstention", "evidence gap"] });
+      }
+
+      function openGraphRecord(nodeId) {
+        if (!nodeId || !findNode(nodeId)) {
+          showToast("The selected packet has no projected source node.");
+          return;
+        }
+        switchScreen("graph");
+        window.setTimeout(function () {
+          var node = findNode(nodeId);
+          if (node) selectNode(nodeId, true);
+        }, 0);
+      }
+
+      function openActionDialog(action) {
+        var program = selectedProgram();
+        if (!program) return;
+        state.pendingAction = action;
+        elements.actionTitle.textContent = action;
+        elements.actionDescription.textContent = action + " for " + program.short + ". This creates a mock audit event only and does not change source scientific records.";
+        elements.actionRationale.value = "";
+        elements.actionError.textContent = "";
+        elements.actionDialog.showModal();
+        elements.actionRationale.focus();
+      }
+
+      function recordAction(event) {
+        event.preventDefault();
+        var rationale = elements.actionRationale.value.trim();
+        if (!rationale) {
+          elements.actionError.textContent = "A rationale is required; no event has been recorded.";
+          return;
+        }
+        var program = selectedProgram();
+        var before = "decision-set-v" + state.decisionSetVersion;
+        if (state.pendingAction === "Add hard constraint") state.decisionSetVersion += 1;
+        var after = "decision-set-v" + state.decisionSetVersion;
+        state.auditEvents.unshift({
+          action: state.pendingAction,
+          program: program.short,
+          rationale: rationale,
+          timestamp: new Date().toLocaleTimeString(),
+          actor: "UNVERIFIED MOCK ACTOR",
+          before: before,
+          after: after
+        });
+        elements.actionDialog.close();
+        renderAuditLog();
+        showToast(state.pendingAction + " recorded as a prototype audit event; scientific records unchanged.");
+      }
+
+      function renderAuditLog() {
+        elements.auditLog.innerHTML = "";
+        state.auditEvents.forEach(function (event) {
+          var item = document.createElement("li");
+          item.innerHTML = "<strong>" + escapeHTML(event.action) + " · " + escapeHTML(event.program) + "</strong><br>actor " + escapeHTML(event.actor) + " · " + escapeHTML(event.timestamp) + "<br>rationale: " + escapeHTML(event.rationale) + "<br>source " + escapeHTML(event.before) + " → " + escapeHTML(event.after);
+          elements.auditLog.appendChild(item);
+        });
+        if (!state.auditEvents.length) elements.auditLog.innerHTML = "<li>No review events yet. Source scientific records remain unchanged.</li>";
+      }
+
+      async function launchHighlander() {
+        if (!state.highlanderReady || !elements.gapConfirmInput.checked) return;
+        if (state.transportMode === "api") {
+          if (state.highlanderSubmitting) return;
+          state.highlanderSubmitting = true;
+          renderReadiness();
+          try {
+            var payload = await apiFetchJSON("/api/runs/" + encodeURIComponent(state.runId) + "/highlander", {
+              method: "POST",
+              body: JSON.stringify({ acknowledgeGaps: true })
+            });
+            applyRunState(payload);
+            if (!state.highlanderLaunched) throw new Error("Highlander launch was not confirmed by the run state.");
+            showToast("One idempotent Highlander job was confirmed for " + (state.packetSnapshot || state.runId) + ".");
+            switchScreen("highlander");
+          } catch (error) {
+            showToast("Highlander launch failed: " + error.message);
+            announce("Highlander launch failed; the graph and gap acknowledgement were retained.");
+          } finally {
+            state.highlanderSubmitting = false;
+            renderReadiness();
+          }
+          return;
+        }
+        if (!state.highlanderLaunched) {
+          state.highlanderLaunched = true;
+          var nav = document.querySelector('[data-nav="highlander"]');
+          nav.disabled = false;
+          nav.classList.remove("locked");
+          showToast("One idempotent mock Highlander job created from " + state.packetSnapshot + ".");
+        }
+        switchScreen("highlander");
+      }
+
+      function bindEvents() {
+        elements.form.addEventListener("submit", submitRun);
+        [elements.indication, elements.maxBiomarkers, elements.maxPapers, elements.maxHypotheses].forEach(function (input) {
+          input.addEventListener("input", validateSetup);
+          input.addEventListener("blur", validateSetup);
+        });
+
+        document.querySelectorAll("[data-step-target]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            var input = document.getElementById(button.dataset.stepTarget);
+            var current = Number(input.value);
+            if (!Number.isInteger(current) || current < Number(input.min) || current > Number(input.max)) {
+              validateSetup();
+              return;
+            }
+            var next = current + Number(button.dataset.step);
+            next = Math.max(Number(input.min), Math.min(Number(input.max), next));
+            input.value = String(next);
+            validateSetup();
+          });
+        });
+
+        ["biomarker", "hypothesis"].forEach(function (name) {
+          ["low", "high"].forEach(function (handle) {
+            var rangeInput = document.getElementById(name + "-" + handle);
+            rangeInput.addEventListener("input", function () {
+              updateDualRange(name, handle);
+            });
+            rangeInput.addEventListener("keydown", function (event) {
+              var handled = ["ArrowLeft", "ArrowDown", "ArrowRight", "ArrowUp", "PageDown", "PageUp", "Home", "End"];
+              if (!handled.includes(event.key)) return;
+              event.preventDefault();
+              var value = Number(rangeInput.value);
+              if (event.key === "Home") value = Number(rangeInput.min);
+              else if (event.key === "End") value = Number(rangeInput.max);
+              else if (event.key === "ArrowLeft" || event.key === "ArrowDown" || event.key === "PageDown") value -= Number(rangeInput.step);
+              else value += Number(rangeInput.step);
+              value = Math.max(Number(rangeInput.min), Math.min(Number(rangeInput.max), value));
+              rangeInput.value = String(value);
+              updateDualRange(name, handle);
+            });
+          });
+        });
+
+        document.querySelectorAll("[data-nav]").forEach(function (button) {
+          button.addEventListener("click", function () { switchScreen(button.dataset.nav); });
+        });
+
+        document.querySelectorAll("[data-metric-stage]").forEach(function (select) {
+          select.addEventListener("change", function () {
+            var priorX = new Map(state.nodes.map(function (node) { return [node.id, node.x]; }));
+            state.metrics[select.dataset.metricStage] = select.value;
+            renderGraph();
+            var xStable = state.nodes.every(function (node) { return priorX.get(node.id) === node.x; });
+            announce(METRICS[select.dataset.metricStage][select.value].label + " selected. Presentation changed; stored records and x lanes " + (xStable ? "remain unchanged." : "changed unexpectedly."));
+          });
+        });
+
+        document.getElementById("restart-demo").addEventListener("click", restartCurrentRun);
+        document.getElementById("module-map-button").addEventListener("click", function () { document.getElementById("module-dialog").showModal(); });
+        elements.freshnessButton.addEventListener("click", function () {
+          if (state.transportMode === "api") {
+            if (!state.runId) {
+              showToast("Create an integrated run before retrying the API connection.");
+              return;
+            }
+            elements.freshnessButton.disabled = true;
+            elements.freshnessButton.textContent = "Reconnecting…";
+            pollRunState(state.runId, state.pollGeneration, true);
+            return;
+          }
+          if (state.freshness === "fresh") {
+            state.freshness = "stale";
+            elements.freshnessButton.textContent = "Retry mock connection";
+            updateFreshness("UI is stale; last confirmed graph retained");
+            renderGraph();
+          } else {
+            elements.freshnessButton.disabled = true;
+            elements.freshnessButton.textContent = "Reconnecting…";
+            setTimer(function () {
+              state.freshness = "fresh";
+              elements.freshnessButton.disabled = false;
+              elements.freshnessButton.textContent = "Simulate stale UI";
+              updateFreshness("Mock UI reconnected");
+              renderGraph();
+            }, 650);
+          }
+        });
+
+        elements.gapConfirmInput.addEventListener("change", renderReadiness);
+        elements.launchHighlander.addEventListener("click", launchHighlander);
+
+        elements.inspector.querySelector(".collapse-inspector").addEventListener("click", function () {
+          if (state.inspectorCollapsed) expandInspector();
+          else collapseInspector(true);
+        });
+        elements.inspector.querySelector(".close-inspector").addEventListener("click", clearSelection);
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && state.screen === "graph" && state.inspectorVisible && !elements.actionDialog.open) {
+            event.preventDefault();
+            collapseInspector(true);
+          }
+        });
+
+        document.getElementById("scenario-profile").addEventListener("change", function (event) {
+          state.scenario = event.target.value;
+          renderHighlander();
+          announce("Viewing profile changed to " + SCENARIOS[state.scenario].name + ". Raw objectives and baseline Pareto membership are unchanged.");
+        });
+        document.getElementById("show-dominated").addEventListener("change", renderHighlander);
+        document.getElementById("show-incomparable").addEventListener("change", renderHighlander);
+        document.getElementById("open-source-node").addEventListener("click", function (event) { openGraphRecord(event.currentTarget.dataset.nodeId); });
+
+        document.querySelectorAll(".starter").forEach(function (button) {
+          button.addEventListener("click", function () { answerChat(button.dataset.question); });
+        });
+        document.getElementById("chat-form").addEventListener("submit", function (event) {
+          event.preventDefault();
+          var input = document.getElementById("chat-input");
+          var question = input.value.trim();
+          if (!question) return;
+          input.value = "";
+          answerChat(question);
+        });
+
+        document.querySelectorAll(".review-action").forEach(function (button) {
+          button.addEventListener("click", function () { openActionDialog(button.dataset.action); });
+        });
+        document.getElementById("action-form").addEventListener("submit", recordAction);
+
+        document.querySelectorAll("[data-close-dialog]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            var dialog = document.getElementById(button.dataset.closeDialog);
+            if (dialog.open) dialog.close();
+          });
+        });
+      }
+
+      function initialize() {
+        updateDualRange("biomarker", "low");
+        updateDualRange("hypothesis", "low");
+        renderTransportMode();
+        bindEvents();
+        validateSetup();
+        renderProgress();
+        renderAuditLog();
+      }
+
+      initialize();
+    }());
+  </script>
+</body>
+</html>

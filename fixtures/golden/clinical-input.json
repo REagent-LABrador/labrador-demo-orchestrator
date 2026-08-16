@@ -1,0 +1,37 @@
+{
+  "id": "irak4-ra-sourced",
+  "asset": {
+    "name": "IRAK4 inhibitor (small molecule)",
+    "modality": "small_molecule"
+  },
+  "target": {
+    "symbol": "IRAK4",
+    "direction": "inhibit",
+    "uniprot_accession": "Q9NWZ3"
+  },
+  "disease": {
+    "name": "rheumatoid arthritis"
+  },
+  "biomarker_population": {
+    "marker": "seropositive RA (RF and/or anti-CCP positive)",
+    "prevalence_in_disease": 0.62,
+    "assay_available": true
+  },
+  "tissue": "synovium",
+  "endpoint": {
+    "name": "ACR20 response at week 12",
+    "type": "binary",
+    "expected_effect_size": 0.35
+  },
+  "mechanism": "IRAK4 sits downstream of IL-1R/TLR-MyD88 signalling; small-molecule inhibition suppresses synovial fibroblast-driven and myeloid inflammatory output in RA.",
+  "evidence": [
+    {
+      "claim": "Seropositive fraction of incident RA is 62% (37% dual RF+/anti-CCP+, 13% anti-CCP only, 12% RF only) in a population-based US cohort, 2003-2019, n=1373 -- the enrollable-population denominator for a seropositive-required trial.",
+      "direction": "supports",
+      "source": "doi:10.1002/acr.80009",
+      "source_type": "publication",
+      "strength": 0.8
+    }
+  ],
+  "uncertainty": 0.45
+}

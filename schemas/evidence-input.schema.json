@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:reagent-labrador:orchestrator:evidence-request:1",
+  "title": "Research evidence mapper request",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "graph_id": {"type": "string", "minLength": 1},
+    "ask": {
+      "type": "string",
+      "enum": ["new_question", "expand_node", "resolve_link", "test_gap"]
+    },
+    "target": {"type": "string", "minLength": 1},
+    "depth": {"type": "string", "enum": ["quick", "standard", "deep", "exhaustive"]},
+    "years": {"type": "integer", "minimum": 1},
+    "reason": {"type": ["string", "null"]}
+  },
+  "required": ["ask", "target", "depth"]
+}

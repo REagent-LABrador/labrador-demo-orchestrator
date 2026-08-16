@@ -1,0 +1,113 @@
+{
+  "as_of_date": null,
+  "counterfactual": {
+    "achieves": "none",
+    "change": "No biomarker relaxation works: even all-comers (100%) predicts 282 months at 85 sites. The binding constraints are elsewhere — N=340 against 189 competing trials; feasibility would need ~510 sites even without the biomarker.",
+    "simulated_months_after": 282
+  },
+  "eligibility": {
+    "cited_trials": [
+      "NCT01061736",
+      "NCT00810836",
+      "NCT01194414",
+      "NCT00563849"
+    ],
+    "drivers": [
+      "active disease thresholds (tender/swollen joint counts, elevated CRP/ESR) exclude many seropositive patients with low disease activity",
+      "requirement for inadequate response/stable dose on background DMARD/MTX therapy for defined duration excludes new or unstable patients",
+      "exclusion of prior biologic/TNF non-responders or any biologic use removes a substantial subset",
+      "restrictions on corticosteroid dose/timing and recent intra-articular/parenteral steroid use exclude additional patients",
+      "age and comorbidity exclusions (hepatic, renal, infection) further reduce eligible pool"
+    ],
+    "multiplier": 0.35,
+    "reasoning": "Across precedent RA trials, the combination of strict active-disease thresholds (joint counts, CRP/ESR), required stable background DMARD/MTX therapy, and exclusion of prior biologic or TNF failures typically screens out a majority of otherwise biomarker-positive patients. Applying these compounded but partially overlapping filters to seropositive RA patients yields roughly a third passing all remaining inclusion/exclusion criteria."
+  },
+  "evidence": {
+    "competing_trials": 189,
+    "precedent_trials": [
+      "NCT01061736",
+      "NCT00810836",
+      "NCT01416493",
+      "NCT01194414",
+      "NCT00563849",
+      "NCT03008590",
+      "NCT00750880",
+      "NCT00815906",
+      "NCT01534884",
+      "NCT02760316"
+    ]
+  },
+  "failed_precedents": [
+    {
+      "nct_id": "NCT01955733",
+      "why_stopped": "Substance discontinued"
+    },
+    {
+      "nct_id": "NCT02390700",
+      "why_stopped": "Business decision based on lack of enrollment"
+    },
+    {
+      "nct_id": "NCT01525654",
+      "why_stopped": "Ran out of funding"
+    },
+    {
+      "nct_id": "NCT00083759",
+      "why_stopped": "The biological effect seen with natalizumab was not sufficient to warrant further development in RA."
+    },
+    {
+      "nct_id": "NCT04143841",
+      "why_stopped": "Financial constraints"
+    }
+  ],
+  "input": {
+    "as_of_date": null,
+    "asset": {
+      "name": "IRAK4 inhibitor (small molecule)",
+      "modality": "small_molecule"
+    },
+    "biomarker_population": {
+      "marker": "seropositive RA (RF and/or anti-CCP positive)",
+      "prevalence_in_disease": 0.62,
+      "assay_available": true
+    },
+    "disease": {
+      "name": "rheumatoid arthritis"
+    },
+    "endpoint": {
+      "name": "ACR20 response at week 12",
+      "type": "binary",
+      "expected_effect_size": 0.35
+    },
+    "evidence": [
+      {
+        "claim": "Seropositive fraction of incident RA is 62% (37% dual RF+/anti-CCP+, 13% anti-CCP only, 12% RF only) in a population-based US cohort, 2003-2019, n=1373 -- the enrollable-population denominator for a seropositive-required trial.",
+        "direction": "supports",
+        "source": "doi:10.1002/acr.80009",
+        "source_type": "publication",
+        "strength": 0.8
+      }
+    ],
+    "id": "irak4-ra-sourced",
+    "mechanism": "IRAK4 sits downstream of IL-1R/TLR-MyD88 signalling; small-molecule inhibition suppresses synovial fibroblast-driven and myeloid inflammatory output in RA.",
+    "mechanism_hypothesis": null,
+    "target": {
+      "symbol": "IRAK4",
+      "direction": "inhibit",
+      "uniprot_accession": "Q9NWZ3"
+    },
+    "tissue": "synovium",
+    "uncertainty": 0.45
+  },
+  "phase3_median_n": 269,
+  "powering_basis": "effect size d=0.35",
+  "precedent_median_n": 98.5,
+  "required_n": 340,
+  "score": 0,
+  "screens_per_enrollee": 5,
+  "simulated_months_range": [93, 1172],
+  "simulated_months_to_enroll": 455,
+  "sites": 85,
+  "sites_basis": "precedent",
+  "waterfall_delta": -12,
+  "why": "340 patients (effect size d=0.35) at 85 sites (p75 of at-scale precedents); precedent velocity 0.65 pt/site/mo across 196 completed trials (sampled from 2268 registered), narrowed by 62% biomarker prevalence and 35% eligibility pass rate, with ~189 interventional trials competing for the same patients."
+}
