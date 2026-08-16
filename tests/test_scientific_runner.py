@@ -27,9 +27,11 @@ parser.add_argument("--input", required=True)
 parser.add_argument("--output", required=True)
 parser.add_argument("--fail-focus")
 parser.add_argument("--roi-fail-focus")
+parser.add_argument("--roi-structured-error", action="store_true")
 parser.add_argument("--sleep", action="store_true")
 args = parser.parse_args()
 value = json.loads(Path(args.input).read_text(encoding="utf-8"))
+exit_code = 0
 if args.sleep:
     time.sleep(0.2)
 
@@ -62,7 +64,7 @@ if args.stage == "evidence_mapper":
     }
 elif args.stage == "hypothesis_generator":
     focus = value["focus_thing_id"]
-    if args.fail_focus == focus:
+    if args.fail_focus in {focus, "*"}:
         Path(args.output).write_text(json.dumps({
             "status": "CANNOT_COMPLETE",
             "error": {
@@ -73,7 +75,7 @@ elif args.stage == "hypothesis_generator":
         sys.exit(2)
     document = {
         "schema_version": "2.0",
-        "provenance": {"graph_id": value["graph"]["graph_id"]},
+        "provenance": {"graph_id": value["graph"]["graph_id"], "round": 1},
         "hypothesis": {
             "id": "H-" + focus,
             "motif": "gap_closure",
@@ -82,6 +84,18 @@ elif args.stage == "hypothesis_generator":
             "subject_name": focus,
             "object_name": "Pathway readout",
             "hops": 1,
+            "path": [],
+            "scores": {
+                "support": 0.7,
+                "novelty": 0.6,
+                "testability": 0.8,
+                "contradiction_risk": 0.1,
+            },
+            "evidence": {},
+            "caveats": [],
+            "verification": None,
+            "issues": [],
+            "provenance": "fixture focus-scoped hypothesis",
             "articulation": {
                 "statement": focus + " predicts a pathway change",
                 "mechanism": focus + " changes the pathway",
@@ -127,7 +141,22 @@ elif args.stage == "clinical_simulation":
         "input": value,
     }
 elif args.stage == "roi_calculator":
-    output = {"status": "ok", "request_id": value["request_id"], "payload": value}
+    if args.roi_structured_error:
+        output = {
+            "status": "error",
+            "request_id": value["request_id"],
+            "payload": None,
+            "errors": [
+                {
+                    "type": "missing",
+                    "path": ["program", "assumptions"],
+                    "message": "Required valuation assumption is missing",
+                }
+            ],
+        }
+        exit_code = 2
+    else:
+        output = {"status": "ok", "request_id": value["request_id"], "payload": value}
 else:
     output = {
         "status": "ok",
@@ -137,6 +166,7 @@ else:
     }
 Path(args.output).parent.mkdir(parents=True, exist_ok=True)
 Path(args.output).write_text(json.dumps(output, sort_keys=True), encoding="utf-8")
+raise SystemExit(exit_code)
 '''
 
 
@@ -224,6 +254,7 @@ def configure_scientific_fixture(
     fail_focus: str | None = None,
     roi_fail_focus: str | None = None,
     slow_simulation: bool = False,
+    roi_structured_error: bool = False,
 ) -> None:
     script = fixture.root / "fake_scientific.py"
     script.write_text(FAKE_SCIENTIFIC_SOURCE, encoding="utf-8")
@@ -248,6 +279,8 @@ def configure_scientific_fixture(
         if slow_simulation and module["id"] == "simulation":
             command.append("--sleep")
             module["timeout_seconds"] = 0.02
+        if roi_structured_error and module["id"] == "roi_calculator":
+            command.append("--roi-structured-error")
         module["live_command"] = command
         module["replay_command"] = command
     fixture.flush_registry()

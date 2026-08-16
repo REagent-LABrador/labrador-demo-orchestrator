@@ -25,10 +25,52 @@
     "id": "hypothesis_highlander",
     "repository": "REagent-LABrador/hypothesis-highlander",
     "repository_url": "https://github.com/REagent-LABrador/hypothesis-highlander.git",
-    "commit": "7a58c63fc2349eb7dc449a7b352997ec77904070",
-    "mode": "NOT_WIRED",
-    "active_comparison": "FRONTEND_CLIENT_SIDE",
-    "timeout_seconds": 240
+    "commit": "4d08ea6c38548c491f915b934a6fdd5e58f39dd6",
+    "module_root": ".modules/hypothesis-highlander",
+    "mode": "SERVER_NATIVE",
+    "active_comparison": "HIGHLANDER_PACKET_CONSUMER",
+    "setup_command": ["uv", "sync", "--extra", "dev"],
+    "command": ["{module_root}/.venv/bin/python", "-m", "highlander", "compare", "--request", "{request}", "--out", "{output}"],
+    "timeout_seconds": 240,
+    "adapter_version": "packet-adapters.v1",
+    "producer_contracts": {
+      "evidence_mapper": {
+        "module_id": "research-evidence-mapper",
+        "native_schema_id": "EvidenceGraph",
+        "native_schema_version": "1.1"
+      },
+      "hypothesis_generator": {
+        "module_id": "hypothesis-generator",
+        "native_schema_id": "https://labrador.dev/schemas/headless-output.schema.json",
+        "native_schema_version": "unversioned"
+      },
+      "clinical_simulation": {
+        "module_id": "trial-recruitment-forecaster",
+        "native_schema_id": "https://github.com/REagent-LABrador/clinical_simulation/schemas/output.schema.json",
+        "native_schema_version": "1.0.0"
+      },
+      "roi_calculator": {
+        "module_id": "therapeutic-program-economics",
+        "native_schema_id": "urn:reagent-labrador:rnpv_roi_calculator:output:1.0.0",
+        "native_schema_version": "1.0.0"
+      },
+      "simulation": {
+        "module_id": "small-molecule-tractability-review",
+        "native_schema_id": "https://github.com/REagent-LABrador/simulation/schema/output.schema.json",
+        "native_schema_version": "1.0.0"
+      }
+    },
+    "objective_policy": {
+      "policyId": "labrador.scientific-portfolio.v1",
+      "objectives": [
+        {"objectiveId": "support", "direction": "MAX"},
+        {"objectiveId": "novelty", "direction": "MAX"},
+        {"objectiveId": "testability", "direction": "MAX"},
+        {"objectiveId": "contradiction_risk", "direction": "MIN"},
+        {"objectiveId": "recruitability", "direction": "MAX"},
+        {"objectiveId": "roi", "direction": "MAX"}
+      ]
+    }
   },
   "modules": [
     {
@@ -58,7 +100,7 @@
       "order": 2,
       "repository": "REagent-LABrador/Hypothesis_Generator",
       "repository_url": "https://github.com/REagent-LABrador/Hypothesis_Generator.git",
-      "commit": "80cf2524372003b96b39106dc5487b1f98330fd3",
+      "commit": "02ea1441412c556fdaf80a1264bbe605d0133ceb",
       "module_root": ".modules/Hypothesis_Generator",
       "mode": "auto",
       "setup_command": ["uv", "sync", "--extra", "dev"],

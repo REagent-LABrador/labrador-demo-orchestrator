@@ -117,7 +117,10 @@ uv run python app.py run --setup fixtures/scientific/run-setup.v3.json \
 Its artifacts live under `runs/LR-…/scientific/` and `runs/LR-…/branches/`. Every node records
 the exact producer SHA, native input/output, hashes, origin, runtime, and terminal reason. The
 snapshot endpoint returns `labrador.scientific-snapshot.v1` for these runs. Representative demo
-presentation is a watermark-only UI mode and cannot change the scientific artifact hashes.
+presentation is a watermark-only UI mode and cannot change the scientific artifact hashes or
+Highlander candidate membership. After the run reaches a terminal state, `POST
+/api/runs/{runId}/highlander` builds RFC 8785 packets from those artifacts and invokes the pinned
+server-side consumer with a four-minute timeout.
 
 Every run is written under `runs/LR-…/`:
 
@@ -130,7 +133,8 @@ events.ndjson
 03_clinical_simulation/{input,output}.json
 04_roi_calculator/{input,output}.json
 05_simulation/{input,output}.json
-highlander_packet.json        # after explicit launch
+highlander/{request,result,execution}.json  # after a scientific Highlander launch
+highlander_packet.json                    # legacy run launch only
 ```
 
 `manifest.json` is atomically replaced and revisioned. Execution status, output origin, result
@@ -187,12 +191,12 @@ and preserves every native station result unchanged in the run artifact. The jud
 readable interpretation and representative display values without rewriting native scientific
 outputs or manufacturing atomistic evidence.
 
-Screen 3 currently performs an advisory three-dimensional Pareto comparison in the browser. It
-maps every plan by P50 rNPV, recruitability, and simulation / tractability; any missing axis stays
-incomparable instead of being imputed. In the golden RA profile, the Z axis uses the explicitly
-labeled representative branch-context fit while the native cached dossier remains shared across
-plans. The landed `hypothesis-highlander` packet consumer is pinned as `NOT_WIRED` and is not
-invoked or presented as integrated in this judging slice.
+Legacy presentation runs retain their existing browser comparison. Scientific v3 runs use the
+pinned `hypothesis-highlander` packet consumer on the server. The request includes complete and
+failed producer attempts, exact artifact bytes, terminal reasons, and a disclosed six-axis policy;
+missing axes remain incomparable. The result, Pareto frontier, and producer-grounded
+`nextEvidenceAction` are returned by `/snapshot`. Representative presentation values are never
+included in the packet request.
 
 ## Verification
 

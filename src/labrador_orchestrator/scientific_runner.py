@@ -51,6 +51,30 @@ def _terminal_from_stderr(value: str) -> dict[str, Any] | None:
     return None
 
 
+def _structured_error_reason(
+    module_id: str, output: dict[str, Any]
+) -> tuple[str | None, str | None]:
+    """Project a producer's native error envelope without rewriting the artifact."""
+
+    if output.get("status") != "error":
+        return None, None
+    errors = output.get("errors")
+    first = errors[0] if isinstance(errors, list) and errors else None
+    detail = first if isinstance(first, dict) else {}
+    error_type = detail.get("type") or output.get("error_type")
+    token = re.sub(r"[^A-Za-z0-9]+", "_", str(error_type or "")).strip("_").upper()
+    prefix = {
+        "roi_calculator": "ROI",
+        "clinical_simulation": "CLINICAL",
+        "hypothesis_generator": "HYPGEN",
+        "evidence_mapper": "MAPPER",
+        "simulation": "TRACTABILITY",
+    }.get(module_id, "PRODUCER")
+    reason_code = f"{prefix}_ERROR_{token}" if token else f"{prefix}_ERROR"
+    message = detail.get("message") or output.get("message")
+    return reason_code, message if isinstance(message, str) else None
+
+
 def select_focus_nodes(graph: dict[str, Any], *, maximum: int) -> list[dict[str, Any]]:
     """Select real graph biomarker nodes, then evidence-supported process nodes."""
 
@@ -139,6 +163,17 @@ def _hypothesis_claim(document: dict[str, Any]) -> str:
     raise ContractError("canonical hypothesis has no mechanism or statement")
 
 
+def canonical_hypothesis_id(document: dict[str, Any]) -> str:
+    """Return the one producer-owned identity shared by every branch consumer."""
+
+    hypothesis = document.get("hypothesis")
+    hypothesis = hypothesis if isinstance(hypothesis, dict) else {}
+    for value in (hypothesis.get("id"), document.get("id")):
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    raise ContractError("canonical hypothesis has no id")
+
+
 def _source_for_finding(
     finding: dict[str, Any], papers_by_id: dict[str, dict[str, Any]]
 ) -> str | None:
@@ -160,7 +195,6 @@ def assemble_clinical_thesis(
     focus: dict[str, Any],
     hypothesis_document: dict[str, Any],
     frame: dict[str, Any],
-    branch_id: str,
 ) -> dict[str, Any]:
     """Assemble only branch evidence/hypothesis fields plus explicit setup values."""
 
@@ -206,7 +240,7 @@ def assemble_clinical_thesis(
         "uniprot_accession": frame["target"]["uniprotAccession"],
     }
     thesis: dict[str, Any] = {
-        "id": branch_id + "-clinical",
+        "id": canonical_hypothesis_id(hypothesis_document),
         "asset": asset,
         "target": target,
         "disease": copy.deepcopy(frame["disease"]),
@@ -470,7 +504,10 @@ class ScientificBranchRunner:
                             )
                         ),
                     )
-            if process.returncode != 0 and output.get("status") != "CANNOT_COMPLETE":
+            if process.returncode != 0 and output.get("status") not in {
+                "CANNOT_COMPLETE",
+                "error",
+            }:
                 output = self._cannot_complete(
                     output_path,
                     reason_code="PROCESS_FAILED",
@@ -552,7 +589,7 @@ class ScientificBranchRunner:
         execution_mode: str,
         exit_code: int | None,
     ) -> dict[str, Any]:
-        cannot = output.get("status") == "CANNOT_COMPLETE"
+        cannot = output.get("status") in {"CANNOT_COMPLETE", "error"}
         origin = output.get("output_origin")
         interpretability = output.get("interpretability")
         extensions = (
@@ -574,6 +611,11 @@ class ScientificBranchRunner:
             or error.get("reasonCode")
         )
         message = output.get("message") or error.get("message")
+        structured_reason, structured_message = _structured_error_reason(
+            module.module_id, output
+        )
+        reason_code = reason_code or structured_reason
+        message = message or structured_message
         return {
             "module_id": module.module_id,
             "status": "CANNOT_COMPLETE" if cannot else "COMPLETE",
@@ -600,11 +642,15 @@ class ScientificBranchRunner:
         node_dir: Path,
         dependency: str,
         execution_mode: str,
+        input_value: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         node_dir.mkdir(parents=True, exist_ok=True)
         input_path = node_dir / "input.json"
         output_path = node_dir / "output.json"
-        dump_json_atomic(input_path, {"unavailable": True, "dependency": dependency})
+        dump_json_atomic(
+            input_path,
+            input_value or {"unavailable": True, "dependency": dependency},
+        )
         output = self._cannot_complete(
             output_path,
             reason_code="UPSTREAM_FAILED",
@@ -765,7 +811,6 @@ class ScientificBranchRunner:
                         focus=branch["focus"],
                         hypothesis_document=document,
                         frame=frame,
-                        branch_id=branch["branch_id"],
                     )
                     clinical_node = self._invoke(
                         clinical_module,
@@ -774,11 +819,16 @@ class ScientificBranchRunner:
                         execution_mode=execution_mode,
                     )
                 except ContractError as exc:
+                    try:
+                        failed_thesis_id = canonical_hypothesis_id(document)
+                    except ContractError:
+                        failed_thesis_id = branch["branch_id"]
                     clinical_node = self._dependency_failure(
                         clinical_module,
                         node_dir=branch_dir / "clinical_simulation",
                         dependency=str(exc),
                         execution_mode=execution_mode,
+                        input_value={"id": failed_thesis_id},
                     )
             else:
                 clinical_node = self._dependency_failure(
@@ -786,6 +836,7 @@ class ScientificBranchRunner:
                     node_dir=branch_dir / "clinical_simulation",
                     dependency="hypothesis_generator.hypothesis",
                     execution_mode=execution_mode,
+                    input_value={"id": branch["branch_id"]},
                 )
             if isinstance(roi_request, dict):
                 roi_node = self._invoke(
@@ -800,6 +851,7 @@ class ScientificBranchRunner:
                     node_dir=branch_dir / "roi_calculator",
                     dependency="hypothesis_generator.roi_request",
                     execution_mode=execution_mode,
+                    input_value={"program": {"program_id": None}},
                 )
             branch["nodes"]["clinical_simulation"] = clinical_node
             branch["nodes"]["roi_calculator"] = roi_node
@@ -891,9 +943,10 @@ class ScientificBranchRunner:
             manifest["run_status"] = (
                 "COMPLETED" if len(complete) == len(branches) else "COMPLETED_WITH_WARNINGS"
             )
-            manifest["highlander"]["ready"] = any(
-                branch["nodes"]["hypothesis_generator"]["status"] == "COMPLETE"
+            manifest["highlander"]["ready"] = bool(branches) and all(
+                node.get("status") in TERMINAL_NODE_STATUSES
                 for branch in branches
+                for node in branch["nodes"].values()
             )
             manifest["scientific"]["branches"] = copy.deepcopy(branches)
             for branch_id, node in failed_nodes:
